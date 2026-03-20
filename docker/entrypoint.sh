@@ -9,6 +9,9 @@ log "================================================================"
 log " Arranque RTT-IT (producao) | SQLite + verificacao"
 log "================================================================"
 
+cd /app || exit 1
+export PYTHONPATH="${PYTHONPATH:-/app}"
+
 if [[ "${DJANGO_PRODUCTION:-0}" != "1" ]]; then
   log "ERRO: DJANGO_PRODUCTION deve ser 1 nesta imagem."
   exit 1

@@ -27,6 +27,7 @@ LABEL org.opencontainers.image.title="RTT-IT" \
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app \
     DJANGO_SETTINGS_MODULE=RTT_IT_System.settings \
     DJANGO_PRODUCTION=1 \
     DJANGO_DEBUG=0 \

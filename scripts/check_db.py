@@ -7,6 +7,12 @@ from __future__ import annotations
 import os
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
+
+# Garantir raiz do projeto no path (python /app/scripts/check_db.py não adiciona /app sozinho)
+_APP_ROOT = Path(__file__).resolve().parent.parent
+if str(_APP_ROOT) not in sys.path:
+    sys.path.insert(0, str(_APP_ROOT))
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'RTT_IT_System.settings')
 
