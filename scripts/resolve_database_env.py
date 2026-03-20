@@ -118,7 +118,9 @@ def main() -> int:
 
     log("")
     log("ERRO: Não foi possível determinar a ligação ao PostgreSQL.")
-    log("       Defina no EasyPanel (serviço da APP) uma destas opções:")
+    log("       Para SQLite no EasyPanel (bind mount -> /app/media), defina:")
+    log("       DJANGO_USE_SQLITE=1   (e opcional SQLITE_PATH=/app/media/db.sqlite3)")
+    log("       Ou para PostgreSQL, defina no serviço da APP:")
     log("       A) DB_HOST, DB_NAME, DB_USER, DB_PASSWORD  [e opcionalmente DB_PORT]")
     log("       B) DATABASE_URL=postgresql://USER:SENHA@HOST:5432/NOME_BD")
     log("       C) POSTGRES_HOST, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD")
