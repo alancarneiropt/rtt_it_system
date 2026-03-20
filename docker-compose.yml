@@ -1,6 +1,5 @@
-# RTT-IT — exemplo de stack (apenas a app).
-# Modo A: DJANGO_USE_SQLITE=1 + bind mount /app/media (SQLite).
-# Modo B: PostgreSQL externo — defina DB_* ou DATABASE_URL no .env.
+# RTT-IT — app Docker + SQLite persistente.
+# Monte um volume em /app/media (ex.: bind .../volumes/db -> /app/media).
 
 services:
   web:
@@ -15,13 +14,7 @@ services:
       DJANGO_DEBUG: "0"
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?defina no .env}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:?defina no .env}
-      DJANGO_USE_SQLITE: ${DJANGO_USE_SQLITE:-0}
       SQLITE_PATH: ${SQLITE_PATH:-/app/media/db.sqlite3}
-      DB_HOST: ${DB_HOST:-}
-      DB_NAME: ${DB_NAME:-}
-      DB_USER: ${DB_USER:-}
-      DB_PASSWORD: ${DB_PASSWORD:-}
-      DB_PORT: ${DB_PORT:-5432}
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-}
       USE_X_FORWARDED_PROTO: ${USE_X_FORWARDED_PROTO:-1}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}

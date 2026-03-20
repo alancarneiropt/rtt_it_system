@@ -3,7 +3,6 @@ django-filter>=23,<24
 openpyxl>=3.1.0
 reportlab>=4.0.0
 
-# Produção (Docker / Gunicorn / PostgreSQL)
+# Produção (Docker / Gunicorn)
 gunicorn>=21.0,<23
-psycopg2-binary>=2.9.9
 whitenoise>=6.6,<7
