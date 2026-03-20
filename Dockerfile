@@ -46,6 +46,12 @@ COPY . /app/
 RUN chown -R appuser:appuser /app \
     && chmod +x /app/docker/entrypoint.sh
 
+# Falha no build se o pacote RTT_IT_System não estiver na imagem (evita deploy com gitlink vazio).
+RUN DJANGO_SECRET_KEY=build-verify-not-used-at-runtime-xxxxxxxx \
+    DJANGO_PRODUCTION=1 \
+    ALLOWED_HOSTS=127.0.0.1 \
+    python -c "import django; django.setup(); print('RTT_IT_System.settings OK')"
+
 USER appuser
 
 EXPOSE 8009
