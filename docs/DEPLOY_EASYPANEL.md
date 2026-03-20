@@ -26,11 +26,13 @@ Copie `.env.example` para `.env` e preencha. No EasyPanel, defina as mesmas vari
 | `DJANGO_DEBUG` | Sim | `0` em produção. |
 | `DJANGO_SECRET_KEY` | Sim | Chave secreta forte (não use a de desenvolvimento). |
 | `ALLOWED_HOSTS` | Sim | Domínios/IP separados por vírgula (sem `*`). |
-| `DB_HOST` | Sim | Host do PostgreSQL. |
+| `DB_HOST` | Sim* | Host do PostgreSQL (hostname na rede Docker, **não** caminho de pasta). |
 | `DB_PORT` | Não | Por defeito `5432`. |
-| `DB_NAME` | Sim | Nome da base de dados. |
-| `DB_USER` | Sim | Utilizador PostgreSQL. |
-| `DB_PASSWORD` | Sim | Palavra-passe. |
+| `DB_NAME` | Sim* | Nome da base de dados. |
+| `DB_USER` | Sim* | Utilizador PostgreSQL. |
+| `DB_PASSWORD` | Sim* | Palavra-passe. |
+
+\* **Alternativa:** pode definir só `DATABASE_URL` (`postgresql://...`) ou `POSTGRES_HOST` + `POSTGRES_DB` + `POSTGRES_USER` + `POSTGRES_PASSWORD` — o **entrypoint** converte automaticamente para `DB_*` e regista tudo nos **logs em tempo real** (Fase 1/7).
 | `CSRF_TRUSTED_ORIGINS` | Recomendado | URLs `https://...` separadas por vírgula. |
 | `USE_X_FORWARDED_PROTO` | Recomendado | `1` se o proxy terminar HTTPS. |
 
