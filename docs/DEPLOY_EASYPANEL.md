@@ -83,10 +83,32 @@ Ver `requirements.txt` (inclui `gunicorn`, `psycopg2-binary`, `whitenoise` para 
 - `SECRET_KEY` obrigatória e não pode começar por `django-insecure-` em produção.
 - Cookies `Secure` quando `DEBUG=False` (ajustável com `SESSION_COOKIE_SECURE` / `CSRF_COOKIE_SECURE`).
 
-## 9. Problemas frequentes
+## 9. Bind mount: pasta no VPS ≠ “caminho do PostgreSQL”
+
+- **`DB_HOST` não é um caminho de pastas** (ex.: não uses `/etc/easypanel/...`). É o **nome de rede** ou **IP** do servidor PostgreSQL (ex.: hostname interno do serviço Postgres no EasyPanel, muitas vezes algo como `nome_do_servico_postgres` ou o nome do container na mesma rede Docker).
+- Os **ficheiros de dados do PostgreSQL** ficam no **volume do serviço PostgreSQL** que o EasyPanel gere — não se montam na app Django como se fosse SQLite.
+- Se montares no container da app:
+  - **Host:** `/etc/easypanel/projects/.../volumes/db` (ou outra pasta tua)
+  - **Container:** `/app/media`  
+  isso serve para **`MEDIA_ROOT`** (uploads / ficheiros da app), **não** para ligar o Django ao Postgres.
+
+`MEDIA_ROOT` por defeito é `BASE_DIR / 'media'` (= `/app/media` no Docker). Opcional: variável `MEDIA_ROOT` se quiseres outro caminho.
+
+## 10. Erro: `ERRO: Variável obrigatória DB_HOST não definida`
+
+No EasyPanel, no **serviço da aplicação** (não só no Postgres), adiciona **Environment** / variáveis:
+
+- `DB_HOST` = hostname/IP do Postgres (copiar do painel do serviço PostgreSQL no EasyPanel)
+- `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_PORT` (se não for 5432)
+- `DJANGO_SECRET_KEY`, `ALLOWED_HOSTS`, `DJANGO_PRODUCTION=1`, `DJANGO_DEBUG=0`
+
+Sem isto, o `entrypoint` **aborta de propósito** antes de subir o Gunicorn.
+
+## 11. Problemas frequentes
 
 | Sintoma | Causa provável |
 |---------|----------------|
+| `DB_HOST não definida` | Faltam variáveis de ambiente na **app** no EasyPanel. |
 | Container reinicia logo | PostgreSQL inacessível, credenciais erradas ou BD não criada — ver logs do entrypoint. |
 | 400 Bad Request / CSRF | Preencher `CSRF_TRUSTED_ORIGINS` e `ALLOWED_HOSTS` com o domínio real. |
 | Redirect HTTP/HTTPS errado | Ativar `USE_X_FORWARDED_PROTO=1` atrás do proxy. |
