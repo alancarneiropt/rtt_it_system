@@ -52,8 +52,7 @@ RUN DJANGO_SECRET_KEY=build-verify-not-used-at-runtime-xxxxxxxx \
     ALLOWED_HOSTS=127.0.0.1 \
     python -c "import django; django.setup(); print('RTT_IT_System.settings OK')"
 
-USER appuser
-
+# Entrypoint corre como root só para chown do bind mount /app/media; Gunicorn corre como appuser.
 EXPOSE 8009
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \

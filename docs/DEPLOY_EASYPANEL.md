@@ -32,8 +32,11 @@ O ficheiro da base fica em **`/app/media/db.sqlite3`**. Uploads usam **`/app/med
 ## 3. Arranque (entrypoint)
 
 1. Confirma pasta `/app/media` (bind mount).
-2. `scripts/check_db.py` — testa SQLite.
-3. `migrate` → `collectstatic` → `manage.py check` → **Gunicorn**.
+2. **Como root:** `chown -R appuser:appuser /app/media` — volumes no host vêm muitas vezes como `root:root`; sem isto o SQLite dá *attempt to write a readonly database* (ex.: login backoffice ao gravar sessão).
+3. `scripts/check_db.py` — testa SQLite (como `appuser`).
+4. `migrate` → `collectstatic` → `manage.py check` → **Gunicorn** (como `appuser`).
+
+**Nota:** o contentor inicia o script como **root** só para este `chown`; o processo Gunicorn corre como **`appuser`**. Se o painel forçar *run as non-root* sem root no arranque, ajuste no **host** o dono da pasta do volume para o UID do utilizador do contentor ou desative essa restrição para esta app.
 
 ## 4. Problemas
 
@@ -41,6 +44,7 @@ O ficheiro da base fica em **`/app/media/db.sqlite3`**. Uploads usam **`/app/med
 |---------|--------|
 | Pasta `/app/media` não existe | Bind mount não configurado. |
 | Erro ao criar SQLite | Permissões no volume do host. |
+| `attempt to write a readonly database` | Volume montado só de leitura para a app; o entrypoint faz `chown` de `/app/media` para `appuser` se arrancar como root. Ver nota acima. |
 | 400 / CSRF | `CSRF_TRUSTED_ORIGINS` e `ALLOWED_HOSTS` corretos para o domínio. |
 
 ## 5. Docker local
