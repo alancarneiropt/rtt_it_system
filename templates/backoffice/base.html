@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Backoffice{% endblock %} | RTT-IT</title>
+    <meta name="theme-color" content="#2563EB">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/static/pwa/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/static/pwa/icon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+    {% block extrahead %}{% endblock %}
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 antialiased">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-56 bg-slate-700 text-white flex-shrink-0 flex flex-col">
+            <div class="p-4 border-b border-slate-600">
+                <a href="{% url 'backoffice_dashboard' %}" class="text-lg font-bold text-white">RTT - Nordigal</a>
+                <p class="text-xs text-slate-400 mt-1">Backoffice</p>
+            </div>
+            <nav class="p-2 flex-1">
+                <a href="{% url 'backoffice_dashboard' %}" class="block px-3 py-2 rounded-md text-sm font-medium {% if request.resolver_match.url_name == 'backoffice_dashboard' or request.resolver_match.url_name == 'backoffice_espelho' %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Espelho de Ponto</a>
+                <a href="{% url 'backoffice_indicadores' %}" class="hidden block px-3 py-2 rounded-md text-sm font-medium {% if request.resolver_match.url_name == 'backoffice_indicadores' %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Indicadores</a>
+                <a href="{% url 'backoffice_colaborador_list' %}" class="block px-3 py-2 rounded-md text-sm font-medium {% if 'colaborador' in request.resolver_match.url_name %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Colaboradores</a>
+                <a href="{% url 'backoffice_departamento_list' %}" class="hidden block px-3 py-2 rounded-md text-sm font-medium {% if 'departamento' in request.resolver_match.url_name %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Departamentos</a>
+                <a href="{% url 'backoffice_jornada_list' %}" class="hidden block px-3 py-2 rounded-md text-sm font-medium {% if 'jornada' in request.resolver_match.url_name %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Jornadas</a>
+                <a href="{% url 'admin:index' %}" class="hidden block px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-slate-600 hover:text-white">Django Admin</a>
+            </nav>
+            <div class="p-3 border-t border-slate-600">
+                <a href="{% url 'backoffice_logout' %}" class="block w-full text-center py-2 px-3 rounded-md bg-slate-600 text-white text-sm font-medium hover:bg-red-600 transition-colors">Sair</a>
+            </div>
+        </aside>
+        <!-- Main -->
+        <main class="flex-1 overflow-auto p-6">
+            <header class="mb-6">
+                <h1 class="text-2xl font-extrabold text-slate-900 leading-tight" id="boHeaderSaudacao"
+                    data-nome="{{ request.user.profile.nome|default:request.user.email|default:'Utilizador' }}">
+                    Olá
+                </h1>
+                <p class="text-sm text-slate-500 mt-1" id="boHeaderData">—</p>
+            </header>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    <script>
+    (function() {
+        var LOGOUT_AFTER_MS = 5 * 60 * 1000;
+        var logoutUrl = '{% url "backoffice_logout" %}';
+        var t;
+        function resetTimer() {
+            clearTimeout(t);
+            t = setTimeout(function() {
+                window.location.href = logoutUrl;
+            }, LOGOUT_AFTER_MS);
+        }
+        ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'].forEach(function(ev) {
+            document.addEventListener(ev, resetTimer);
+        });
+        resetTimer();
+    })();
+    </script>
+    <script>
+    (function() {
+        var h = new Date().getHours();
+        var saudacao = (h < 12) ? 'Bom dia' : (h < 18) ? 'Boa tarde' : 'Boa noite';
+        var el = document.getElementById('boHeaderSaudacao');
+        if (el) {
+            var nome = (el.getAttribute('data-nome') || '').trim();
+            el.textContent = saudacao + (nome ? (', ' + nome) : '');
+        }
+        var dataEl = document.getElementById('boHeaderData');
+        if (dataEl) {
+            var d = new Date();
+            try {
+                dataEl.textContent = d.toLocaleDateString('pt-PT', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+            } catch (e) {
+                // fallback: mantém a data já renderizada no HTML
+            }
+        }
+    })();
+    </script>
+    <script>
+    (function() {
+      if (!('serviceWorker' in navigator)) return;
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/service-worker.js', { scope: '/' }).catch(function() {});
+      });
+    })();
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>RTT - Nordigal</title>
+    <meta name="theme-color" content="#2563EB">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/static/pwa/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/static/pwa/icon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: radial-gradient(1200px 600px at 50% -50%, rgba(37, 99, 235, 0.25), rgba(248, 250, 252, 0) 60%), #F1F5F9;
+            color: #1A1A1A;
+            margin: 0;
+            min-height: 100vh;
+            padding: 0;
+            padding-bottom: 80px;
+        }
+        .wrap { max-width: 480px; margin: 0 auto; min-height: 100vh; }
+
+        /* Cabeçalho (estilo imagem) */
+        .header-wrap { padding: 0.9rem 1rem 0.5rem; }
+        .header {
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 40%, #3b82f6 100%);
+            color: #fff;
+            border-radius: 16px;
+            padding: 1rem 1rem 0.9rem;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before{
+            content:'';
+            position:absolute;
+            inset:-40px -60px auto auto;
+            width:220px;
+            height:220px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), rgba(255,255,255,0) 60%);
+            transform: rotate(12deg);
+        }
+        .header-top {
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:0.75rem;
+            position:relative;
+            z-index:1;
+        }
+        .perfil-mini {
+            display:flex;
+            align-items:center;
+            gap:0.75rem;
+            min-width:0;
+        }
+        .avatar {
+            width:54px;
+            height:54px;
+            border-radius:999px;
+            background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,.15));
+            border: 3px solid rgba(255,255,255,.55);
+            box-shadow: 0 10px 20px rgba(0,0,0,.18);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:700;
+            letter-spacing:.02em;
+            flex-shrink:0;
+        }
+        .avatar-status{
+            position:relative;
+        }
+        .avatar-status::after{
+            content:'';
+            position:absolute;
+            right:-2px;
+            bottom:-2px;
+            width:14px;
+            height:14px;
+            border-radius:999px;
+            background:#22c55e;
+            border:2px solid #fff;
+            box-shadow:0 4px 10px rgba(0,0,0,.22);
+        }
+        .perfil-texto{ min-width:0; flex:1; min-width:0; }
+        .perfil-nome{
+            font-size:1rem;
+            font-weight:700;
+            line-height:1.2;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .header-data{
+            font-size:0.9rem;
+            opacity:.95;
+            white-space:nowrap;
+            text-align:center;
+            margin-top:0.35rem;
+            position:relative;
+            z-index:1;
+        }
+        .btn-sair-top{
+            display:inline-flex;
+            align-items:center;
+            gap:0.5rem;
+            padding:0.55rem 0.85rem;
+            border-radius:12px;
+            background: rgba(255,255,255,.14);
+            color:#fff;
+            text-decoration:none;
+            font-weight:600;
+            border:1px solid rgba(255,255,255,.22);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+            flex-shrink:0;
+        }
+        .btn-sair-top:hover{ background: rgba(255,255,255,.18); }
+        .header-hora{
+            text-align:center;
+            font-size:3.0rem;
+            font-weight:800;
+            letter-spacing:0.03em;
+            margin-top:0.5rem;
+            position:relative;
+            z-index:1;
+        }
+
+        /* Secção Agenda — linha do tempo */
+        .agenda-section {
+            background: #fff;
+            margin: 0 1rem;
+            margin-top: 0.75rem;
+            border-radius: 18px;
+            padding: 1.25rem 1.5rem 1.5rem;
+            box-shadow: 0 22px 50px rgba(15, 23, 42, 0.10);
+        }
+        .agenda-section .agenda-titulo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 1rem 0;
+            letter-spacing: -0.01em;
+            text-transform: none;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 2.5rem;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.45rem;
+            top: 0.65rem;
+            bottom: 0.65rem;
+            width: 3px;
+            background: linear-gradient(180deg, rgba(59,130,246,.45), rgba(148,163,184,.35));
+            border-radius: 999px;
+        }
+        .timeline-item {
+            position: relative;
+            padding: 0.6rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .timeline-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .timeline-item:first-child { padding-top: 0; }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            border: 3px solid #fff;
+            box-shadow: 0 0 0 1px #e2e8f0;
+        }
+        .timeline-item.registado::before {
+            background: #2563EB;
+            box-shadow: 0 0 0 1px #2563EB, 0 10px 22px rgba(37,99,235,.25);
+        }
+        .timeline-item .label {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            flex: 1;
+            min-width: 0;
+        }
+        .timeline-item .icon-wrap {
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
+            background: #eef2ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .timeline-item .icon-wrap svg {
+            width: 18px;
+            height: 18px;
+            stroke: #64748b;
+            fill: none;
+        }
+        .timeline-item.registado .icon-wrap { background: #e0ecff; }
+        .timeline-item.registado .icon-wrap svg { stroke: #2563EB; }
+        .timeline-item .text-block .text,
+        .timeline-item .timeline-item-texto {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #334155;
+        }
+        .timeline-item .timeline-item-texto { margin-left: 0.5rem; }
+        .timeline-item .text-block .sublabel {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            margin-top: 0.1rem;
+        }
+        .timeline-item .hora {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #0f172a;
+            white-space: nowrap;
+        }
+        .timeline-item .hora.planejado { font-weight: 500; color: #64748b; }
+        .timeline-item .hora .planejado-label { font-size: 0.75rem; font-weight: 400; color: #94a3b8; }
+        #timeline-lista:empty::before,
+        #timeline-calendario-lista:empty::before {
+            content: 'Nenhuma marcação neste dia.';
+            display: block;
+            padding: 0.6rem 0;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+        .calendario-dia-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: nowrap;
+        }
+        .calendario-dia-nav {
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #475569;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .calendario-dia-nav:hover { background: #f1f5f9; border-color: #cbd5e1; color: #1e293b; }
+        .calendario-dia-nav:active { background: #e2e8f0; }
+        .calendario-dia-input {
+            flex-shrink: 0;
+            width: 140px;
+            padding: 0.5rem 0.65rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+        .calendario-dia-input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.15); }
+        .calendario-dia-label {
+            flex: 1;
+            min-width: 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #334155;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Botões de ação */
+        .acoes.acoes-single {
+            display: flex;
+            justify-content: center;
+            grid-template-columns: none;
+        }
+        .acoes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin: 1.5rem 1rem;
+        }
+        .btn-acao {
+            border: none;
+            border-radius: 14px;
+            padding: 1.05rem 1.2rem;
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.12s, filter 0.2s;
+            box-shadow: 0 16px 28px rgba(15,23,42,.18);
+        }
+        .btn-acao:active { transform: scale(0.98); }
+        .btn-acao:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-registrar { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; min-width: 200px; }
+        .btn-registrar:hover:not(:disabled), .btn-registrar:active:not(:disabled) { filter: brightness(1.05); }
+        .btn-oi {
+            background: linear-gradient(180deg, #22c55e, #16a34a);
+        }
+        .btn-tchau {
+            background: linear-gradient(180deg, #ef4444, #dc2626);
+        }
+        .btn-oi:hover:not(:disabled), .btn-tchau:hover:not(:disabled) { filter: brightness(1.03); }
+
+        /* Mensagem de feedback */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(-120%);
+            background: #1e293b;
+            color: #fff;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            max-width: 90%;
+        }
+        .toast.visible { transform: translateX(-50%) translateY(0); }
+        .toast.erro { background: #dc2626; }
+
+        /* Secções da área (Painel, Calendário, Hoje, Perfil) */
+        .area-sec {
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+        .area-sec.visivel { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .sec-titulo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 0.75rem 0;
+            padding: 0 0.25rem;
+        }
+        .card-sec {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin: 0 1rem 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,.06);
+        }
+        .card-sec h3 { font-size: 0.9rem; font-weight: 600; color: #475569; margin: 0 0 0.5rem 0; }
+        .card-sec p { font-size: 0.9rem; color: #64748b; margin: 0; }
+        .lista-dias { list-style: none; padding: 0; margin: 0; }
+        .lista-dias li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+        }
+        .lista-dias li:last-child { border-bottom: none; }
+        .lista-dias .dia-num { font-weight: 600; color: #334155; }
+        .lista-dias .dia-marc { font-size: 0.8rem; color: #64748b; }
+
+        /* Relatório semanal — Calendário (estilo Super Punch) */
+        .calendario-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin: 0 1rem 0.75rem;
+            padding: 0.5rem 0;
+        }
+        .calendario-periodo {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .calendario-nav {
+            display: flex;
+            gap: 0.25rem;
+        }
+        .calendario-nav button {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #fff;
+            color: #475569;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s;
+        }
+        .calendario-nav button:hover { background: #f1f5f9; color: #2563EB; }
+        .relatorio-wrap {
+            margin: 0 1rem 1rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.06);
+            overflow: hidden;
+        }
+        .relatorio-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .relatorio-table {
+            width: 100%;
+            min-width: 560px;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        .relatorio-table th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+            text-align: left;
+            padding: 0.5rem 0.4rem;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        .relatorio-table td {
+            padding: 0.5rem 0.4rem;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        .relatorio-table tbody tr.fim-de-semana { background: #f8fafc; }
+        .relatorio-table tbody tr.fim-de-semana td { color: #94a3b8; }
+        .relatorio-table .col-data { font-weight: 600; color: #334155; min-width: 72px; }
+        .relatorio-table .col-jornada { color: #64748b; font-size: 0.75rem; min-width: 70px; }
+        .relatorio-table .cel-ok { color: #16a34a; font-weight: 500; }
+        .relatorio-table .cel-falta { color: #dc2626; font-style: italic; }
+        .relatorio-table .cel-planejado { color: #64748b; }
+        .relatorio-table .cel-vazio { color: #cbd5e1; }
+        .relatorio-loading { padding: 1.5rem; text-align: center; color: #94a3b8; font-size: 0.9rem; }
+        .relatorio-erro { padding: 1rem; text-align: center; color: #dc2626; font-size: 0.9rem; }
+
+        .perfil-campo { margin-bottom: 1rem; }
+        .perfil-campo:last-child { margin-bottom: 0; }
+        .perfil-campo label { display: block; font-size: 0.75rem; font-weight: 600; color: #94a3b8; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .perfil-campo .valor { font-size: 1rem; color: #1e293b; font-weight: 500; }
+        .perfil-campo .btn-logout { display: inline-block; margin-top: 1rem; padding: 0.6rem 1.2rem; background: #ef4444; color: #fff; border-radius: 8px; text-decoration: none; font-size: 0.9rem; font-weight: 600; border: none; cursor: pointer; }
+        .perfil-campo .btn-logout:hover { background: #dc2626; }
+
+        /* Barra de navegação inferior */
+        .nav-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 480px;
+            margin: 0 auto;
+            background: rgba(255,255,255,.95);
+            border-top: 1px solid rgba(226,232,240,.9);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0 0.75rem;
+            padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.35rem 0.5rem;
+            border-radius: 8px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .nav-item:hover { color: #64748b; background: #f8fafc; }
+        .nav-item svg { width: 22px; height: 22px; }
+        .nav-item.ativo { color: #2563EB; font-weight: 700; }
+        .nav-item.ativo:hover { color: #2563EB; background: #eff6ff; }
+        .nav-item:focus { outline: none; }
+        .nav-bottom a[data-sec="painel"] { display: none; }
+
+        /* Utilizador / logout no topo */
+        .user-bar { display:none; }
+
+        /* Modal justificativa saída sem almoço */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.visible { display: flex; }
+        .modal-justificativa {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(0,0,0,.2);
+        }
+        .modal-justificativa h3 { margin: 0 0 0.5rem; font-size: 1.1rem; color: #1e293b; }
+        .modal-justificativa p { margin: 0 0 1rem; font-size: 0.9rem; color: #64748b; }
+        .modal-justificativa textarea {
+            width: 100%;
+            min-height: 90px;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: vertical;
+        }
+        .modal-justificativa textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.2); }
+        .modal-botoes { display: flex; gap: 0.75rem; margin-top: 1rem; }
+        .modal-botoes button { flex: 1; padding: 0.65rem 1rem; border-radius: 10px; font-weight: 600; font-size: 0.95rem; cursor: pointer; border: none; }
+        .modal-btn-cancelar { background: #f1f5f9; color: #475569; }
+        .modal-btn-confirmar { background: #2563eb; color: #fff; }
+        .modal-btn-confirmar:disabled { opacity: 0.6; cursor: not-allowed; }
+        .modal-registro-sucesso .modal-registro-data-hora { font-size: 1.1rem; font-weight: 700; color: #2563eb; margin: 0.5rem 0 1rem; }
+        .modal-registro-sucesso .modal-botoes { justify-content: center; }
+
+    </style>
+</head>
+<body>
+    <div class="wrap">
+
+        <!-- Secção Painel -->
+        <section id="sec-painel" class="area-sec" aria-labelledby="titulo-painel">
+            <h2 id="titulo-painel" class="sec-titulo" style="margin-top: 1rem; padding: 0 1rem;">Painel</h2>
+            <div class="card-sec">
+                <h3>Resumo da semana</h3>
+                <p id="painel-resumo">A carregar…</p>
+                <ul class="lista-dias" id="painel-lista"></ul>
+            </div>
+        </section>
+
+        <!-- Secção Calendário — Timeline do dia + Relatório semanal -->
+        <section id="sec-calendario" class="area-sec" aria-labelledby="titulo-calendario">
+            <h2 id="titulo-calendario" class="sec-titulo" style="margin-top: 1rem; padding: 0 1rem;">Calendário</h2>
+
+            <!-- Timeline do dia (linha do tempo) com filtro de data -->
+            <section class="agenda-section agenda-section-calendario">
+                <h3 class="agenda-titulo">Marcações do dia</h3>
+                <div class="calendario-dia-toolbar">
+                    <button type="button" id="calendario-dia-prev" class="calendario-dia-nav" aria-label="Dia anterior">‹</button>
+                    <span class="calendario-dia-label" id="calendario-dia-label">—</span>
+                    <button type="button" id="calendario-dia-next" class="calendario-dia-nav" aria-label="Dia seguinte">›</button>
+                    <input type="date" id="calendario-dia-input" class="calendario-dia-input" aria-label="Selecionar data">
+                </div>
+                <div class="timeline" id="timeline-calendario">
+                    <div id="timeline-calendario-lista"></div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Secção Hoje: apenas botão Registrar -->
+        <section id="sec-hoje" class="area-sec visivel" aria-labelledby="titulo-hoje">
+            <div class="header-wrap">
+                <header class="header">
+                    <div class="header-top">
+                        <div class="perfil-mini">
+                            <div class="avatar-status">
+                                <div class="avatar" id="avatarIniciais">RT</div>
+                            </div>
+                            <div class="perfil-texto">
+                                <div class="perfil-nome" title="{{ nome }}">{{ nome }}</div>
+                            </div>
+                        </div>
+                        <a class="btn-sair-top" href="?sair=1" aria-label="Sair">
+                            <span style="font-size:1rem; line-height:0;">⎋</span>
+                            <span>Sair</span>
+                        </a>
+                    </div>
+                    <div class="header-hora" id="horaAtual">--:--</div>
+                    <div class="header-data" id="dataHoje"></div>
+                </header>
+            </div>
+
+            <div class="acoes acoes-single">
+                <button type="button" class="btn-acao btn-registrar" id="btnRegistrar">Registrar</button>
+            </div>
+        </section>
+
+        <!-- Secção Perfil (dados do cadastro do colaborador, somente leitura) -->
+        <section id="sec-perfil" class="area-sec" aria-labelledby="titulo-perfil">
+            <h2 id="titulo-perfil" class="sec-titulo" style="margin-top: 1rem; padding: 0 1rem;">Perfil</h2>
+            <div class="card-sec">
+                <div class="perfil-campo">
+                    <label>Nome</label>
+                    <div class="valor">{{ nome }}</div>
+                </div>
+                {% if email %}
+                <div class="perfil-campo">
+                    <label>Email</label>
+                    <div class="valor">{{ email }}</div>
+                </div>
+                {% endif %}
+                {% if endereco %}
+                <div class="perfil-campo">
+                    <label>Endereço</label>
+                    <div class="valor">{{ endereco }}</div>
+                </div>
+                {% endif %}
+                {% if data_nascimento %}
+                <div class="perfil-campo">
+                    <label>Data de nascimento</label>
+                    <div class="valor">{{ data_nascimento|date:"d/m/Y" }}</div>
+                </div>
+                {% endif %}
+                {% if departamento_nome %}
+                <div class="perfil-campo">
+                    <label>Departamento</label>
+                    <div class="valor">{{ departamento_nome }}</div>
+                </div>
+                {% endif %}
+                {% if jornada_nome %}
+                <div class="perfil-campo">
+                    <label>Jornada</label>
+                    <div class="valor">{{ jornada_nome }}</div>
+                </div>
+                {% endif %}
+                <div class="perfil-campo">
+                    <a href="?sair=1" class="btn-logout">Terminar sessão</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="toast" id="toast" role="alert"></div>
+
+    <div class="modal-overlay" id="modalRegistroSucesso" role="dialog" aria-labelledby="modalRegistroSucessoTitulo" aria-modal="true">
+        <div class="modal-justificativa modal-registro-sucesso">
+            <h3 id="modalRegistroSucessoTitulo">Registrada com sucesso</h3>
+            <p class="modal-registro-data-hora" id="modalRegistroDataHora">—</p>
+            <div class="modal-botoes">
+                <button type="button" class="modal-btn-confirmar" id="btnModalRegistroOk">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalJustificativa" role="dialog" aria-labelledby="modalJustificativaTitulo" aria-modal="true">
+        <div class="modal-justificativa">
+            <h3 id="modalJustificativaTitulo">Saída sem pausa para almoço</h3>
+            <p>Indique o motivo da saída antes de registar a pausa para almoço (obrigatório).</p>
+            <textarea id="inputJustificativa" placeholder="Ex.: Saída antecipada por motivo pessoal" maxlength="500"></textarea>
+            <div class="modal-botoes">
+                <button type="button" class="modal-btn-cancelar" id="btnModalCancelar">Cancelar</button>
+                <button type="button" class="modal-btn-confirmar" id="btnModalConfirmar">Confirmar saída</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="nav-bottom" aria-label="Navegação principal">
+        <a href="#painel" class="nav-item" data-sec="painel" aria-label="Painel">📊<span>Painel</span></a>
+        <a href="#calendario" class="nav-item" data-sec="calendario" aria-label="Calendário">📅<span>Calendário</span></a>
+        <a href="#hoje" class="nav-item ativo" data-sec="hoje" aria-label="Hoje" aria-current="page">📍<span>Hoje</span></a>
+        <a href="#perfil" class="nav-item" data-sec="perfil" aria-label="Perfil">👤<span>Perfil</span></a>
+    </nav>
+
+    <script>
+(function() {
+    var LOGOUT_AFTER_MS = 5 * 60 * 1000;
+    var logoutUrl = '/area/?sair=1';
+    var inactivityTimer;
+    function resetInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(function() {
+            window.location.href = logoutUrl;
+        }, LOGOUT_AFTER_MS);
+    }
+    ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'].forEach(function(ev) {
+        document.addEventListener(ev, resetInactivityTimer, { passive: true });
+    });
+    resetInactivityTimer();
+
+    var API_MINHAS = '/api/marcacoes/minhas/';
+    var API_MARCAR = '/api/marcacoes/';
+    var TIPOS_ORDEM = ['entrada', 'inicio_almoco', 'fim_almoco', 'fim_jornada'];
+    var estadoHoje = { entrada: false, inicio_almoco: false, fim_almoco: false, fim_jornada: false };
+    var totalMarcacoesHoje = 0;
+    var ICONE_MARCACAO = '<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>';
+
+    function hojeISO() {
+        var d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+
+    function atualizarDataHora() {
+        var now = new Date();
+        var opts = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+        document.getElementById('dataHoje').textContent = now.toLocaleDateString('pt-PT', opts);
+        document.getElementById('horaAtual').textContent = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+
+    function atualizarAvatar() {
+        var el = document.getElementById('avatarIniciais');
+        if (!el) return;
+        var nomeEl = document.querySelector('.perfil-nome');
+        var nome = (nomeEl && nomeEl.textContent) ? nomeEl.textContent.trim() : '';
+        var parts = nome.split(/\s+/).filter(Boolean);
+        var ini = '';
+        if (parts.length >= 2) ini = (parts[0][0] + parts[parts.length - 1][0]);
+        else if (parts.length === 1) ini = parts[0].slice(0, 2);
+        ini = (ini || 'RT').toUpperCase();
+        el.textContent = ini;
+    }
+
+    function showToast(msg, isError) {
+        var el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.toggle('erro', !!isError);
+        el.classList.add('visible');
+        setTimeout(function() { el.classList.remove('visible'); }, 3500);
+    }
+
+    function parseDataHora(str) {
+        if (!str) return null;
+        var m = str.match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})/);
+        if (!m) return null;
+        return { date: m[1]+'-'+m[2]+'-'+m[3], time: m[4]+':'+m[5] };
+    }
+
+    function carregarAgenda() {
+        fetch(API_MINHAS, { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(lista) {
+                var hoje = hojeISO();
+                var porTipo = {};
+                TIPOS_ORDEM.forEach(function(t) { porTipo[t] = null; });
+                totalMarcacoesHoje = 0;
+                var mapTipo = { 'Entrada': 'entrada', 'Início Almoço': 'inicio_almoco', 'Fim Almoço': 'fim_almoco', 'Fim Jornada': 'fim_jornada' };
+                (lista || []).forEach(function(m) {
+                    var key = m['Tipo de Marcação'];
+                    var tipo = mapTipo[key];
+                    if (!tipo) return;
+                    var dh = parseDataHora(m['Data e Hora']);
+                    if (!dh || dh.date !== hoje) return;
+                    totalMarcacoesHoje += 1;
+                    if (!porTipo[tipo]) porTipo[tipo] = dh;
+                });
+                estadoHoje = { entrada: !!porTipo.entrada, inicio_almoco: !!porTipo.inicio_almoco, fim_almoco: !!porTipo.fim_almoco, fim_jornada: !!porTipo.fim_jornada };
+                atualizarBotoes();
+            })
+            .catch(function() { showToast('Erro ao carregar agenda.', true); });
+    }
+
+    function proximoPasso() {
+        if (totalMarcacoesHoje >= 8) return null;
+        // Cicla nos 4 tipos para permitir até 8 marcações no dia.
+        return TIPOS_ORDEM[totalMarcacoesHoje % TIPOS_ORDEM.length];
+    }
+
+    function atualizarBotoes() {
+        var btn = document.getElementById('btnRegistrar');
+        if (!btn) return;
+        var next = proximoPasso();
+        btn.textContent = 'Registrar';
+        btn.disabled = !next;
+    }
+
+    function marcar(tipo, btn, justificativa) {
+        if (!navigator.geolocation) {
+            showToast('Geolocalização não disponível.', true);
+            return;
+        }
+        btn.disabled = true;
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                var payload = { tipo_marcacao: tipo, latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+                if (tipo === 'fim_jornada' && justificativa) payload.justificativa = justificativa;
+                fetch(API_MARCAR, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data && data.sucesso) {
+                            carregarAgenda();
+                            var dataHora = data.data_hora || (new Date().toLocaleDateString('pt-PT') + ' ' + new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', hour12: false }));
+                            var el = document.getElementById('modalRegistroDataHora');
+                            if (el) el.textContent = dataHora;
+                            var overlay = document.getElementById('modalRegistroSucesso');
+                            if (overlay) overlay.classList.add('visible');
+                        } else {
+                            showToast(data.mensagem || data.erro || 'Erro ao marcar.', true);
+                        }
+                    })
+                    .catch(function() { showToast('Erro de ligação.', true); })
+                    .finally(function() { btn.disabled = false; });
+            },
+            function() {
+                showToast('Não foi possível obter a localização.', true);
+                btn.disabled = false;
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    }
+
+    function decidirOi() {
+        if (!estadoHoje.entrada) return 'entrada';
+        if (estadoHoje.inicio_almoco && !estadoHoje.fim_almoco) return 'fim_almoco';
+        return null;
+    }
+    function decidirTchau() {
+        if (!estadoHoje.entrada) return null;
+        if (!estadoHoje.inicio_almoco) return 'inicio_almoco';
+        if (!estadoHoje.fim_jornada) return 'fim_jornada';
+        return null;
+    }
+
+    function precisaJustificativaSaida() {
+        // Mantemos a lógica de pedir justificativa quando estiver a tentar "fim_jornada"
+        // sem ter registado "inicio_almoco" pelo menos uma vez no dia.
+        return estadoHoje.entrada && !estadoHoje.inicio_almoco;
+    }
+
+    function abrirModalJustificativa(btnRef) {
+        var overlay = document.getElementById('modalJustificativa');
+        var input = document.getElementById('inputJustificativa');
+        var btnConfirmar = document.getElementById('btnModalConfirmar');
+        input.value = '';
+        overlay.classList.add('visible');
+        input.focus();
+        var confirmarHandler = function() {
+            var texto = (input.value || '').trim();
+            if (!texto) { showToast('Indique uma justificativa.', true); return; }
+            overlay.classList.remove('visible');
+            document.getElementById('btnModalCancelar').removeEventListener('click', cancelarHandler);
+            btnConfirmar.removeEventListener('click', confirmarHandler);
+            marcar('fim_jornada', btnRef, texto);
+        };
+        var cancelarHandler = function() {
+            overlay.classList.remove('visible');
+            document.getElementById('btnModalCancelar').removeEventListener('click', cancelarHandler);
+            btnConfirmar.removeEventListener('click', confirmarHandler);
+        };
+        document.getElementById('btnModalCancelar').addEventListener('click', cancelarHandler);
+        btnConfirmar.addEventListener('click', confirmarHandler);
+    }
+
+    document.getElementById('btnRegistrar').addEventListener('click', function() {
+        var t = proximoPasso();
+        if (!t) { showToast('Nenhuma marcação disponível.', true); return; }
+        if (t === 'fim_jornada' && precisaJustificativaSaida()) {
+            abrirModalJustificativa(this);
+        } else {
+            marcar(t, this);
+        }
+    });
+
+    document.getElementById('btnModalRegistroOk').addEventListener('click', function() {
+        document.getElementById('modalRegistroSucesso').classList.remove('visible');
+    });
+
+    atualizarDataHora();
+    atualizarAvatar();
+    setInterval(atualizarDataHora, 1000);
+    carregarAgenda();
+
+    // --- Navegação entre secções (Painel, Calendário, Hoje, Perfil) ---
+    var secIds = { painel: 'sec-painel', calendario: 'sec-calendario', hoje: 'sec-hoje', perfil: 'sec-perfil' };
+    function mostrarSec(id) {
+        id = id || 'hoje';
+        if (!secIds[id]) id = 'hoje';
+        document.querySelectorAll('.area-sec').forEach(function(sec) { sec.classList.remove('visivel'); });
+        var el = document.getElementById(secIds[id]);
+        if (el) el.classList.add('visivel');
+        document.querySelectorAll('.nav-item').forEach(function(a) {
+            a.classList.remove('ativo');
+            a.removeAttribute('aria-current');
+            if (a.getAttribute('data-sec') === id) {
+                a.classList.add('ativo');
+                if (id === 'hoje') a.setAttribute('aria-current', 'page');
+            }
+        });
+        window.location.hash = id;
+        if (id === 'painel') carregarPainel();
+        if (id === 'calendario') {
+            if (dataSelecionadaCalendario === null) dataSelecionadaCalendario = hojeISO();
+            var inputDia = document.getElementById('calendario-dia-input');
+            var labelDia = document.getElementById('calendario-dia-label');
+            if (inputDia) inputDia.value = dataSelecionadaCalendario;
+            if (labelDia) labelDia.textContent = formatarDiaLabel(dataSelecionadaCalendario);
+            carregarTimelineDia(dataSelecionadaCalendario);
+        }
+    }
+    var dataSelecionadaCalendario = null;
+    function formatarDiaLabel(iso) {
+        if (!iso) return '—';
+        var d = new Date(iso + 'T12:00:00');
+        return d.toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+    var timelineDiaReqId = 0;
+    function carregarTimelineDia(dataISO) {
+        var listaEl = document.getElementById('timeline-calendario-lista');
+        if (!listaEl) return;
+        listaEl.innerHTML = '';
+        var reqId = ++timelineDiaReqId;
+        fetch(API_MINHAS, { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(lista) {
+                if (reqId !== timelineDiaReqId) return; // ignora respostas antigas (evita duplicados)
+                var doDia = [];
+                var vistos = {};
+                (lista || []).forEach(function(m) {
+                    var dh = parseDataHora(m['Data e Hora']);
+                    if (!dh || dh.date !== dataISO) return;
+                    var key = (m['Data e Hora'] || (dh.date + ' ' + dh.time + ':00'));
+                    if (vistos[key]) return;
+                    vistos[key] = true;
+                    doDia.push({ time: dh.time, sortKey: m['Data e Hora'] || (dh.date + ' ' + dh.time + ':00') });
+                });
+                doDia.sort(function(a, b) { return (a.sortKey || '').localeCompare(b.sortKey || ''); });
+                doDia.forEach(function(reg) {
+                    var div = document.createElement('div');
+                    div.className = 'timeline-item registado';
+                    div.innerHTML = '<div class="label"><div class="icon-wrap">' + ICONE_MARCACAO + '</div><span class="timeline-item-texto">Registrado</span></div><span class="hora">' + reg.time + '</span>';
+                    listaEl.appendChild(div);
+                });
+            })
+            .catch(function() { listaEl.innerHTML = ''; });
+    }
+    function aplicarDataCalendario(iso) {
+        dataSelecionadaCalendario = iso;
+        var inputDia = document.getElementById('calendario-dia-input');
+        var labelDia = document.getElementById('calendario-dia-label');
+        if (inputDia) inputDia.value = iso;
+        if (labelDia) labelDia.textContent = formatarDiaLabel(iso);
+        carregarTimelineDia(iso);
+    }
+    document.getElementById('calendario-dia-prev') && document.getElementById('calendario-dia-prev').addEventListener('click', function() {
+        var d = new Date((dataSelecionadaCalendario || hojeISO()) + 'T12:00:00');
+        d.setDate(d.getDate() - 1);
+        aplicarDataCalendario(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'));
+    });
+    document.getElementById('calendario-dia-next') && document.getElementById('calendario-dia-next').addEventListener('click', function() {
+        var d = new Date((dataSelecionadaCalendario || hojeISO()) + 'T12:00:00');
+        d.setDate(d.getDate() + 1);
+        aplicarDataCalendario(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'));
+    });
+    document.getElementById('calendario-dia-input') && document.getElementById('calendario-dia-input').addEventListener('change', function() {
+        var v = this.value;
+        if (v) aplicarDataCalendario(v);
+    });
+
+    function secFromHash() {
+        var h = (window.location.hash || '#hoje').replace('#', '');
+        return secIds[h] ? h : 'hoje';
+    }
+    document.querySelectorAll('.nav-item').forEach(function(a) {
+        a.addEventListener('click', function(e) {
+            e.preventDefault();
+            var id = a.getAttribute('data-sec');
+            if (id) mostrarSec(id);
+        });
+    });
+    window.addEventListener('hashchange', function() { mostrarSec(secFromHash()); });
+    mostrarSec(secFromHash());
+
+    function carregarPainel() {
+        var resumo = document.getElementById('painel-resumo');
+        var lista = document.getElementById('painel-lista');
+        if (!resumo || !lista) return;
+        resumo.textContent = 'A carregar…';
+        lista.innerHTML = '';
+        fetch(API_MINHAS, { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(marcacoes) {
+                var mapTipo = { 'Entrada': 'entrada', 'Início Almoço': 'inicio_almoco', 'Fim Almoço': 'fim_almoco', 'Fim Jornada': 'fim_jornada' };
+                var porDia = {};
+                var hoje = hojeISO();
+                (marcacoes || []).slice(0, 100).forEach(function(m) {
+                    var dh = parseDataHora(m['Data e Hora']);
+                    if (!dh) return;
+                    if (!porDia[dh.date]) porDia[dh.date] = [];
+                    porDia[dh.date].push({ tipo: mapTipo[m['Tipo de Marcação']], time: dh.time });
+                });
+                var dias = Object.keys(porDia).sort().reverse().slice(0, 7);
+                if (dias.length === 0) {
+                    resumo.textContent = 'Ainda não há marcações esta semana.';
+                } else {
+                    resumo.textContent = 'Últimos dias com marcações.';
+                }
+                dias.forEach(function(date) {
+                    var li = document.createElement('li');
+                    var d = new Date(date + 'T12:00:00');
+                    var label = d.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short' });
+                    var marks = porDia[date].map(function(x) { return x.time + ' ' + x.tipo; }).join(', ');
+                    li.innerHTML = '<span class="dia-num">' + label + '</span><span class="dia-marc">' + marks + '</span>';
+                    lista.appendChild(li);
+                });
+            })
+            .catch(function() { resumo.textContent = 'Erro ao carregar.'; });
+    }
+
+    // --- Relatório semanal (Calendário) ---
+    var calendarWeekStart = null; // ISO date (YYYY-MM-DD) do Monday da semana em exibição
+
+    function getMondayOfWeek(d) {
+        var date = new Date(d);
+        var day = date.getDay();
+        var diff = day === 0 ? -6 : 1 - day;
+        date.setDate(date.getDate() + diff);
+        return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+    }
+    function getWeekDates(weekStartISO) {
+        var out = [];
+        for (var i = 0; i < 7; i++) {
+            var d = new Date(weekStartISO + 'T12:00:00');
+            d.setDate(d.getDate() + i);
+            out.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'));
+        }
+        return out;
+    }
+    function minutosFromTime(t) {
+        if (!t || t.length < 5) return null;
+        var p = t.split(':');
+        return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+    }
+    function formatDuracao(minutos) {
+        if (minutos == null || minutos < 0) return '—';
+        var h = Math.floor(minutos / 60);
+        var m = minutos % 60;
+        return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+    }
+
+    function carregarCalendario() {
+        var tbody = document.getElementById('relatorio-tbody');
+        var periodoEl = document.getElementById('calendario-periodo');
+        if (!tbody || !periodoEl) return;
+        if (calendarWeekStart === null) calendarWeekStart = getMondayOfWeek(new Date());
+        var weekDates = getWeekDates(calendarWeekStart);
+        var seg = new Date(weekDates[0] + 'T12:00:00');
+        var dom = new Date(weekDates[6] + 'T12:00:00');
+        periodoEl.textContent = seg.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short' }) + ' - ' + dom.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short' }) + ', ' + dom.getFullYear();
+        tbody.innerHTML = '<tr><td colspan="8" class="relatorio-loading">A carregar…</td></tr>';
+        fetch(API_MINHAS, { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(marcacoes) {
+                var mapTipo = { 'Entrada': 'entrada', 'Início Almoço': 'inicio_almoco', 'Fim Almoço': 'fim_almoco', 'Fim Jornada': 'fim_jornada' };
+                var porDia = {};
+                (marcacoes || []).forEach(function(m) {
+                    var dh = parseDataHora(m['Data e Hora']);
+                    if (!dh) return;
+                    var tipo = mapTipo[m['Tipo de Marcação']];
+                    if (!tipo) return;
+                    if (!porDia[dh.date]) porDia[dh.date] = {};
+                    if (!porDia[dh.date][tipo]) porDia[dh.date][tipo] = dh.time;
+                });
+                var diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+                tbody.innerHTML = '';
+                weekDates.forEach(function(date, i) {
+                    var d = new Date(date + 'T12:00:00');
+                    var isWeekend = i >= 5;
+                    var row = porDia[date] || {};
+                    var entrada = row.entrada || null;
+                    var inicioInt = row.inicio_almoco || null;
+                    var voltaInt = row.fim_almoco || null;
+                    var saida = row.fim_jornada || null;
+                    var trab = '—';
+                    if (entrada && saida && !isWeekend) {
+                        var mEnt = minutosFromTime(entrada);
+                        var mSai = minutosFromTime(saida);
+                        if (mEnt != null && mSai != null) {
+                            var dur = mSai - mEnt;
+                            if (inicioInt && voltaInt) {
+                                var mIni = minutosFromTime(inicioInt);
+                                var mVol = minutosFromTime(voltaInt);
+                                if (mIni != null && mVol != null) dur -= (mVol - mIni);
+                            }
+                            trab = formatDuracao(dur >= 0 ? dur : null);
+                        }
+                    }
+                    var cel = function(val, falta) {
+                        if (isWeekend) return '<span class="cel-vazio">—</span>';
+                        if (falta && !val) return '<span class="cel-falta">Missing</span>';
+                        if (val) return '<span class="cel-ok">' + val + '</span>';
+                        return '<span class="cel-vazio">—</span>';
+                    };
+                    var tr = document.createElement('tr');
+                    if (isWeekend) tr.classList.add('fim-de-semana');
+                    var dataLabel = diasSemana[i] + ' ' + String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+                    tr.innerHTML =
+                        '<td class="col-data">' + dataLabel + '</td>' +
+                        '<td class="col-jornada">' + (isWeekend ? 'Folga' : 'Padrão 08h-18h') + '</td>' +
+                        '<td class="cel-planejado">' + (isWeekend ? '—' : '08:00') + '</td>' +
+                        '<td>' + cel(entrada, true) + '</td>' +
+                        '<td>' + cel(inicioInt, true) + '</td>' +
+                        '<td>' + cel(voltaInt, true) + '</td>' +
+                        '<td>' + cel(saida, true) + '</td>' +
+                        '<td>' + (isWeekend ? '<span class="cel-vazio">—</span>' : '<span class="cel-' + (trab !== '—' ? 'ok' : 'vazio') + '">' + trab + '</span>') + '</td>';
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(function() {
+                tbody.innerHTML = '<tr><td colspan="8" class="relatorio-erro">Erro ao carregar marcações.</td></tr>';
+            });
+    }
+})();
+    </script>
+</body>
+<script>
+(function() {
+  if (!('serviceWorker' in navigator)) return;
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/service-worker.js', { scope: '/' }).catch(function() {});
+  });
+})();
+</script>
+</html>

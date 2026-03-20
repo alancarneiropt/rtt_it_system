@@ -1,0 +1,68 @@
+{% extends "backoffice/base.html" %}
+
+{% block title %}Indicadores{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold text-slate-800 mb-6">Indicadores e Relatórios</h1>
+
+<!-- Absenteísmo por departamento -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+    <div class="px-6 py-4 border-b border-slate-200">
+        <h2 class="text-lg font-semibold text-slate-800">Presença por departamento (este mês)</h2>
+        <p class="text-sm text-slate-500">Dias com pelo menos uma marcação de entrada</p>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-6 py-3 text-left font-semibold text-slate-600">Departamento</th>
+                    <th class="px-6 py-3 text-left font-semibold text-slate-600">Colaboradores</th>
+                    <th class="px-6 py-3 text-left font-semibold text-slate-600">Dias com entrada</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for dept, dados in dept_absenteismo.items %}
+                <tr>
+                    <td class="px-6 py-3 font-medium text-slate-700">{{ dept }}</td>
+                    <td class="px-6 py-3 text-slate-600">{{ dados.colaboradores }}</td>
+                    <td class="px-6 py-3 text-slate-600">{{ dados.dias_com_entrada }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="px-6 py-8 text-center text-slate-500">Nenhum departamento com dados.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Alertas de inconsistência -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-slate-200 flex items-center gap-2">
+        <span class="text-pink-500 text-xl" title="Atenção">⚠</span>
+        <h2 class="text-lg font-semibold text-slate-800">Alertas de inconsistência</h2>
+        <p class="text-sm text-slate-500">Sem marcação de saída (últimos 7 dias)</p>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-6 py-3 text-left font-semibold text-slate-600">Colaborador</th>
+                    <th class="px-6 py-3 text-left font-semibold text-slate-600">Data</th>
+                    <th class="px-6 py-3 text-left font-semibold text-slate-600">Tipo</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for a in alertas %}
+                <tr>
+                    <td class="px-6 py-3 font-medium text-slate-700">{{ a.nome }}</td>
+                    <td class="px-6 py-3 text-slate-600">{{ a.data|date:"d/m/Y" }}</td>
+                    <td class="px-6 py-3 text-red-600">{{ a.tipo }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="px-6 py-8 text-center text-slate-500">Nenhum alerta.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

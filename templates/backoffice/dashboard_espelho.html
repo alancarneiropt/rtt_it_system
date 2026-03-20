@@ -1,0 +1,163 @@
+{% extends "backoffice/base.html" %}
+{% load static %}
+
+{% block title %}Espelho de Ponto{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <h1 class="text-2xl font-bold text-slate-800">Espelho de Ponto</h1>
+    <div class="flex items-center gap-2">
+        <a href="{% url 'backoffice_export_excel' %}?data_inicio={{ data_inicio|date:'Y-m-d' }}&data_fim={{ data_fim|date:'Y-m-d' }}{% if colaborador_selecionado %}&colaborador={{ colaborador_selecionado }}{% endif %}" class="inline-flex items-center px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700">Exportar Excel</a>
+        <a href="{% url 'backoffice_export_pdf' %}?data_inicio={{ data_inicio|date:'Y-m-d' }}&data_fim={{ data_fim|date:'Y-m-d' }}{% if colaborador_selecionado %}&colaborador={{ colaborador_selecionado }}{% endif %}" class="inline-flex items-center px-3 py-2 rounded-lg bg-rose-600 text-white text-sm font-medium hover:bg-rose-700">Exportar PDF</a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<form method="get" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
+    <div class="flex flex-wrap items-end gap-4">
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Colaborador</label>
+            <select name="colaborador" class="w-48 rounded-lg border-slate-300 text-sm">
+                <option value="">Todos</option>
+                {% for u in colaboradores %}
+                <option value="{{ u.pk }}" {% if colaborador_selecionado == u.pk|stringformat:"s" %}selected{% endif %}>{{ u.profile.nome|default:u.email }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Data início</label>
+            <input type="date" name="data_inicio" value="{{ data_inicio|date:'Y-m-d' }}" class="rounded-lg border-slate-300 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Data fim</label>
+            <input type="date" name="data_fim" value="{{ data_fim|date:'Y-m-d' }}" class="rounded-lg border-slate-300 text-sm">
+        </div>
+        <button type="submit" class="px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-medium hover:bg-slate-800">Filtrar</button>
+    </div>
+</form>
+
+<!-- Tabela -->
+<div class="space-y-4">
+    {% regroup linhas by data as grupos_por_data %}
+    {% for g in grupos_por_data %}
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="flex items-center justify-between gap-3 px-4 py-3 bg-slate-50 border-b border-slate-200">
+            <div class="flex items-baseline gap-2">
+                <h2 class="text-sm font-semibold text-slate-800">
+                    {{ g.list.0.dia_semana }} • {{ g.grouper|date:"d/m/Y" }}
+                </h2>
+                <span class="text-xs text-slate-500">({{ g.list|length }} registo{{ g.list|length|pluralize }})</span>
+            </div>
+        </div>
+
+        <div class="divide-y divide-slate-100">
+            {% for ln in g.list %}
+            <div class="p-4 hover:bg-slate-50/50 transition-colors border-l-4 border-transparent"
+                 data-utilizador-id="{{ ln.utilizador.pk }}"
+                 data-data="{{ ln.data|date:'Y-m-d' }}">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 truncate"
+                              data-user-badge="{{ ln.utilizador.pk }}">
+                            {{ ln.nome }}
+                        </span>
+                        {% if ln.is_weekend %}
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                            Fim‑de‑semana
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-500">Horas</span>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-900 text-white text-xs font-semibold">
+                            {{ ln.total }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                        <div class="text-[11px] text-slate-500 font-medium">1ª</div>
+                        <div class="mt-0.5 text-sm font-semibold text-slate-800">{{ ln.marcacao_1 }}</div>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                        <div class="text-[11px] text-slate-500 font-medium">2ª</div>
+                        <div class="mt-0.5 text-sm font-semibold text-slate-800">{{ ln.marcacao_2 }}</div>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                        <div class="text-[11px] text-slate-500 font-medium">3ª</div>
+                        <div class="mt-0.5 text-sm font-semibold text-slate-800">{{ ln.marcacao_3 }}</div>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                        <div class="text-[11px] text-slate-500 font-medium">4ª</div>
+                        <div class="mt-0.5 text-sm font-semibold text-slate-800">{{ ln.marcacao_4 }}</div>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                        <div class="text-[11px] text-slate-500 font-medium">5ª</div>
+                        <div class="mt-0.5 text-sm font-semibold text-slate-800">{{ ln.marcacao_5 }}</div>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                        <div class="text-[11px] text-slate-500 font-medium">6ª</div>
+                        <div class="mt-0.5 text-sm font-semibold text-slate-800">{{ ln.marcacao_6 }}</div>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                        <div class="text-[11px] text-slate-500 font-medium">7ª</div>
+                        <div class="mt-0.5 text-sm font-semibold text-slate-800">{{ ln.marcacao_7 }}</div>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                        <div class="text-[11px] text-slate-500 font-medium">8ª</div>
+                        <div class="mt-0.5 text-sm font-semibold text-slate-800">{{ ln.marcacao_8 }}</div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="px-4 py-8 text-center text-slate-500">Nenhum registo no intervalo selecionado.</div>
+            {% endfor %}
+        </div>
+    </section>
+    {% empty %}
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 px-4 py-10 text-center text-slate-500">
+        Nenhum registo no intervalo selecionado.
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    var palette = [
+        { border: 'border-sky-400', badgeBg: 'bg-sky-50', badgeText: 'text-sky-800', badgeRing: 'ring-sky-200' },
+        { border: 'border-emerald-400', badgeBg: 'bg-emerald-50', badgeText: 'text-emerald-800', badgeRing: 'ring-emerald-200' },
+        { border: 'border-violet-400', badgeBg: 'bg-violet-50', badgeText: 'text-violet-800', badgeRing: 'ring-violet-200' },
+        { border: 'border-amber-400', badgeBg: 'bg-amber-50', badgeText: 'text-amber-900', badgeRing: 'ring-amber-200' },
+        { border: 'border-rose-400', badgeBg: 'bg-rose-50', badgeText: 'text-rose-800', badgeRing: 'ring-rose-200' },
+        { border: 'border-teal-400', badgeBg: 'bg-teal-50', badgeText: 'text-teal-800', badgeRing: 'ring-teal-200' },
+        { border: 'border-indigo-400', badgeBg: 'bg-indigo-50', badgeText: 'text-indigo-800', badgeRing: 'ring-indigo-200' },
+        { border: 'border-lime-400', badgeBg: 'bg-lime-50', badgeText: 'text-lime-900', badgeRing: 'ring-lime-200' }
+    ];
+
+    function pick(userId) {
+        var n = parseInt(userId, 10);
+        if (!isFinite(n)) n = 0;
+        return palette[Math.abs(n) % palette.length];
+    }
+
+    document.querySelectorAll('[data-utilizador-id]').forEach(function(card) {
+        var id = card.getAttribute('data-utilizador-id');
+        var c = pick(id);
+        card.classList.remove('border-transparent');
+        card.classList.add(c.border);
+    });
+
+    document.querySelectorAll('[data-user-badge]').forEach(function(badge) {
+        var id = badge.getAttribute('data-user-badge');
+        var c = pick(id);
+        badge.classList.remove('bg-slate-100', 'text-slate-700');
+        badge.classList.add(c.badgeBg, c.badgeText, 'ring-1', c.badgeRing);
+    });
+})();
+</script>
+{% endblock %}

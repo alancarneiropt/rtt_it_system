@@ -1,0 +1,54 @@
+{% extends "backoffice/base.html" %}
+
+{% block title %}Colaboradores{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <h1 class="text-2xl font-bold text-slate-800">Colaboradores</h1>
+    <a href="{% url 'backoffice_colaborador_create' %}" class="inline-flex items-center px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-medium hover:bg-slate-800">+ Novo colaborador</a>
+</div>
+
+<form method="get" class="mb-4">
+    <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Pesquisar por nome ou email..."
+        class="w-full max-w-md px-3 py-2 border border-slate-300 rounded-lg">
+    <button type="submit" class="mt-2 px-4 py-2 rounded-lg bg-slate-600 text-white text-sm">Pesquisar</button>
+</form>
+
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <table class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="bg-slate-50">
+            <tr>
+                <th class="px-6 py-3 text-left font-semibold text-slate-600">Nome</th>
+                <th class="px-6 py-3 text-left font-semibold text-slate-600">Email</th>
+                <th class="px-6 py-3 text-left font-semibold text-slate-600">Acesso Backoffice</th>
+                <th class="px-6 py-3 w-24"></th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+            {% for p in perfis %}
+            <tr>
+                <td class="px-6 py-3 font-medium text-slate-700">{{ p.nome }}</td>
+                <td class="px-6 py-3 text-slate-600">{{ p.user.email }}</td>
+                <td class="px-6 py-3">
+                    {% if p.user.is_staff %}<span class="text-green-600 font-medium">Sim</span>{% else %}<span class="text-slate-400">Não</span>{% endif %}
+                </td>
+                <td class="px-6 py-3">
+                    <div class="flex items-center gap-2 justify-end">
+                        <a href="{% url 'backoffice_colaborador_detail' p.pk %}"
+                           class="inline-flex items-center whitespace-nowrap px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 text-xs font-medium hover:bg-slate-50">
+                            Ver marcações
+                        </a>
+                        <a href="{% url 'backoffice_colaborador_edit' p.pk %}"
+                           class="inline-flex items-center whitespace-nowrap px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-700">
+                            Editar
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="px-6 py-8 text-center text-slate-500">Nenhum colaborador. <a href="{% url 'backoffice_colaborador_create' %}" class="text-blue-600 hover:underline">Cadastrar o primeiro</a>.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

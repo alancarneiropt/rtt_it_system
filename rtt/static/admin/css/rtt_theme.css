@@ -1,0 +1,102 @@
+/* RTT-IT Admin: tema sóbrio e profissional
+   Cor primária: #2563EB (azul indigo)
+   Texto: #1A1A1A
+   Fundo: #F8FAFC
+   Fonte: Inter
+*/
+:root {
+  --rtt-primary: #2563EB;
+  --rtt-primary-dark: #1d4ed8;
+  --rtt-text: #1A1A1A;
+  --rtt-bg: #F8FAFC;
+  --rtt-font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body,
+input, textarea, select, button {
+  font-family: var(--rtt-font) !important;
+  color: var(--rtt-text) !important;
+}
+
+body {
+  background: var(--rtt-bg) !important;
+}
+
+#header {
+  background: var(--rtt-primary) !important;
+  color: #fff !important;
+}
+
+#branding h1 a:link,
+#branding h1 a:visited {
+  color: #fff !important;
+}
+
+#branding h1 {
+  color: #fff !important;
+}
+
+a:link, a:visited {
+  color: var(--rtt-primary) !important;
+}
+
+a:hover {
+  color: var(--rtt-primary-dark) !important;
+}
+
+.module h2,
+.module caption,
+.inline-group h2 {
+  background: var(--rtt-primary) !important;
+  color: #fff !important;
+}
+
+.button,
+input[type=submit],
+input[type=button],
+.submit-row input {
+  background: var(--rtt-primary) !important;
+  color: #fff !important;
+}
+
+.button:hover,
+input[type=submit]:hover,
+input[type=button]:hover {
+  background: var(--rtt-primary-dark) !important;
+}
+
+#user-tools a {
+  color: rgba(255,255,255,0.9) !important;
+}
+
+#user-tools a:hover {
+  color: #fff !important;
+}
+
+.logout-link:link,
+.logout-link:visited {
+  color: rgba(255,255,255,0.9) !important;
+}
+
+#content-main,
+#content {
+  color: var(--rtt-text);
+}
+
+.change-list .results {
+  background: #fff;
+}
+
+.change-list table thead th {
+  background: var(--rtt-bg);
+  color: var(--rtt-text);
+  border-bottom: 2px solid var(--rtt-primary);
+}
+
+.change-list table tbody tr:hover {
+  background: var(--rtt-bg);
+}
+
+.select2-container--admin-autocomplete .select2-results__option--highlighted[aria-selected] {
+  background: var(--rtt-primary) !important;
+}

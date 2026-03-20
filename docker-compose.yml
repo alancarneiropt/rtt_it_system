@@ -1,0 +1,27 @@
+# RTT-IT — exemplo de stack (apenas a app).
+# O PostgreSQL deve ser um serviço EXTERNO (EasyPanel, managed DB, etc.).
+# Não incluímos Postgres aqui de propósito.
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rtt-it:latest
+    ports:
+      - "8009:8009"
+    environment:
+      DJANGO_PRODUCTION: "1"
+      DJANGO_DEBUG: "0"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?defina no .env}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:?defina no .env}
+      DB_HOST: ${DB_HOST:?defina no .env}
+      DB_NAME: ${DB_NAME:?defina no .env}
+      DB_USER: ${DB_USER:?defina no .env}
+      DB_PASSWORD: ${DB_PASSWORD:?defina no .env}
+      DB_PORT: ${DB_PORT:-5432}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-}
+      USE_X_FORWARDED_PROTO: ${USE_X_FORWARDED_PROTO:-1}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-3}
+    restart: unless-stopped

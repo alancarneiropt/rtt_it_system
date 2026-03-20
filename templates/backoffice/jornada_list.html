@@ -1,0 +1,39 @@
+{% extends "backoffice/base.html" %}
+
+{% block title %}Jornadas{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <h1 class="text-2xl font-bold text-slate-800">Jornadas</h1>
+    <a href="{% url 'backoffice_jornada_create' %}" class="inline-flex items-center px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-medium hover:bg-slate-800">+ Nova jornada</a>
+</div>
+<p class="text-sm text-slate-600 mb-4">Estes valores aparecem no dropdown <strong>Jornada</strong> ao cadastrar ou editar um colaborador (horários planejados para o espelho de ponto).</p>
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <table class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="bg-slate-50">
+            <tr>
+                <th class="px-6 py-3 text-left font-semibold text-slate-600">Nome</th>
+                <th class="px-6 py-3 text-left font-semibold text-slate-600">Tipo</th>
+                <th class="px-6 py-3 text-left font-semibold text-slate-600">Entrada</th>
+                <th class="px-6 py-3 text-left font-semibold text-slate-600">Saída</th>
+                <th class="px-6 py-3 text-left font-semibold text-slate-600">Estado</th>
+                <th class="px-6 py-3 w-24"></th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+            {% for j in lista %}
+            <tr>
+                <td class="px-6 py-3 font-medium text-slate-700">{{ j.nome }}</td>
+                <td class="px-6 py-3 text-slate-600">{{ j.get_tipo_display }}</td>
+                <td class="px-6 py-3 text-slate-600">{{ j.hora_entrada_planejada|time:"H:i" }}</td>
+                <td class="px-6 py-3 text-slate-600">{{ j.hora_saida_planejada|time:"H:i" }}</td>
+                <td class="px-6 py-3">{% if j.ativo %}<span class="text-green-600">Ativo</span>{% else %}<span class="text-slate-400">Inativo</span>{% endif %}</td>
+                <td class="px-6 py-3"><a href="{% url 'backoffice_jornada_edit' j.pk %}" class="text-blue-600 hover:underline">Editar</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="px-6 py-8 text-center text-slate-500">Nenhuma jornada. <a href="{% url 'backoffice_jornada_create' %}" class="text-blue-600 hover:underline">Criar a primeira</a>.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
