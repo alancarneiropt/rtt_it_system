@@ -5,6 +5,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from django.utils import timezone
 
 from django.views.decorators.http import require_GET
@@ -210,6 +211,23 @@ def login_view(request):
         'sucesso': True,
         'mensagem': 'Autenticação realizada com sucesso.',
         'utilizador_id': user.pk,
+    })
+
+
+@require_GET
+@never_cache
+def hora_servidor(request):
+    """
+    GET /api/hora-servidor/ — instante atual do servidor (UTC ms) e fuso usado nos registos.
+    O cliente aplica offset face ao relógio local para mostrar a mesma hora que nas marcações.
+    """
+    user, err = _require_auth(request)
+    if err:
+        return err
+    now = timezone.now()
+    return _json({
+        'unix_ms': int(now.timestamp() * 1000),
+        'time_zone': settings.TIME_ZONE,
     })
 
 

@@ -700,21 +700,63 @@
 
     var API_MINHAS = '/api/marcacoes/minhas/';
     var API_MARCAR = '/api/marcacoes/';
+    var API_HORA_SERVIDOR = '/api/hora-servidor/';
+    /** Fuso do Django (settings.TIME_ZONE); o servidor devolve o valor real em /api/hora-servidor/ */
+    var SERVER_TZ = 'Europe/Lisbon';
+    /** Offset em ms: hora_do_servidor ≈ Date.now() + clockOffsetMs (mesma referência que nas marcações). */
+    var clockOffsetMs = 0;
+    var clockSyncOk = false;
     var TIPOS_ORDEM = ['entrada', 'inicio_almoco', 'fim_almoco', 'fim_jornada'];
     var estadoHoje = { entrada: false, inicio_almoco: false, fim_almoco: false, fim_jornada: false };
     var totalMarcacoesHoje = 0;
     var ICONE_MARCACAO = '<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>';
 
+    function serverInstantMs() {
+        return Date.now() + clockOffsetMs;
+    }
+
+    function syncServerClock() {
+        return fetch(API_HORA_SERVIDOR, { credentials: 'same-origin', cache: 'no-store' })
+            .then(function(r) {
+                if (!r.ok) throw new Error('hora');
+                return r.json();
+            })
+            .then(function(data) {
+                if (data.time_zone) SERVER_TZ = data.time_zone;
+                clockOffsetMs = (data.unix_ms || 0) - Date.now();
+                clockSyncOk = true;
+            });
+    }
+
+    /** Data civil YYYY-MM-DD no fuso SERVER_TZ para o instante dado (ms). */
+    function ymdISOFromMs(ms) {
+        var parts = new Intl.DateTimeFormat('en-CA', { timeZone: SERVER_TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(ms));
+        var y = '', m = '', d = '';
+        parts.forEach(function(p) {
+            if (p.type === 'year') y = p.value;
+            if (p.type === 'month') m = p.value;
+            if (p.type === 'day') d = p.value;
+        });
+        return y + '-' + m + '-' + d;
+    }
+
     function hojeISO() {
-        var d = new Date();
-        return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        if (!clockSyncOk) return ymdISOFromMs(Date.now());
+        return ymdISOFromMs(serverInstantMs());
     }
 
     function atualizarDataHora() {
-        var now = new Date();
-        var opts = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-        document.getElementById('dataHoje').textContent = now.toLocaleDateString('pt-PT', opts);
-        document.getElementById('horaAtual').textContent = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', hour12: false });
+        var horaEl = document.getElementById('horaAtual');
+        var dataEl = document.getElementById('dataHoje');
+        if (!horaEl || !dataEl) return;
+        if (!clockSyncOk) {
+            horaEl.textContent = '…';
+            return;
+        }
+        var d = new Date(serverInstantMs());
+        var opts = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: SERVER_TZ };
+        dataEl.textContent = d.toLocaleDateString('pt-PT', opts);
+        horaEl.textContent = d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: SERVER_TZ });
     }
 
     function atualizarAvatar() {
@@ -803,7 +845,7 @@
                     .then(function(data) {
                         if (data && data.sucesso) {
                             carregarAgenda();
-                            var dataHora = data.data_hora || (new Date().toLocaleDateString('pt-PT') + ' ' + new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', hour12: false }));
+                            var dataHora = data.data_hora || '—';
                             var el = document.getElementById('modalRegistroDataHora');
                             if (el) el.textContent = dataHora;
                             var overlay = document.getElementById('modalRegistroSucesso');
@@ -879,10 +921,27 @@
         document.getElementById('modalRegistroSucesso').classList.remove('visible');
     });
 
-    atualizarDataHora();
     atualizarAvatar();
-    setInterval(atualizarDataHora, 1000);
-    carregarAgenda();
+    (function iniciarRelogioServidor() {
+        function depoisDeSincronizar() {
+            atualizarDataHora();
+            setInterval(atualizarDataHora, 1000);
+            setInterval(function() { syncServerClock().catch(function() {}); }, 5 * 60 * 1000);
+            carregarAgenda();
+            /* Recarrega a secção visível com “hoje” já alinhado ao servidor (calendário/painel). */
+            if (typeof mostrarSec === 'function' && typeof secFromHash === 'function') {
+                mostrarSec(secFromHash());
+            }
+        }
+        syncServerClock()
+            .then(depoisDeSincronizar)
+            .catch(function retry() {
+                showToast('A sincronizar a hora com o servidor…', false);
+                setTimeout(function() {
+                    syncServerClock().then(depoisDeSincronizar).catch(retry);
+                }, 2000);
+            });
+    })();
 
     // --- Navegação entre secções (Painel, Calendário, Hoje, Perfil) ---
     var secIds = { painel: 'sec-painel', calendario: 'sec-calendario', hoje: 'sec-hoje', perfil: 'sec-perfil' };
@@ -914,9 +973,31 @@
     var dataSelecionadaCalendario = null;
     function formatarDiaLabel(iso) {
         if (!iso) return '—';
-        var d = new Date(iso + 'T12:00:00');
-        return d.toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        var p = iso.split('-');
+        if (p.length !== 3) return iso;
+        var utcNoon = new Date(Date.UTC(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10), 12, 0, 0));
+        return utcNoon.toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: SERVER_TZ });
     }
+
+    function addCalendarDays(iso, delta) {
+        var p = iso.split('-');
+        var d = new Date(Date.UTC(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10), 12, 0, 0));
+        d.setUTCDate(d.getUTCDate() + delta);
+        return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
+    }
+
+    function parseISOYMD(iso) {
+        var p = (iso || '').split('-');
+        return { y: parseInt(p[0], 10), m: parseInt(p[1], 10), d: parseInt(p[2], 10) };
+    }
+
+    function formatDiaCurtoPtFromIso(iso) {
+        var pr = parseISOYMD(iso);
+        if (isNaN(pr.y)) return iso;
+        var utcNoon = new Date(Date.UTC(pr.y, pr.m - 1, pr.d, 12, 0, 0));
+        return utcNoon.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short', timeZone: SERVER_TZ });
+    }
+
     var timelineDiaReqId = 0;
     function carregarTimelineDia(dataISO) {
         var listaEl = document.getElementById('timeline-calendario-lista');
@@ -956,14 +1037,10 @@
         carregarTimelineDia(iso);
     }
     document.getElementById('calendario-dia-prev') && document.getElementById('calendario-dia-prev').addEventListener('click', function() {
-        var d = new Date((dataSelecionadaCalendario || hojeISO()) + 'T12:00:00');
-        d.setDate(d.getDate() - 1);
-        aplicarDataCalendario(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'));
+        aplicarDataCalendario(addCalendarDays(dataSelecionadaCalendario || hojeISO(), -1));
     });
     document.getElementById('calendario-dia-next') && document.getElementById('calendario-dia-next').addEventListener('click', function() {
-        var d = new Date((dataSelecionadaCalendario || hojeISO()) + 'T12:00:00');
-        d.setDate(d.getDate() + 1);
-        aplicarDataCalendario(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'));
+        aplicarDataCalendario(addCalendarDays(dataSelecionadaCalendario || hojeISO(), 1));
     });
     document.getElementById('calendario-dia-input') && document.getElementById('calendario-dia-input').addEventListener('change', function() {
         var v = this.value;
@@ -1010,8 +1087,7 @@
                 }
                 dias.forEach(function(date) {
                     var li = document.createElement('li');
-                    var d = new Date(date + 'T12:00:00');
-                    var label = d.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short' });
+                    var label = formatDiaCurtoPtFromIso(date);
                     var marks = porDia[date].map(function(x) { return x.time + ' ' + x.tipo; }).join(', ');
                     li.innerHTML = '<span class="dia-num">' + label + '</span><span class="dia-marc">' + marks + '</span>';
                     lista.appendChild(li);
@@ -1024,18 +1100,29 @@
     var calendarWeekStart = null; // ISO date (YYYY-MM-DD) do Monday da semana em exibição
 
     function getMondayOfWeek(d) {
-        var date = new Date(d);
-        var day = date.getDay();
-        var diff = day === 0 ? -6 : 1 - day;
-        date.setDate(date.getDate() + diff);
-        return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+        var ms = d.getTime();
+        var formatter = new Intl.DateTimeFormat('en-US', { timeZone: SERVER_TZ, weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit' });
+        var parts = formatter.formatToParts(new Date(ms));
+        var map = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+        var wdStr = '';
+        var y, m, day;
+        parts.forEach(function(p) {
+            if (p.type === 'weekday') wdStr = p.value;
+            if (p.type === 'year') y = parseInt(p.value, 10);
+            if (p.type === 'month') m = parseInt(p.value, 10);
+            if (p.type === 'day') day = parseInt(p.value, 10);
+        });
+        var wi = map[wdStr];
+        var diff = wi === 0 ? -6 : 1 - wi;
+        var utc = Date.UTC(y, m - 1, day, 12, 0, 0);
+        var adj = new Date(utc);
+        adj.setUTCDate(adj.getUTCDate() + diff);
+        return adj.getUTCFullYear() + '-' + String(adj.getUTCMonth() + 1).padStart(2, '0') + '-' + String(adj.getUTCDate()).padStart(2, '0');
     }
     function getWeekDates(weekStartISO) {
         var out = [];
         for (var i = 0; i < 7; i++) {
-            var d = new Date(weekStartISO + 'T12:00:00');
-            d.setDate(d.getDate() + i);
-            out.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'));
+            out.push(addCalendarDays(weekStartISO, i));
         }
         return out;
     }
@@ -1055,11 +1142,10 @@
         var tbody = document.getElementById('relatorio-tbody');
         var periodoEl = document.getElementById('calendario-periodo');
         if (!tbody || !periodoEl) return;
-        if (calendarWeekStart === null) calendarWeekStart = getMondayOfWeek(new Date());
+        if (calendarWeekStart === null) calendarWeekStart = getMondayOfWeek(new Date(serverInstantMs()));
         var weekDates = getWeekDates(calendarWeekStart);
-        var seg = new Date(weekDates[0] + 'T12:00:00');
-        var dom = new Date(weekDates[6] + 'T12:00:00');
-        periodoEl.textContent = seg.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short' }) + ' - ' + dom.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short' }) + ', ' + dom.getFullYear();
+        var yDom = parseISOYMD(weekDates[6]).y;
+        periodoEl.textContent = formatDiaCurtoPtFromIso(weekDates[0]) + ' - ' + formatDiaCurtoPtFromIso(weekDates[6]) + ', ' + yDom;
         tbody.innerHTML = '<tr><td colspan="8" class="relatorio-loading">A carregar…</td></tr>';
         fetch(API_MINHAS, { credentials: 'same-origin' })
             .then(function(r) { return r.json(); })
@@ -1077,7 +1163,7 @@
                 var diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
                 tbody.innerHTML = '';
                 weekDates.forEach(function(date, i) {
-                    var d = new Date(date + 'T12:00:00');
+                    var dp = parseISOYMD(date);
                     var isWeekend = i >= 5;
                     var row = porDia[date] || {};
                     var entrada = row.entrada || null;
@@ -1106,7 +1192,7 @@
                     };
                     var tr = document.createElement('tr');
                     if (isWeekend) tr.classList.add('fim-de-semana');
-                    var dataLabel = diasSemana[i] + ' ' + String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+                    var dataLabel = diasSemana[i] + ' ' + String(dp.d).padStart(2, '0') + '/' + String(dp.m).padStart(2, '0');
                     tr.innerHTML =
                         '<td class="col-data">' + dataLabel + '</td>' +
                         '<td class="col-jornada">' + (isWeekend ? 'Folga' : 'Padrão 08h-18h') + '</td>' +
