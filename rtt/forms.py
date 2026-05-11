@@ -76,6 +76,13 @@ class ColaboradorForm(forms.ModelForm):
             self.fields['password'].required = True
             self.fields['password'].help_text = 'Senha para o colaborador aceder ao sistema de ponto.'
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip().lower()
+        if not self.edit_user:
+            if User.objects.filter(email__iexact=email).exists() or User.objects.filter(username__iexact=email).exists():
+                raise forms.ValidationError("Este email já está registado no sistema.")
+        return email
+
     def save(self, commit=True):
         email = self.cleaned_data.get('email')
         password = self.cleaned_data.get('password')

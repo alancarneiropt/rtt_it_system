@@ -27,25 +27,51 @@ def health_view(request):
 
 # ---------- Página inicial: sempre tela de login ----------
 def root_view(request):
-    """Raiz (/) mostra sempre a tela de login. Backoffice só em /backoffice/."""
+    """
+    Raiz (/) unificada:
+    - Se não logado: mostra tela de login única.
+    - Se logado e admin (is_staff): vai para o dashboard do backoffice.
+    - Se logado e comum: vai para a área do utilizador.
+    """
     if request.user.is_authenticated:
+        if request.user.is_staff:
+            return redirect('backoffice_dashboard')
         return redirect('area_utilizador')
 
     if request.method == 'POST':
         email = (request.POST.get('email') or '').strip()
         palavra_passe = request.POST.get('palavra_passe') or ''
+        
         if not email or not palavra_passe:
             return render(request, 'rtt/login.html', {'erro': 'Indique email e palavra-passe.', 'email': email})
+        
         user = authenticate(request, email=email, password=palavra_passe)
         if user is None:
+            # Tenta autenticar pelo username caso o email não seja o username principal
+            user = authenticate(request, username=email, password=palavra_passe)
+            
+        if user is None:
             return render(request, 'rtt/login.html', {'erro': 'Email ou palavra-passe incorretos.', 'email': email})
+        
         login(request, user)
+        
+        # Respeita o parâmetro 'next' se existir
         next_url = request.GET.get('next') or request.POST.get('next')
         if next_url and next_url.startswith('/') and not next_url.startswith('//'):
             return redirect(next_url)
+            
+        # Redirecionamento baseado no tipo de utilizador
+        if user.is_staff:
+            return redirect('backoffice_dashboard')
         return redirect('area_utilizador')
 
-    return render(request, 'rtt/login.html')
+    # Trata mensagens de erro via GET (vindo do backoffice_required, por exemplo)
+    erro_get = request.GET.get('erro')
+    mensagem_erro = None
+    if erro_get == 'acesso_restrito':
+        mensagem_erro = 'Acesso restrito a administradores.'
+
+    return render(request, 'rtt/login.html', {'erro': mensagem_erro})
 
 
 def area_utilizador_view(request):
@@ -55,6 +81,7 @@ def area_utilizador_view(request):
     if request.GET.get('sair') == '1':
         auth_logout(request)
         return redirect('/')
+        
     try:
         profile = request.user.profile
         nome = profile.nome or request.user.email
@@ -63,11 +90,33 @@ def area_utilizador_view(request):
         departamento_nome = profile.departamento.nome if profile.departamento else ''
         jornada_nome = profile.jornada.nome if profile.jornada else ''
     except Profile.DoesNotExist:
+        profile = None
         nome = request.user.email or getattr(request.user, 'username', '')
         endereco = ''
         data_nascimento = None
         departamento_nome = ''
         jornada_nome = ''
+
+    # Lógica do Espelho de Ponto para o utilizador
+    from .backoffice_views import construir_espelho
+    from django.utils import timezone
+    
+    # Encontra a data da primeira marcação para mostrar "todo o percurso"
+    primeira = Marcacao.objects.filter(utilizador=request.user).order_by('timestamp').first()
+    hoje = timezone.localdate()
+    
+    if primeira:
+        data_inicio = timezone.localtime(primeira.timestamp).date()
+    else:
+        data_inicio = hoje
+        
+    # Se houver filtro de data via GET, respeita-o (opcional, mas bom ter)
+    data_fim = hoje
+    
+    # Gerar as linhas do espelho (reutilizando a lógica do backoffice)
+    # Passamos uma lista com apenas o utilizador logado
+    espelho_linhas = construir_espelho(data_inicio, data_fim, [request.user])
+
     email = getattr(request.user, 'email', '') or ''
     return render(request, 'rtt/area_utilizador.html', {
         'nome': nome,
@@ -76,6 +125,9 @@ def area_utilizador_view(request):
         'data_nascimento': data_nascimento,
         'departamento_nome': departamento_nome,
         'jornada_nome': jornada_nome,
+        'espelho_linhas': espelho_linhas,
+        'data_inicio': data_inicio,
+        'data_fim': data_fim,
     })
 
 

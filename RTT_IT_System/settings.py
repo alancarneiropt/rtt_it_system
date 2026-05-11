@@ -57,7 +57,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'rtt.middleware.BackofficeSessionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -66,7 +65,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'RTT_IT_System.urls'
+ROOT_URLCONF = 'rtt_it_system.urls'
 
 TEMPLATES = [
     {
@@ -84,7 +83,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'RTT_IT_System.wsgi.application'
+WSGI_APPLICATION = 'rtt_it_system.wsgi.application'
 
 # --- SQLite (ficheiro no volume: SQLITE_PATH ou BASE_DIR/media/db.sqlite3) ---
 _sqlite_env = os.environ.get('SQLITE_PATH', '').strip()

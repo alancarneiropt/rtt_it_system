@@ -448,6 +448,12 @@
         .relatorio-table .col-data { font-weight: 600; color: #334155; min-width: 72px; }
         .relatorio-table .col-jornada { color: #64748b; font-size: 0.75rem; min-width: 70px; }
         .relatorio-table .cel-ok { color: #16a34a; font-weight: 500; }
+        .relatorio-table .cel-falta { color: #f97316; font-weight: 500; }
+        .status-atraso { color: #dc2626 !important; font-weight: 600; }
+        .status-falta { color: #f97316 !important; font-weight: 600; }
+        .status-ok { color: #16a34a !important; font-weight: 600; }
+        .status-total { font-weight: 700; color: #0f172a; }
+        .fim-de-semana { background-color: #f8fafc; }
         .relatorio-table .cel-falta { color: #dc2626; font-style: italic; }
         .relatorio-table .cel-planejado { color: #64748b; }
         .relatorio-table .cel-vazio { color: #cbd5e1; }
@@ -549,13 +555,40 @@
 <body>
     <div class="wrap">
 
-        <!-- Secção Painel -->
+        <!-- Secção Espelho de Ponto (Antigo Painel) -->
         <section id="sec-painel" class="area-sec" aria-labelledby="titulo-painel">
-            <h2 id="titulo-painel" class="sec-titulo" style="margin-top: 1rem; padding: 0 1rem;">Painel</h2>
-            <div class="card-sec">
-                <h3>Resumo da semana</h3>
-                <p id="painel-resumo">A carregar…</p>
-                <ul class="lista-dias" id="painel-lista"></ul>
+            <h2 id="titulo-painel" class="sec-titulo" style="margin-top: 1rem; padding: 0 1rem;">Espelho de Ponto</h2>
+            <div class="card-sec" style="padding: 0; overflow: hidden; border-radius: 12px;">
+                <div class="relatorio-scroll">
+                    <table class="relatorio-table">
+                        <thead>
+                            <tr>
+                                <th class="col-data">Data</th>
+                                <th>Entrada</th>
+                                <th>Início Int.</th>
+                                <th>Fim Int.</th>
+                                <th>Saída</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for linha in espelho_linhas %}
+                            <tr class="{% if linha.is_weekend %}fim-de-semana{% endif %}">
+                                <td class="col-data">{{ linha.dia_semana }}, {{ linha.data|date:"d/m/y" }}</td>
+                                <td class="{% if linha.marcacao_1_status %}status-{{ linha.marcacao_1_status }}{% endif %}">{{ linha.marcacao_1 }}</td>
+                                <td class="{% if linha.marcacao_2_status %}status-{{ linha.marcacao_2_status }}{% endif %}">{{ linha.marcacao_2 }}</td>
+                                <td class="{% if linha.marcacao_3_status %}status-{{ linha.marcacao_3_status }}{% endif %}">{{ linha.marcacao_3 }}</td>
+                                <td class="{% if linha.marcacao_4_status %}status-{{ linha.marcacao_4_status }}{% endif %}">{{ linha.marcacao_4 }}</td>
+                                <td class="status-total">{{ linha.total }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">Nenhuma marcação encontrada.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -645,6 +678,9 @@
                 </div>
                 {% endif %}
                 <div class="perfil-campo">
+                    {% if user.is_staff %}
+                    <a href="{% url 'backoffice_dashboard' %}" class="btn-logout" style="background: #2563eb; margin-right: 0.5rem;">Ir para Backoffice</a>
+                    {% endif %}
                     <a href="?sair=1" class="btn-logout">Terminar sessão</a>
                 </div>
             </div>
@@ -676,7 +712,7 @@
     </div>
 
     <nav class="nav-bottom" aria-label="Navegação principal">
-        <a href="#painel" class="nav-item" data-sec="painel" aria-label="Painel">📊<span>Painel</span></a>
+        <a href="#espelho" class="nav-item" data-sec="painel" aria-label="Espelho">📊<span>Espelho</span></a>
         <a href="#calendario" class="nav-item" data-sec="calendario" aria-label="Calendário">📅<span>Calendário</span></a>
         <a href="#hoje" class="nav-item ativo" data-sec="hoje" aria-label="Hoje" aria-current="page">📍<span>Hoje</span></a>
         <a href="#perfil" class="nav-item" data-sec="perfil" aria-label="Perfil">👤<span>Perfil</span></a>
@@ -1062,38 +1098,7 @@
     mostrarSec(secFromHash());
 
     function carregarPainel() {
-        var resumo = document.getElementById('painel-resumo');
-        var lista = document.getElementById('painel-lista');
-        if (!resumo || !lista) return;
-        resumo.textContent = 'A carregar…';
-        lista.innerHTML = '';
-        fetch(API_MINHAS, { credentials: 'same-origin' })
-            .then(function(r) { return r.json(); })
-            .then(function(marcacoes) {
-                var mapTipo = { 'Entrada': 'entrada', 'Início Almoço': 'inicio_almoco', 'Fim Almoço': 'fim_almoco', 'Fim Jornada': 'fim_jornada' };
-                var porDia = {};
-                var hoje = hojeISO();
-                (marcacoes || []).slice(0, 100).forEach(function(m) {
-                    var dh = parseDataHora(m['Data e Hora']);
-                    if (!dh) return;
-                    if (!porDia[dh.date]) porDia[dh.date] = [];
-                    porDia[dh.date].push({ tipo: mapTipo[m['Tipo de Marcação']], time: dh.time });
-                });
-                var dias = Object.keys(porDia).sort().reverse().slice(0, 7);
-                if (dias.length === 0) {
-                    resumo.textContent = 'Ainda não há marcações esta semana.';
-                } else {
-                    resumo.textContent = 'Últimos dias com marcações.';
-                }
-                dias.forEach(function(date) {
-                    var li = document.createElement('li');
-                    var label = formatDiaCurtoPtFromIso(date);
-                    var marks = porDia[date].map(function(x) { return x.time + ' ' + x.tipo; }).join(', ');
-                    li.innerHTML = '<span class="dia-num">' + label + '</span><span class="dia-marc">' + marks + '</span>';
-                    lista.appendChild(li);
-                });
-            })
-            .catch(function() { resumo.textContent = 'Erro ao carregar.'; });
+        return; // Dados agora vêm estáticos do Django
     }
 
     // --- Relatório semanal (Calendário) ---

@@ -51,7 +51,7 @@ class Profile(models.Model):
         on_delete=models.CASCADE,
         related_name='profile'
     )
-    nome = models.CharField(max_length=255)
+    nome = models.CharField(max_length=255, unique=True)
     endereco = models.CharField(max_length=500, blank=True)
     data_nascimento = models.DateField(null=True, blank=True)
     departamento = models.ForeignKey(

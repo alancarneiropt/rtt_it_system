@@ -25,11 +25,11 @@ TIPO_MARCACAO_LABEL = {
     'fim_jornada': '4ª marcação',
 }
 
-BACKOFFICE_LOGIN_URL = '/backoffice/login/'
+BACKOFFICE_LOGIN_URL = '/'
 
 
 def backoffice_required(view_func):
-    """Decorator: exige login e is_staff. Redireciona para tela de login do backoffice."""
+    """Decorator: exige login e is_staff. Redireciona para tela de login unificada."""
     def _wrapped(request, *args, **kwargs):
         if not request.user.is_authenticated:
             from urllib.parse import quote
@@ -42,37 +42,8 @@ def backoffice_required(view_func):
 
 
 def backoffice_login_view(request):
-    """Tela de login do Backoffice. Só utilizadores com is_staff podem entrar."""
-    if request.user.is_authenticated and request.user.is_staff:
-        next_url = request.GET.get('next', '/backoffice/')
-        if next_url.startswith('/backoffice'):
-            return redirect(next_url)
-        return redirect('/backoffice/')
-
-    erro = None
-    if request.GET.get('erro') == 'acesso_restrito':
-        erro = 'Acesso restrito a administradores. Utilize uma conta com permissão de Backoffice.'
-    if request.method == 'POST':
-        email = (request.POST.get('email') or '').strip()
-        palavra_passe = request.POST.get('palavra_passe') or ''
-        if not email or not palavra_passe:
-            erro = 'Indique email e palavra-passe.'
-        else:
-            user = authenticate(request, username=email, password=palavra_passe)
-            if user is None:
-                user = authenticate(request, email=email, password=palavra_passe)
-            if user is None:
-                erro = 'Email ou palavra-passe incorretos.'
-            elif not user.is_staff:
-                erro = 'Acesso restrito a administradores. Esta conta não tem permissão para o Backoffice.'
-            else:
-                auth_login(request, user)
-                next_url = request.POST.get('next') or request.GET.get('next') or '/backoffice/'
-                if not next_url.startswith('/backoffice'):
-                    next_url = '/backoffice/'
-                return redirect(next_url)
-    next_param = request.GET.get('next', '/backoffice/')
-    return render(request, 'backoffice/login.html', {'erro': erro, 'next': next_param})
+    """Redireciona para a tela de login unificada na raiz."""
+    return redirect('/')
 
 
 def backoffice_logout_view(request):
