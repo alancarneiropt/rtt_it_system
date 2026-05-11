@@ -21,4 +21,5 @@ urlpatterns = [
     path('api/adicionar-ponto/', backoffice_views.adicionar_ponto_view, name='backoffice_adicionar_ponto'),
     path('export/excel/', backoffice_views.export_espelho_excel_view, name='backoffice_export_excel'),
     path('export/pdf/', backoffice_views.export_espelho_pdf_view, name='backoffice_export_pdf'),
+    path('km-registros/', backoffice_views.backoffice_km_list_view, name='backoffice_km_list'),
 ]

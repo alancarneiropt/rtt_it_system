@@ -8,12 +8,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.utils import timezone
 
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render, redirect
 from django.contrib.auth import logout as auth_logout
+import json
 
-from .models import Marcacao, Profile
+from .models import Marcacao, Profile, RegistroKM
 
 User = get_user_model()
 
@@ -74,6 +75,7 @@ def root_view(request):
     return render(request, 'rtt/login.html', {'erro': mensagem_erro})
 
 
+@ensure_csrf_cookie
 def area_utilizador_view(request):
     """Área do utilizador após login. ?sair=1 termina sessão e redireciona para /."""
     if not request.user.is_authenticated:
@@ -129,6 +131,58 @@ def area_utilizador_view(request):
         'data_inicio': data_inicio,
         'data_fim': data_fim,
     })
+
+
+@csrf_exempt
+@require_POST
+def km_registo_view(request):
+    """Registo de KM: inicial ou final."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'sucesso': False, 'erro': 'Não autenticado.'}, 401)
+        
+    try:
+        data = json.loads(request.body)
+        km_valor = data.get('km')
+        tipo = data.get('tipo') # 'inicial' ou 'final'
+        veiculo = data.get('veiculo', '')
+        
+        if km_valor is None:
+            return JsonResponse({'sucesso': False, 'erro': 'Valor de KM obrigatório.'}, 400)
+            
+        hoje = timezone.localdate()
+        registo, created = RegistroKM.objects.get_or_create(utilizador=request.user, data=hoje)
+        
+        if tipo == 'inicial':
+            registo.km_inicial = km_valor
+            registo.timestamp_inicial = timezone.now()
+            if veiculo: registo.veiculo = veiculo
+        elif tipo == 'final':
+            registo.km_final = km_valor
+            registo.timestamp_final = timezone.now()
+        else:
+            return JsonResponse({'sucesso': False, 'erro': 'Tipo de registo inválido.'}, 400)
+            
+        registo.save()
+        return JsonResponse({'sucesso': True, 'mensagem': f'KM {tipo} registado com sucesso.'})
+    except Exception as e:
+        return JsonResponse({'sucesso': False, 'erro': str(e)}, 500)
+
+
+@require_GET
+def km_status_view(request):
+    """Retorna o status do KM de hoje para o utilizador."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'sucesso': False}, 401)
+    hoje = timezone.localdate()
+    registo = RegistroKM.objects.filter(utilizador=request.user, data=hoje).first()
+    if registo:
+        return JsonResponse({
+            'sucesso': True,
+            'km_inicial': str(registo.km_inicial) if registo.km_inicial else None,
+            'km_final': str(registo.km_final) if registo.km_final else None,
+            'veiculo': registo.veiculo
+        })
+    return JsonResponse({'sucesso': True, 'km_inicial': None, 'km_final': None, 'veiculo': ''})
 
 
 @require_GET

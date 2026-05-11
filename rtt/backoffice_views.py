@@ -12,7 +12,8 @@ from django.db.models.functions import TruncDate
 
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 
-from .models import Marcacao, Profile, Jornada, Departamento
+from .models import Marcacao, Profile, Jornada, Departamento, RegistroKM
+
 from .filters import EspelhoPontoFilter
 
 User = get_user_model()
@@ -446,6 +447,34 @@ def construir_espelho(data_inicio, data_fim, utilizadores_queryset):
         reverse=True
     )
     return linhas
+
+
+@backoffice_required
+def backoffice_km_list_view(request):
+    """Lista de registos de KM diários."""
+    registos = RegistroKM.objects.select_related('utilizador', 'utilizador__profile').order_by('-data')
+    
+    colaborador_id = request.GET.get('colaborador')
+    if colaborador_id:
+        registos = registos.filter(utilizador_id=colaborador_id)
+        
+    data_inicio = request.GET.get('data_inicio')
+    if data_inicio:
+        registos = registos.filter(data__gte=data_inicio)
+        
+    data_fim = request.GET.get('data_fim')
+    if data_fim:
+        registos = registos.filter(data__lte=data_fim)
+
+    colaboradores = User.objects.filter(profile__isnull=False).distinct().order_by('profile__nome')
+    
+    return render(request, 'backoffice/km_list.html', {
+        'registos': registos,
+        'colaboradores': colaboradores,
+        'colaborador_selecionado': colaborador_id,
+        'data_inicio': data_inicio,
+        'data_fim': data_fim,
+    })
 
 
 @backoffice_required

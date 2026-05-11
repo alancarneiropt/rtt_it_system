@@ -9,4 +9,6 @@ urlpatterns = [
     path('utilizadores/', views.utilizador_create, name='utilizador_create'),
     path('relatorios/marcacoes/', views.relatorios_marcacoes, name='relatorios_marcacoes'),
     path('relatorios/exportar_csv/', views.relatorios_exportar_csv, name='relatorios_exportar_csv'),
+    path('km-registo/', views.km_registo_view, name='km_registo'),
+    path('km-status/', views.km_status_view, name='km_status'),
 ]

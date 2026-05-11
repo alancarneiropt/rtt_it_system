@@ -121,3 +121,35 @@ class Marcacao(models.Model):
 
     def __str__(self):
         return f"{self.utilizador} - {self.get_tipo_display()} ({self.timestamp})"
+
+
+class RegistroKM(models.Model):
+    """Registo de quilometragem diária: KM inicial e final."""
+    utilizador = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='registos_km'
+    )
+    data = models.DateField(auto_now_add=True)
+    km_inicial = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    km_final = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    veiculo = models.CharField(max_length=50, blank=True, help_text="Matrícula ou identificação do veículo")
+    observacoes = models.TextField(blank=True)
+    
+    timestamp_inicial = models.DateTimeField(null=True, blank=True)
+    timestamp_final = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Registo de KM'
+        verbose_name_plural = 'Registos de KM'
+        unique_together = ('utilizador', 'data')
+        ordering = ['-data']
+
+    def __str__(self):
+        return f"KM {self.utilizador} - {self.data}"
+
+    @property
+    def distancia_percorrida(self):
+        if self.km_inicial is not None and self.km_final is not None:
+            return self.km_final - self.km_inicial
+        return None
