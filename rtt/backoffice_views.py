@@ -12,7 +12,7 @@ from django.db.models.functions import TruncDate
 
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 
-from .models import Marcacao, Profile, Jornada, Departamento, RegistroKM
+from .models import Marcacao, Profile, Jornada, Departamento, RegistroKM, Viatura
 
 from .filters import EspelhoPontoFilter
 
@@ -451,8 +451,8 @@ def construir_espelho(data_inicio, data_fim, utilizadores_queryset):
 
 @backoffice_required
 def backoffice_km_list_view(request):
-    """Lista de registos de KM diários."""
-    registos = RegistroKM.objects.select_related('utilizador', 'utilizador__profile').order_by('-data')
+    """Lista de registos de KM com totais."""
+    registos = RegistroKM.objects.select_related('utilizador', 'utilizador__profile').order_by('-timestamp')
     
     colaborador_id = request.GET.get('colaborador')
     if colaborador_id:
@@ -466,15 +466,85 @@ def backoffice_km_list_view(request):
     if data_fim:
         registos = registos.filter(data__lte=data_fim)
 
+    viatura_id = request.GET.get('viatura')
+    if viatura_id:
+        registos = registos.filter(viatura_id=viatura_id)
+
+    # Cálculo do total do período filtrado (Soma do deslocamento diário por viatura/utilizador)
+    from django.db.models import Max, Min
+    resumo = registos.order_by().values('data', 'viatura', 'utilizador').annotate(
+        max_km=Max('km'),
+        min_prev=Min('km_anterior')
+    )
+    total_periodo = 0
+    for r in resumo:
+        if r['max_km'] is not None and r['min_prev'] is not None:
+            diff = r['max_km'] - r['min_prev']
+            if diff > 0:
+                total_periodo += diff
+
+    # Totais específicos se houver colaborador selecionado
+    stats_colaborador = None
+    if colaborador_id:
+        from django.utils import timezone
+        hoje = timezone.localdate()
+        
+        def get_total_range(start_date):
+            qs = RegistroKM.objects.filter(utilizador_id=colaborador_id, data__gte=start_date)
+            res = qs.order_by().values('data', 'viatura').annotate(
+                max_km=Max('km'),
+                min_prev=Min('km_anterior')
+            )
+            s = 0
+            for r in res:
+                if r['max_km'] and r['min_prev']:
+                    d = r['max_km'] - r['min_prev']
+                    if d > 0: s += d
+            return float(s)
+
+        stats_colaborador = {
+            'hoje': get_total_range(hoje),
+            'semana': get_total_range(hoje - timezone.timedelta(days=hoje.weekday())),
+            'mes': get_total_range(hoje.replace(day=1))
+        }
+
     colaboradores = User.objects.filter(profile__isnull=False).distinct().order_by('profile__nome')
+    viaturas = Viatura.objects.filter(ativo=True).order_by('matricula')
     
     return render(request, 'backoffice/km_list.html', {
         'registos': registos,
         'colaboradores': colaboradores,
+        'viaturas': viaturas,
         'colaborador_selecionado': colaborador_id,
+        'viatura_selecionada': viatura_id,
         'data_inicio': data_inicio,
         'data_fim': data_fim,
+        'total_periodo': float(total_periodo),
+        'stats_colaborador': stats_colaborador
     })
+
+
+@backoffice_required
+def backoffice_km_create_view(request):
+    """Permite ao administrador registrar um KM manualmente."""
+    from .forms import RegistroKMForm
+    if request.method == 'POST':
+        form = RegistroKMForm(request.POST)
+        if form.is_valid():
+            registo = form.save(commit=False)
+            viatura = registo.viatura
+            # Validação: KM deve ser superior ao atual da viatura
+            if registo.km < viatura.km_atual:
+                form.add_error('km', f'O KM não pode ser menor que o atual da viatura ({viatura.km_atual}).')
+            else:
+                registo.km_anterior = viatura.km_atual
+                registo.save()
+                viatura.km_atual = registo.km
+                viatura.save()
+                return redirect('backoffice_km_list')
+    else:
+        form = RegistroKMForm()
+    return render(request, 'backoffice/km_form.html', {'form': form, 'titulo': 'Lançar Registro de KM'})
 
 
 @backoffice_required
@@ -722,3 +792,40 @@ def export_espelho_pdf_view(request):
     response = HttpResponse(buf.read(), content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="espelho_ponto_{data_inicio}_{data_fim}.pdf"'
     return response
+
+
+# ---------- Viaturas ----------
+@backoffice_required
+def viatura_list_view(request):
+    """Lista viaturas com link para novo e editar."""
+    viaturas = Viatura.objects.all().order_by('matricula')
+    return render(request, 'backoffice/viatura_list.html', {'viaturas': viaturas})
+
+
+@backoffice_required
+def viatura_create_view(request):
+    """Formulário para cadastrar nova viatura."""
+    from .forms import ViaturaForm
+    if request.method == 'POST':
+        form = ViaturaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('backoffice_viatura_list')
+    else:
+        form = ViaturaForm()
+    return render(request, 'backoffice/viatura_form.html', {'form': form, 'titulo': 'Nova viatura'})
+
+
+@backoffice_required
+def viatura_edit_view(request, pk):
+    """Formulário para editar viatura."""
+    from .forms import ViaturaForm
+    viatura = get_object_or_404(Viatura, pk=pk)
+    if request.method == 'POST':
+        form = ViaturaForm(request.POST, instance=viatura)
+        if form.is_valid():
+            form.save()
+            return redirect('backoffice_viatura_list')
+    else:
+        form = ViaturaForm(instance=viatura)
+    return render(request, 'backoffice/viatura_form.html', {'form': form, 'titulo': 'Editar viatura', 'viatura': viatura})

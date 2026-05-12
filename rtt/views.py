@@ -133,56 +133,124 @@ def area_utilizador_view(request):
     })
 
 
+@require_GET
+def viaturas_api_view(request):
+    """Retorna a lista de viaturas ativas."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'sucesso': False}, 401)
+    viaturas = Viatura.objects.filter(ativo=True).order_by('matricula')
+    lista = []
+    for v in viaturas:
+        lista.append({
+            'id': v.id,
+            'matricula': v.matricula,
+            'marca_modelo': v.marca_modelo,
+            'km_atual': v.km_atual
+        })
+    return JsonResponse({'sucesso': True, 'viaturas': lista})
+
+
 @csrf_exempt
 @require_POST
 def km_registo_view(request):
-    """Registo de KM: inicial ou final."""
+    """Registo de KM associado a uma viatura cadastrada."""
     if not request.user.is_authenticated:
         return JsonResponse({'sucesso': False, 'erro': 'Não autenticado.'}, 401)
         
     try:
         data = json.loads(request.body)
         km_valor = data.get('km')
-        tipo = data.get('tipo') # 'inicial' ou 'final'
-        veiculo = data.get('veiculo', '')
+        viatura_id = data.get('viatura_id')
+        descricao = data.get('descricao', '')
         
-        if km_valor is None:
-            return JsonResponse({'sucesso': False, 'erro': 'Valor de KM obrigatório.'}, 400)
+        if km_valor is None or not viatura_id:
+            return JsonResponse({'sucesso': False, 'erro': 'KM e Viatura são obrigatórios.'}, 400)
             
-        hoje = timezone.localdate()
-        registo, created = RegistroKM.objects.get_or_create(utilizador=request.user, data=hoje)
+        viatura = get_object_or_404(Viatura, pk=viatura_id)
         
-        if tipo == 'inicial':
-            registo.km_inicial = km_valor
-            registo.timestamp_inicial = timezone.now()
-            if veiculo: registo.veiculo = veiculo
-        elif tipo == 'final':
-            registo.km_final = km_valor
-            registo.timestamp_final = timezone.now()
-        else:
-            return JsonResponse({'sucesso': False, 'erro': 'Tipo de registo inválido.'}, 400)
+        # Validação: KM deve ser superior ao KM atual da viatura
+        if km_valor < viatura.km_atual:
+            return JsonResponse({
+                'sucesso': False, 
+                'erro': f'KM inválido. O KM atual da viatura ({viatura.matricula}) é {viatura.km_atual}.'
+            }, 400)
             
-        registo.save()
-        return JsonResponse({'sucesso': True, 'mensagem': f'KM {tipo} registado com sucesso.'})
+        # Criar registro guardando o KM anterior da viatura
+        RegistroKM.objects.create(
+            utilizador=request.user,
+            km=km_valor,
+            km_anterior=viatura.km_atual,
+            viatura=viatura,
+            descricao=descricao
+        )
+        
+        # Atualizar KM atual da viatura
+        viatura.km_atual = km_valor
+        viatura.save()
+        
+        return JsonResponse({'sucesso': True, 'mensagem': 'KM registado com sucesso.'})
     except Exception as e:
         return JsonResponse({'sucesso': False, 'erro': str(e)}, 500)
 
 
 @require_GET
 def km_status_view(request):
-    """Retorna o status do KM de hoje para o utilizador."""
+    """Retorna a lista de registos de KM de hoje e totais (dia, semana, mês)."""
     if not request.user.is_authenticated:
         return JsonResponse({'sucesso': False}, 401)
+        
     hoje = timezone.localdate()
-    registo = RegistroKM.objects.filter(utilizador=request.user, data=hoje).first()
-    if registo:
-        return JsonResponse({
-            'sucesso': True,
-            'km_inicial': str(registo.km_inicial) if registo.km_inicial else None,
-            'km_final': str(registo.km_final) if registo.km_final else None,
-            'veiculo': registo.veiculo
+    
+    # Registos de hoje
+    registos_hoje = RegistroKM.objects.filter(utilizador=request.user, data=hoje).order_by('timestamp')
+    
+    lista_hoje = []
+    for r in registos_hoje:
+        lista_hoje.append({
+            'timestamp': timezone.localtime(r.timestamp).strftime('%H:%M'),
+            'km': r.km,
+            'viatura': r.viatura.matricula if r.viatura else '---',
+            'descricao': r.descricao,
+            'percorrido': r.distancia
         })
-    return JsonResponse({'sucesso': True, 'km_inicial': None, 'km_final': None, 'veiculo': ''})
+
+    # Função auxiliar para calcular total de um período (Soma do deslocamento diário por viatura)
+    def calc_total(queryset):
+        from django.db.models import Max, Min
+        # Agrupar por data e viatura para calcular o deslocamento do dia
+        # Deslocamento = Maior KM do dia - Menor KM anterior do dia
+        resumo = queryset.order_by().values('data', 'viatura').annotate(
+            max_km=Max('km'),
+            min_prev=Min('km_anterior')
+        )
+        soma = 0
+        for r in resumo:
+            if r['max_km'] is not None and r['min_prev'] is not None:
+                diff = r['max_km'] - r['min_prev']
+                if diff > 0:
+                    soma += diff
+        return float(soma)
+
+    # Totais
+    total_hoje = calc_total(registos_hoje)
+    
+    inicio_semana = hoje - timezone.timedelta(days=hoje.weekday())
+    registos_semana = RegistroKM.objects.filter(utilizador=request.user, data__gte=inicio_semana)
+    total_semana = calc_total(registos_semana)
+    
+    inicio_mes = hoje.replace(day=1)
+    registos_mes = RegistroKM.objects.filter(utilizador=request.user, data__gte=inicio_mes)
+    total_mes = calc_total(registos_mes)
+    
+    return JsonResponse({
+        'sucesso': True,
+        'registos': lista_hoje,
+        'totais': {
+            'hoje': total_hoje,
+            'semana': total_semana,
+            'mes': total_mes
+        }
+    })
 
 
 @require_GET
@@ -231,8 +299,10 @@ self.addEventListener('fetch', (event) => {
     event.respondWith((async () => {
       try {
         const fresh = await fetch(request);
-        const cache = await caches.open(CACHE_NAME);
-        cache.put(request, fresh.clone());
+        if (request.method === 'GET') {
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(request, fresh.clone());
+        }
         return fresh;
       } catch (e) {
         const cached = await caches.match(request);

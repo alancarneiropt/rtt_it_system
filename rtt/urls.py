@@ -11,4 +11,5 @@ urlpatterns = [
     path('relatorios/exportar_csv/', views.relatorios_exportar_csv, name='relatorios_exportar_csv'),
     path('km-registo/', views.km_registo_view, name='km_registo'),
     path('km-status/', views.km_status_view, name='km_status'),
+    path('viaturas-api/', views.viaturas_api_view, name='viaturas_api'),
 ]

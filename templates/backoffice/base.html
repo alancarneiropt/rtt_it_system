@@ -35,6 +35,7 @@
                 <a href="{% url 'backoffice_departamento_list' %}" class="hidden block px-3 py-2 rounded-md text-sm font-medium {% if 'departamento' in request.resolver_match.url_name %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Departamentos</a>
                 <a href="{% url 'backoffice_jornada_list' %}" class="hidden block px-3 py-2 rounded-md text-sm font-medium {% if 'jornada' in request.resolver_match.url_name %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Jornadas</a>
                 <a href="{% url 'backoffice_km_list' %}" class="block px-3 py-2 rounded-md text-sm font-medium {% if request.resolver_match.url_name == 'backoffice_km_list' %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Registros de KM</a>
+                <a href="{% url 'backoffice_viatura_list' %}" class="block px-3 py-2 rounded-md text-sm font-medium {% if 'viatura' in request.resolver_match.url_name %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Viaturas</a>
                 <a href="{% url 'root' %}" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-blue-600 hover:text-white">📍 Marcar Ponto (Página Inicial)</a>
                 <a href="{% url 'admin:index' %}" class="hidden block px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-slate-600 hover:text-white">Django Admin</a>
             </nav>

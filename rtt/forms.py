@@ -1,7 +1,7 @@
 # Formulários do backoffice (cadastro de colaborador, departamento, jornada)
 from django import forms
 from django.contrib.auth import get_user_model
-from .models import Profile, Departamento, Jornada
+from .models import Profile, Departamento, Jornada, Viatura, RegistroKM
 
 User = get_user_model()
 
@@ -110,3 +110,34 @@ class ColaboradorForm(forms.ModelForm):
             if commit:
                 profile.save()
             return profile
+
+
+class ViaturaForm(forms.ModelForm):
+    """Formulário para criar/editar Viaturas."""
+    class Meta:
+        model = Viatura
+        fields = ['matricula', 'marca_modelo', 'km_inicial', 'ativo']
+        widgets = {
+            'matricula': forms.TextInput(attrs={'placeholder': 'Ex: 00-AA-00', 'class': INPUT_CLASS}),
+            'marca_modelo': forms.TextInput(attrs={'placeholder': 'Ex: Renault Clio', 'class': INPUT_CLASS}),
+            'km_inicial': forms.NumberInput(attrs={'class': INPUT_CLASS}),
+            'ativo': forms.CheckboxInput(attrs={'class': 'rounded border-slate-300'}),
+        }
+
+
+class RegistroKMForm(forms.ModelForm):
+    """Formulário para o administrador lançar KM manualmente."""
+    class Meta:
+        model = RegistroKM
+        fields = ['utilizador', 'viatura', 'km', 'descricao']
+        widgets = {
+            'utilizador': forms.Select(attrs={'class': INPUT_CLASS}),
+            'viatura': forms.Select(attrs={'class': INPUT_CLASS}),
+            'km': forms.NumberInput(attrs={'class': INPUT_CLASS, 'placeholder': 'KM Atual'}),
+            'descricao': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Descrição opcional'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['utilizador'].queryset = User.objects.filter(profile__isnull=False).order_by('profile__nome')
+        self.fields['viatura'].queryset = Viatura.objects.filter(ativo=True).order_by('matricula')

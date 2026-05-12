@@ -624,24 +624,42 @@
         <section id="sec-km" class="area-sec" aria-labelledby="titulo-km">
             <h2 id="titulo-km" class="sec-titulo" style="margin-top: 1rem; padding: 0 1rem;">Registro de KM</h2>
             <div class="card-sec" style="padding: 1.25rem;">
+                
+                <!-- Resumo de Totais -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <div style="background: #eff6ff; padding: 0.75rem; border-radius: 12px; text-align: center; border: 1px solid #dbeafe; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                        <div style="font-size: 0.6rem; color: #1e40af; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Hoje</div>
+                        <div style="font-size: 1.1rem; font-weight: 800; color: #1e3a8a; line-height: 1;" id="km-total-hoje">0.0</div>
+                        <div style="font-size: 0.5rem; color: #60a5fa; margin-top: 2px;">KM</div>
+                    </div>
+                    <div style="background: #f0fdf4; padding: 0.75rem; border-radius: 12px; text-align: center; border: 1px solid #dcfce7; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                        <div style="font-size: 0.6rem; color: #166534; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Semana</div>
+                        <div style="font-size: 1.1rem; font-weight: 800; color: #14532d; line-height: 1;" id="km-total-semana">0.0</div>
+                        <div style="font-size: 0.5rem; color: #4ade80; margin-top: 2px;">KM</div>
+                    </div>
+                    <div style="background: #fff7ed; padding: 0.75rem; border-radius: 12px; text-align: center; border: 1px solid #ffedd5; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                        <div style="font-size: 0.6rem; color: #9a3412; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Mês</div>
+                        <div style="font-size: 1.1rem; font-weight: 800; color: #7c2d12; line-height: 1;" id="km-total-mes">0.0</div>
+                        <div style="font-size: 0.5rem; color: #fb923c; margin-top: 2px;">KM</div>
+                    </div>
+                </div>
                 <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label style="display:block; margin-bottom:0.5rem; font-weight:600; font-size:0.9rem; color:#475569;">Veículo (Matrícula)</label>
-                    <input type="text" id="km-veiculo" placeholder="Ex: 00-AA-00" class="input-km" style="border: 1px solid #cbd5e1; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600; font-size:0.9rem; color:#475569;">Viatura</label>
+                    <select id="km-viatura-select" class="input-km" style="border: 1px solid #cbd5e1; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); background: white; width: 100%; padding: 0.75rem; border-radius: 8px; font-weight: 600; color: #1e293b;">
+                        <option value="">Carregando viaturas...</option>
+                    </select>
                 </div>
-                <div class="km-container">
-                    <div class="km-box">
-                        <h4>Início do Dia</h4>
-                        <div class="km-valor" id="km-inicial-valor">---</div>
-                        <button class="btn-km" id="btn-km-inicial">Registrar</button>
-                    </div>
-                    <div class="km-box">
-                        <h4>Fim do Dia</h4>
-                        <div class="km-valor" id="km-final-valor">---</div>
-                        <button class="btn-km" id="btn-km-final">Registrar</button>
-                    </div>
+                
+                <button class="btn-km" id="btn-km-registrar" style="width: 100%; padding: 1rem; background: #2563eb; color: white; border: none; border-radius: 12px; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                    <span style="font-size:1.2rem;">🚗</span> Registrar KM Atual
+                </button>
+
+                <div id="km-lista-container" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <!-- Registros serão inseridos aqui via JS -->
                 </div>
+                
                 <p style="margin-top:1.25rem; font-size:0.8rem; color:#64748b; line-height:1.5; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
-                    <strong>Dica:</strong> Registre o KM inicial ao sair e o KM final ao regressar. Os dados ficam salvos diariamente para relatório.
+                    <strong>Dica:</strong> Registre o KM em cada parada ou deslocamento importante. Pode registrar quantas vezes precisar por dia.
                 </p>
             </div>
         </section>
@@ -749,8 +767,19 @@
     <div class="modal-overlay" id="modalKM" role="dialog" aria-labelledby="modalKMTitulo" aria-modal="true">
         <div class="modal-justificativa">
             <h3 id="modalKMTitulo">Registrar KM</h3>
-            <p id="modalKMTexto" style="font-size: 0.9rem; color: #64748b; margin-bottom: 1rem;">Insira a quilometragem atual:</p>
-            <input type="number" id="inputKM" placeholder="0.00" step="0.01" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 1rem; font-size: 1.25rem; font-weight: 700; text-align: center;">
+            
+            <div style="background: #f8fafc; padding: 0.75rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid #e2e8f0; text-align: left;">
+                <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 2px;">Viatura Selecionada:</div>
+                <div style="font-weight: 800; color: #1e293b; font-size: 1rem;" id="modalKMViaturaMatricula">---</div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Último KM registrado: <span id="modalKMUltimoValor" style="color: #2563eb; font-weight: 700;">---</span></div>
+            </div>
+
+            <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem; text-align: left;">Novo KM Atual:</p>
+            <input type="number" id="inputKM" placeholder="0" step="1" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 1rem; font-size: 1.25rem; font-weight: 700; text-align: center;">
+            
+            <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem; text-align: left;">Descrição / Onde estou:</p>
+            <input type="text" id="inputKMDescricao" placeholder="Ex: Sede, Cliente X, Posto..." style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 1.5rem; font-size: 1rem;">
+            
             <div class="modal-botoes">
                 <button type="button" class="modal-btn-cancelar" id="btnModalKMCancelar">Cancelar</button>
                 <button type="button" class="modal-btn-confirmar" id="btnModalKMConfirmar">Confirmar</button>
@@ -1032,43 +1061,98 @@
     // --- Lógica de KM ---
     var API_KM_STATUS = '/api/km-status/';
     var API_KM_REGISTO = '/api/km-registo/';
-    
-    function carregarKmStatus() {
-        fetch(API_KM_STATUS, { credentials: 'same-origin' })
+    var API_VIATURAS = '/api/viaturas-api/';
+    var viaturasCache = [];
+
+    function carregarViaturas() {
+        var select = document.getElementById('km-viatura-select');
+        if (!select) return;
+        fetch(API_VIATURAS)
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data.sucesso) {
-                    document.getElementById('km-inicial-valor').textContent = data.km_inicial ? data.km_inicial + ' KM' : '---';
-                    document.getElementById('km-final-valor').textContent = data.km_final ? data.km_final + ' KM' : '---';
-                    if (data.veiculo) document.getElementById('km-veiculo').value = data.veiculo;
-                    if (data.km_inicial) document.getElementById('btn-km-inicial').disabled = true;
-                    else document.getElementById('btn-km-inicial').disabled = false;
-                    if (data.km_final) document.getElementById('btn-km-final').disabled = true;
-                    else document.getElementById('btn-km-final').disabled = false;
+                    viaturasCache = data.viaturas;
+                    select.innerHTML = '<option value="">Selecione uma viatura...</option>';
+                    data.viaturas.forEach(function(v) {
+                        var opt = document.createElement('option');
+                        opt.value = v.id;
+                        opt.textContent = v.matricula + ' (' + v.km_atual + ' KM)';
+                        select.appendChild(opt);
+                    });
                 }
             });
     }
-    
-    function registrarKm(tipo) {
+
+    function carregarKmStatus() {
+        carregarViaturas();
+        fetch(API_KM_STATUS)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.sucesso) {
+                    // Atualizar Totais
+                    if (data.totais) {
+                        document.getElementById('km-total-hoje').textContent = data.totais.hoje.toFixed(0);
+                        document.getElementById('km-total-semana').textContent = data.totais.semana.toFixed(0);
+                        document.getElementById('km-total-mes').textContent = data.totais.mes.toFixed(0);
+                    }
+                    
+                    var container = document.getElementById('km-lista-container');
+                    if (!container) return;
+                    container.innerHTML = '';
+                    if (data.registos.length === 0) {
+                        container.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:0.85rem; padding:1rem;">Nenhum registro hoje.</p>';
+                    } else {
+                        data.registos.forEach(function(r) {
+                            var item = document.createElement('div');
+                            item.style.cssText = 'background:#f8fafc; padding:0.75rem; border-radius:10px; border-left:4px solid #2563eb; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 1px 2px rgba(0,0,0,0.05);';
+                            item.innerHTML = '<div style="flex:1;">' +
+                                '<div style="font-weight:700; font-size:1rem; color:#1e293b;">' + r.km + ' KM</div>' +
+                                '<div style="font-size:0.75rem; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">' + (r.descricao || 'Sem descrição') + '</div>' +
+                                '</div>' +
+                                '<div style="text-align:right; min-width:60px;">' +
+                                '<div style="font-weight:600; font-size:0.85rem; color:#475569;">' + r.timestamp + '</div>' +
+                                '<div style="font-size:0.65rem; color:#94a3b8; font-family:monospace;">' + (r.viatura || '') + '</div>' +
+                                '</div>';
+                            container.appendChild(item);
+                        });
+                    }
+                }
+            });
+    }
+
+    function registrarKm() {
+        var select = document.getElementById('km-viatura-select');
+        var viaturaId = select.value;
+        if (!viaturaId) { showToast('Selecione uma viatura primeiro.', true); return; }
+
+        var viatura = viaturasCache.find(function(v) { return v.id == viaturaId; });
+        if (!viatura) return;
+
         var modal = document.getElementById('modalKM');
         var input = document.getElementById('inputKM');
-        var texto = document.getElementById('modalKMTexto');
+        var inputDesc = document.getElementById('inputKMDescricao');
         var btnConfirmar = document.getElementById('btnModalKMConfirmar');
         var btnCancelar = document.getElementById('btnModalKMCancelar');
         
+        document.getElementById('modalKMViaturaMatricula').textContent = viatura.matricula + (viatura.marca_modelo ? ' - ' + viatura.marca_modelo : '');
+        document.getElementById('modalKMUltimoValor').textContent = viatura.km_atual + ' KM';
+
         input.value = '';
-        texto.textContent = 'Insira a quilometragem ' + (tipo === 'inicial' ? 'inicial' : 'final') + ':';
+        inputDesc.value = '';
         modal.classList.add('visible');
-        input.focus();
+        setTimeout(function() { input.focus(); }, 100);
 
         var confirmar = function() {
             var valor = input.value;
-            if (!valor) { showToast('Insira um valor.', true); return; }
-            var km = parseFloat(valor);
+            var desc = inputDesc.value;
+            if (!valor) { showToast('Insira a quilometragem.', true); return; }
+            var km = parseInt(valor, 10);
             
-            var veiculo = document.getElementById('km-veiculo').value;
-            if (tipo === 'inicial' && !veiculo) { showToast('Indique a matrícula.', true); return; }
-            
+            if (km < viatura.km_atual) {
+                showToast('O KM não pode ser menor que o atual (' + viatura.km_atual + ').', true);
+                return;
+            }
+
             modal.classList.remove('visible');
             btnConfirmar.removeEventListener('click', confirmar);
             btnCancelar.removeEventListener('click', cancelar);
@@ -1077,7 +1161,7 @@
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ km: km, tipo: tipo, veiculo: veiculo })
+                body: JSON.stringify({ km: km, viatura_id: viaturaId, descricao: desc })
             })
             .then(function(r) { return r.json(); })
             .then(function(data) {
@@ -1100,8 +1184,7 @@
         btnCancelar.addEventListener('click', cancelar);
     }
     
-    if (document.getElementById('btn-km-inicial')) document.getElementById('btn-km-inicial').addEventListener('click', function() { registrarKm('inicial'); });
-    if (document.getElementById('btn-km-final')) document.getElementById('btn-km-final').addEventListener('click', function() { registrarKm('final'); });
+    if (document.getElementById('btn-km-registrar')) document.getElementById('btn-km-registrar').addEventListener('click', registrarKm);
 
     // --- Navegação entre secções (Painel, Calendário, KM, Hoje, Perfil) ---
     var secIds = { painel: 'sec-painel', calendario: 'sec-calendario', km: 'sec-km', hoje: 'sec-hoje', perfil: 'sec-perfil' };

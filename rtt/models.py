@@ -2,6 +2,7 @@ import uuid
 from decimal import Decimal
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 
 
 class Departamento(models.Model):
@@ -123,33 +124,56 @@ class Marcacao(models.Model):
         return f"{self.utilizador} - {self.get_tipo_display()} ({self.timestamp})"
 
 
+class Viatura(models.Model):
+    """Cadastro de viaturas da empresa."""
+    matricula = models.CharField(max_length=20, unique=True)
+    marca_modelo = models.CharField(max_length=100, blank=True)
+    km_inicial = models.IntegerField(default=0, help_text="KM no momento do cadastro no sistema")
+    km_atual = models.IntegerField(default=0, help_text="KM atualizado automaticamente")
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'Viatura'
+        verbose_name_plural = 'Viaturas'
+
+    def __str__(self):
+        return f"{self.matricula} ({self.km_atual} KM)"
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # No primeiro cadastro, o km_atual é o km_inicial
+            self.km_atual = self.km_inicial
+        super().save(*args, **kwargs)
+
+
 class RegistroKM(models.Model):
-    """Registo de quilometragem diária: KM inicial e final."""
+    """Registo de quilometragem: permite múltiplos registos por dia (tipo histórico)."""
     utilizador = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='registos_km'
     )
     data = models.DateField(auto_now_add=True)
-    km_inicial = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    km_final = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    veiculo = models.CharField(max_length=50, blank=True, help_text="Matrícula ou identificação do veículo")
-    observacoes = models.TextField(blank=True)
-    
-    timestamp_inicial = models.DateTimeField(null=True, blank=True)
-    timestamp_final = models.DateTimeField(null=True, blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
+    km = models.IntegerField(default=0, help_text="Valor do KM no momento")
+    km_anterior = models.IntegerField(default=0, help_text="Valor do KM antes deste registo")
+    viatura = models.ForeignKey(Viatura, on_delete=models.SET_NULL, null=True, blank=True, related_name='registos')
+    descricao = models.CharField(max_length=255, blank=True, help_text="Onde estou / observações")
 
     class Meta:
         verbose_name = 'Registo de KM'
         verbose_name_plural = 'Registos de KM'
-        unique_together = ('utilizador', 'data')
-        ordering = ['-data']
+        ordering = ['-timestamp']
 
     def __str__(self):
-        return f"KM {self.utilizador} - {self.data}"
+        return f"{self.utilizador} - {self.km} KM ({self.timestamp.strftime('%d/%m %H:%M')})"
+    
+    @property
+    def distancia(self):
+        return self.km - self.km_anterior
 
     @property
     def distancia_percorrida(self):
-        if self.km_inicial is not None and self.km_final is not None:
-            return self.km_final - self.km_inicial
+        # Para lógica de histórico, o percorrido seria o KM atual menos o KM anterior do mesmo utilizador
+        # Mas para simplificar, se for só um log, o cálculo de distância pode ser feito via query
         return None

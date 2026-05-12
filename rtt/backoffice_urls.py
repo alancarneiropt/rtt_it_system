@@ -22,4 +22,8 @@ urlpatterns = [
     path('export/excel/', backoffice_views.export_espelho_excel_view, name='backoffice_export_excel'),
     path('export/pdf/', backoffice_views.export_espelho_pdf_view, name='backoffice_export_pdf'),
     path('km-registros/', backoffice_views.backoffice_km_list_view, name='backoffice_km_list'),
+    path('km-registros/novo/', backoffice_views.backoffice_km_create_view, name='backoffice_km_create'),
+    path('viaturas/', backoffice_views.viatura_list_view, name='backoffice_viatura_list'),
+    path('viaturas/novo/', backoffice_views.viatura_create_view, name='backoffice_viatura_create'),
+    path('viaturas/<int:pk>/editar/', backoffice_views.viatura_edit_view, name='backoffice_viatura_edit'),
 ]
