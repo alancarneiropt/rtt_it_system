@@ -128,6 +128,12 @@
             z-index:1;
         }
 
+        .header-compact .header-hora { display: none; }
+        .header-compact .header-data { display: none; }
+        .header-compact .header { padding-bottom: 0.8rem; }
+        .header.compact { padding-bottom: 0.8rem; }
+        .header.compact .header-hora, .header.compact .header-data { display: none; }
+
         /* Secção Agenda — linha do tempo */
         .agenda-section {
             background: #fff;
@@ -564,6 +570,27 @@
 <body>
     <div class="wrap">
 
+        <div class="header-wrap">
+            <header class="header">
+                <div class="header-top">
+                    <div class="perfil-mini">
+                        <div class="avatar-status">
+                            <div class="avatar" id="avatarIniciais">RT</div>
+                        </div>
+                        <div class="perfil-texto">
+                            <div class="perfil-nome" title="{{ nome }}">{{ nome }}</div>
+                        </div>
+                    </div>
+                    <a class="btn-sair-top" href="?sair=1" aria-label="Sair">
+                        <span style="font-size:1rem; line-height:0;">⎋</span>
+                        <span>Sair</span>
+                    </a>
+                </div>
+                <div class="header-hora" id="horaAtual">--:--</div>
+                <div class="header-data" id="dataHoje"></div>
+            </header>
+        </div>
+
         <!-- Secção Espelho de Ponto (Antigo Painel) -->
         <section id="sec-painel" class="area-sec" aria-labelledby="titulo-painel">
             <h2 id="titulo-painel" class="sec-titulo" style="margin-top: 1rem; padding: 0 1rem;">Espelho de Ponto</h2>
@@ -666,27 +693,6 @@
 
         <!-- Secção Hoje: apenas botão Registrar -->
         <section id="sec-hoje" class="area-sec visivel" aria-labelledby="titulo-hoje">
-            <div class="header-wrap">
-                <header class="header">
-                    <div class="header-top">
-                        <div class="perfil-mini">
-                            <div class="avatar-status">
-                                <div class="avatar" id="avatarIniciais">RT</div>
-                            </div>
-                            <div class="perfil-texto">
-                                <div class="perfil-nome" title="{{ nome }}">{{ nome }}</div>
-                            </div>
-                        </div>
-                        <a class="btn-sair-top" href="?sair=1" aria-label="Sair">
-                            <span style="font-size:1rem; line-height:0;">⎋</span>
-                            <span>Sair</span>
-                        </a>
-                    </div>
-                    <div class="header-hora" id="horaAtual">--:--</div>
-                    <div class="header-data" id="dataHoje"></div>
-                </header>
-            </div>
-
             <div class="acoes acoes-single">
                 <button type="button" class="btn-acao btn-registrar" id="btnRegistrar">Registrar</button>
             </div>
@@ -1195,6 +1201,17 @@
         document.querySelectorAll('.area-sec').forEach(function(sec) { sec.classList.remove('visivel'); });
         var el = document.getElementById(secIds[id]);
         if (el) el.classList.add('visivel');
+        
+        // Ajuste opcional do cabeçalho conforme a secção
+        var header = document.querySelector('.header');
+        if (header) {
+            if (id === 'hoje') {
+                header.classList.remove('compact');
+            } else {
+                header.classList.add('compact');
+            }
+        }
+
         document.querySelectorAll('.nav-item').forEach(function(a) {
             a.classList.remove('ativo');
             a.removeAttribute('aria-current');
