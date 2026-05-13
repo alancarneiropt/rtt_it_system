@@ -10,6 +10,7 @@
     <link rel="apple-touch-icon" href="/static/pwa/icon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         tailwind.config = {
             theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
@@ -17,44 +18,120 @@
     </script>
     <style>
         [x-cloak] { display: none !important; }
+        /* Smooth transition for sidebar */
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out;
+        }
     </style>
     {% block extrahead %}{% endblock %}
 </head>
-<body class="bg-slate-100 font-sans text-slate-800 antialiased">
-    <div class="flex min-h-screen">
+<body class="bg-slate-100 font-sans text-slate-800 antialiased" x-data="{ sidebarOpen: false }">
+    <div class="flex min-h-screen overflow-hidden">
+        <!-- Sidebar Backdrop (Mobile) -->
+        <div 
+            x-show="sidebarOpen" 
+            x-cloak
+            @click="sidebarOpen = false" 
+            class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden transition-opacity"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0">
+        </div>
+
         <!-- Sidebar -->
-        <aside class="w-56 bg-slate-700 text-white flex-shrink-0 flex flex-col">
-            <div class="p-4 border-b border-slate-600">
-                <a href="{% url 'backoffice_dashboard' %}" class="text-lg font-bold text-white">RTT - Nordigal</a>
-                <p class="text-xs text-slate-400 mt-1">Backoffice</p>
+        <aside 
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+            class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-800 text-white flex-shrink-0 flex flex-col sidebar-transition lg:static lg:inset-auto">
+            
+            <div class="p-4 border-b border-slate-700 flex items-center justify-between">
+                <div>
+                    <a href="{% url 'backoffice_dashboard' %}" class="text-lg font-bold text-white">RTT - Nordigal</a>
+                    <p class="text-xs text-slate-400 mt-1">Backoffice</p>
+                </div>
+                <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
-            <nav class="p-2 flex-1">
-                <a href="{% url 'backoffice_dashboard' %}" class="block px-3 py-2 rounded-md text-sm font-medium {% if request.resolver_match.url_name == 'backoffice_dashboard' or request.resolver_match.url_name == 'backoffice_espelho' %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Espelho de Ponto</a>
-                <a href="{% url 'backoffice_indicadores' %}" class="hidden block px-3 py-2 rounded-md text-sm font-medium {% if request.resolver_match.url_name == 'backoffice_indicadores' %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Indicadores</a>
-                <a href="{% url 'backoffice_colaborador_list' %}" class="block px-3 py-2 rounded-md text-sm font-medium {% if 'colaborador' in request.resolver_match.url_name %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Colaboradores</a>
-                <a href="{% url 'backoffice_departamento_list' %}" class="hidden block px-3 py-2 rounded-md text-sm font-medium {% if 'departamento' in request.resolver_match.url_name %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Departamentos</a>
-                <a href="{% url 'backoffice_jornada_list' %}" class="hidden block px-3 py-2 rounded-md text-sm font-medium {% if 'jornada' in request.resolver_match.url_name %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Jornadas</a>
-                <a href="{% url 'backoffice_km_list' %}" class="block px-3 py-2 rounded-md text-sm font-medium {% if request.resolver_match.url_name == 'backoffice_km_list' %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Registros de KM</a>
-                <a href="{% url 'backoffice_viatura_list' %}" class="block px-3 py-2 rounded-md text-sm font-medium {% if 'viatura' in request.resolver_match.url_name %}bg-slate-600 text-white{% else %}text-slate-300 hover:bg-slate-600 hover:text-white{% endif %}">Viaturas</a>
-                <a href="{% url 'root' %}" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-blue-600 hover:text-white">📍 Marcar Ponto (Página Inicial)</a>
-                <a href="{% url 'admin:index' %}" class="hidden block px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-slate-600 hover:text-white">Django Admin</a>
+
+            <nav class="p-4 flex-1 space-y-1 overflow-y-auto">
+                <a @click="sidebarOpen = false" href="{% url 'backoffice_dashboard' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'backoffice_dashboard' or request.resolver_match.url_name == 'backoffice_espelho' %}bg-blue-600 text-white{% else %}text-slate-300 hover:bg-slate-700 hover:text-white{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    Espelho de Ponto
+                </a>
+                
+                <a @click="sidebarOpen = false" href="{% url 'backoffice_indicadores' %}" class="hidden flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'backoffice_indicadores' %}bg-blue-600 text-white{% else %}text-slate-300 hover:bg-slate-700 hover:text-white{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                    Indicadores
+                </a>
+
+                <a @click="sidebarOpen = false" href="{% url 'backoffice_colaborador_list' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if 'colaborador' in request.resolver_match.url_name %}bg-blue-600 text-white{% else %}text-slate-300 hover:bg-slate-700 hover:text-white{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    Colaboradores
+                </a>
+
+                <a @click="sidebarOpen = false" href="{% url 'backoffice_km_list' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'backoffice_km_list' %}bg-blue-600 text-white{% else %}text-slate-300 hover:bg-slate-700 hover:text-white{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    Registros de KM
+                </a>
+
+                <a @click="sidebarOpen = false" href="{% url 'backoffice_viatura_list' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if 'viatura' in request.resolver_match.url_name %}bg-blue-600 text-white{% else %}text-slate-300 hover:bg-slate-700 hover:text-white{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+                    Viaturas
+                </a>
+
+                <div class="pt-4 pb-2">
+                    <div class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Acesso Rápido</div>
+                </div>
+
+                <a href="{% url 'root' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-emerald-400 hover:bg-slate-700 hover:text-emerald-300 transition-colors">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    Marcar Ponto
+                </a>
             </nav>
-            <div class="p-3 border-t border-slate-600">
-                <a href="{% url 'backoffice_logout' %}" class="block w-full text-center py-2 px-3 rounded-md bg-slate-600 text-white text-sm font-medium hover:bg-red-600 transition-colors">Sair</a>
+
+            <div class="p-4 border-t border-slate-700">
+                <a href="{% url 'backoffice_logout' %}" class="flex items-center justify-center w-full py-2.5 px-4 rounded-lg bg-red-600/10 text-red-400 text-sm font-semibold hover:bg-red-600 hover:text-white transition-all">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                    Sair
+                </a>
             </div>
         </aside>
-        <!-- Main -->
-        <main class="flex-1 overflow-auto p-6">
-            <header class="mb-6">
-                <h1 class="text-2xl font-extrabold text-slate-900 leading-tight" id="boHeaderSaudacao"
-                    data-nome="{{ request.user.profile.nome|default:request.user.email|default:'Utilizador' }}">
-                    Olá
-                </h1>
-                <p class="text-sm text-slate-500 mt-1" id="boHeaderData">—</p>
+
+        <!-- Main Content Wrapper -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <!-- Mobile Top Bar -->
+            <header class="lg:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+                <button @click="sidebarOpen = true" class="p-2 -ml-2 text-slate-600 hover:text-slate-900 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <div class="font-bold text-slate-800">RTT - Nordigal</div>
+                <div class="w-6"></div> <!-- Spacer for balance -->
             </header>
-            {% block content %}{% endblock %}
-        </main>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+                <div class="max-w-7xl mx-auto">
+                    <header class="mb-8">
+                        <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 leading-tight" id="boHeaderSaudacao"
+                            data-nome="{{ request.user.profile.nome|default:request.user.email|default:'Utilizador' }}">
+                            Olá
+                        </h1>
+                        <p class="text-sm text-slate-500 mt-1" id="boHeaderData">—</p>
+                    </header>
+
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
     </div>
+
     <script>
     (function() {
         var LOGOUT_AFTER_MS = 5 * 60 * 1000;
@@ -87,7 +164,7 @@
             try {
                 dataEl.textContent = d.toLocaleDateString('pt-PT', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
             } catch (e) {
-                // fallback: mantém a data já renderizada no HTML
+                // fallback
             }
         }
     })();
@@ -96,3 +173,4 @@
     {% block scripts %}{% endblock %}
 </body>
 </html>
+

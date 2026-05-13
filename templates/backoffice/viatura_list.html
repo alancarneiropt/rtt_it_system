@@ -2,48 +2,136 @@
 
 {% block title %}Viaturas{% endblock %}
 
+{% block extrahead %}
+<style>
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+    .modal-overlay.active { display: flex; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
     <h1 class="text-2xl font-bold text-slate-800">Viaturas</h1>
-    <a href="{% url 'backoffice_viatura_create' %}" class="inline-flex items-center px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-medium hover:bg-slate-800">+ Nova viatura</a>
+    <button type="button" onclick="openModal()" class="inline-flex items-center px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-medium hover:bg-slate-800 transition-all shadow-sm">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Nova viatura
+    </button>
+</div>
+
+<!-- Modal Nova Viatura -->
+<div id="modalViatura" class="modal-overlay" onclick="closeModal(event)">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all" onclick="event.stopPropagation()">
+        <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-slate-800">Cadastrar Nova Viatura</h3>
+            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <form action="{% url 'backoffice_viatura_create' %}" method="post" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Matrícula</label>
+                {{ form.matricula }}
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Marca / Modelo</label>
+                {{ form.marca_modelo }}
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">KM Inicial</label>
+                {{ form.km_inicial }}
+                <p class="text-[10px] text-slate-400 mt-1 italic">Este será o valor de partida para todos os deslocamentos.</p>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">{{ form.colaborador_atual.label }}</label>
+                {{ form.colaborador_atual }}
+            </div>
+            <div class="flex items-center gap-2 pt-2">
+                {{ form.ativo }}
+                <label class="text-sm font-semibold text-slate-700">Viatura Ativa</label>
+            </div>
+            
+            <div class="pt-4 flex gap-3">
+                <button type="submit" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
+                    Cadastrar Viatura
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-    <table class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50">
-            <tr>
-                <th class="px-6 py-3 text-left font-semibold text-slate-600 uppercase tracking-wider">Matrícula</th>
-                <th class="px-6 py-3 text-left font-semibold text-slate-600 uppercase tracking-wider">Marca/Modelo</th>
-                <th class="px-6 py-3 text-left font-semibold text-slate-600 uppercase tracking-wider">KM Inicial</th>
-                <th class="px-6 py-3 text-left font-semibold text-slate-600 uppercase tracking-wider">KM Atual</th>
-                <th class="px-6 py-3 text-left font-semibold text-slate-600 uppercase tracking-wider">Status</th>
-                <th class="px-6 py-3 w-24"></th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-            {% for v in viaturas %}
-            <tr class="hover:bg-slate-50 transition-colors">
-                <td class="px-6 py-4 font-bold text-slate-700 uppercase">{{ v.matricula }}</td>
-                <td class="px-6 py-4 text-slate-600">{{ v.marca_modelo|default:"---" }}</td>
-                <td class="px-6 py-4 text-slate-600 font-medium">{{ v.km_inicial }} KM</td>
-                <td class="px-6 py-4 text-blue-600 font-bold">{{ v.km_atual }} KM</td>
-                <td class="px-6 py-4">
-                    {% if v.ativo %}
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Ativa</span>
-                    {% else %}
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">Inativa</span>
-                    {% endif %}
-                </td>
-                <td class="px-6 py-4 text-right">
-                    <a href="{% url 'backoffice_viatura_edit' v.pk %}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold hover:bg-blue-600 hover:text-white transition-all">
-                        Editar
-                    </a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="6" class="px-6 py-12 text-center text-slate-500">Nenhuma viatura cadastrada. <a href="{% url 'backoffice_viatura_create' %}" class="text-blue-600 font-bold hover:underline">Adicionar a primeira</a>.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase tracking-wider text-[11px]">Matrícula</th>
+                    <th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase tracking-wider text-[11px]">Marca/Modelo</th>
+                    <th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase tracking-wider text-[11px]">Utilizador</th>
+                    <th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase tracking-wider text-[11px]">KM Inicial</th>
+                    <th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase tracking-wider text-[11px]">KM Atual</th>
+                    <th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase tracking-wider text-[11px]">Status</th>
+                    <th class="px-6 py-4 w-24"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for v in viaturas %}
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 font-bold text-slate-700 uppercase whitespace-nowrap">{{ v.matricula }}</td>
+                    <td class="px-6 py-4 text-slate-600 whitespace-nowrap">{{ v.marca_modelo|default:"---" }}</td>
+                    <td class="px-6 py-4 text-slate-600 whitespace-nowrap">
+                        {% if v.colaborador_atual %}
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600">
+                                    {{ v.colaborador_atual.profile.nome|slice:":1"|default:v.colaborador_atual.email|slice:":1"|upper }}
+                                </div>
+                                <span class="font-medium text-slate-700">{{ v.colaborador_atual.profile.nome|default:v.colaborador_atual.email }}</span>
+                            </div>
+                        {% else %}
+                            <span class="text-slate-400 italic text-xs">Não atribuído</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-slate-600 font-medium whitespace-nowrap">{{ v.km_inicial }} KM</td>
+                    <td class="px-6 py-4 text-blue-600 font-bold whitespace-nowrap">{{ v.km_atual }} KM</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if v.ativo %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Ativa</span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">Inativa</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                        <a href="{% url 'backoffice_viatura_edit' v.pk %}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold hover:bg-blue-600 hover:text-white transition-all">
+                            Editar
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="px-6 py-12 text-center text-slate-500">Nenhuma viatura cadastrada. <button type="button" onclick="openModal()" class="text-blue-600 font-bold hover:underline">Adicionar a primeira</button>.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function openModal() {
+        document.getElementById('modalViatura').classList.add('active');
+    }
+    function closeModal(e) {
+        document.getElementById('modalViatura').classList.remove('active');
+    }
+</script>
 {% endblock %}

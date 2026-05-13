@@ -10,11 +10,11 @@ from django.utils import timezone
 
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.cache import never_cache
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import logout as auth_logout
 import json
 
-from .models import Marcacao, Profile, RegistroKM
+from .models import Marcacao, Profile, RegistroKM, Viatura
 
 User = get_user_model()
 
@@ -138,7 +138,13 @@ def viaturas_api_view(request):
     """Retorna a lista de viaturas ativas."""
     if not request.user.is_authenticated:
         return JsonResponse({'sucesso': False}, 401)
-    viaturas = Viatura.objects.filter(ativo=True).order_by('matricula')
+    # Filtra apenas viaturas atribuídas ao utilizador logado
+    # (Pode ser via Viatura.colaborador_atual ou via Profile.viatura)
+    from django.db.models import Q
+    viaturas = Viatura.objects.filter(
+        Q(colaborador_atual=request.user) | Q(colaboradores__user=request.user),
+        ativo=True
+    ).distinct().order_by('matricula')
     lista = []
     for v in viaturas:
         lista.append({
@@ -163,8 +169,8 @@ def km_registo_view(request):
         viatura_id = data.get('viatura_id')
         descricao = data.get('descricao', '')
         
-        if km_valor is None or not viatura_id:
-            return JsonResponse({'sucesso': False, 'erro': 'KM e Viatura são obrigatórios.'}, 400)
+        if km_valor is None or not viatura_id or not (descricao or '').strip():
+            return JsonResponse({'sucesso': False, 'erro': 'KM, Viatura e Descrição são obrigatórios.'}, 400)
             
         viatura = get_object_or_404(Viatura, pk=viatura_id)
         
@@ -196,61 +202,63 @@ def km_registo_view(request):
 @require_GET
 def km_status_view(request):
     """Retorna a lista de registos de KM de hoje e totais (dia, semana, mês)."""
-    if not request.user.is_authenticated:
-        return JsonResponse({'sucesso': False}, 401)
+    try:
+        if not request.user.is_authenticated:
+            return JsonResponse({'sucesso': False}, 401)
+            
+        hoje = timezone.localdate()
         
-    hoje = timezone.localdate()
-    
-    # Registos de hoje
-    registos_hoje = RegistroKM.objects.filter(utilizador=request.user, data=hoje).order_by('timestamp')
-    
-    lista_hoje = []
-    for r in registos_hoje:
-        lista_hoje.append({
-            'timestamp': timezone.localtime(r.timestamp).strftime('%H:%M'),
-            'km': r.km,
-            'viatura': r.viatura.matricula if r.viatura else '---',
-            'descricao': r.descricao,
-            'percorrido': r.distancia
+        # Registos de hoje
+        registos_hoje = RegistroKM.objects.filter(utilizador=request.user, data=hoje).order_by('timestamp')
+        
+        lista_hoje = []
+        for r in registos_hoje:
+            lista_hoje.append({
+                'timestamp': timezone.localtime(r.timestamp).strftime('%H:%M'),
+                'km': r.km,
+                'viatura': r.viatura.matricula if r.viatura else '---',
+                'descricao': r.descricao,
+                'percorrido': r.distancia
+            })
+
+        # Função auxiliar para calcular total de um período (Soma do deslocamento diário por viatura)
+        def calc_total(queryset):
+            from django.db.models import Max, Min
+            # Agrupar por data e viatura para calcular o deslocamento do dia
+            resumo = queryset.order_by().values('data', 'viatura').annotate(
+                max_km=Max('km'),
+                min_prev=Min('km_anterior')
+            )
+            soma = 0
+            for r in resumo:
+                if r['max_km'] is not None and r['min_prev'] is not None:
+                    diff = r['max_km'] - r['min_prev']
+                    if diff > 0:
+                        soma += diff
+            return float(soma)
+
+        # Totais
+        total_hoje = calc_total(registos_hoje)
+        
+        inicio_semana = hoje - timezone.timedelta(days=hoje.weekday())
+        registos_semana = RegistroKM.objects.filter(utilizador=request.user, data__gte=inicio_semana)
+        total_semana = calc_total(registos_semana)
+        
+        inicio_mes = hoje.replace(day=1)
+        registos_mes = RegistroKM.objects.filter(utilizador=request.user, data__gte=inicio_mes)
+        total_mes = calc_total(registos_mes)
+        
+        return JsonResponse({
+            'sucesso': True,
+            'registos': lista_hoje,
+            'totais': {
+                'hoje': total_hoje,
+                'semana': total_semana,
+                'mes': total_mes
+            }
         })
-
-    # Função auxiliar para calcular total de um período (Soma do deslocamento diário por viatura)
-    def calc_total(queryset):
-        from django.db.models import Max, Min
-        # Agrupar por data e viatura para calcular o deslocamento do dia
-        # Deslocamento = Maior KM do dia - Menor KM anterior do dia
-        resumo = queryset.order_by().values('data', 'viatura').annotate(
-            max_km=Max('km'),
-            min_prev=Min('km_anterior')
-        )
-        soma = 0
-        for r in resumo:
-            if r['max_km'] is not None and r['min_prev'] is not None:
-                diff = r['max_km'] - r['min_prev']
-                if diff > 0:
-                    soma += diff
-        return float(soma)
-
-    # Totais
-    total_hoje = calc_total(registos_hoje)
-    
-    inicio_semana = hoje - timezone.timedelta(days=hoje.weekday())
-    registos_semana = RegistroKM.objects.filter(utilizador=request.user, data__gte=inicio_semana)
-    total_semana = calc_total(registos_semana)
-    
-    inicio_mes = hoje.replace(day=1)
-    registos_mes = RegistroKM.objects.filter(utilizador=request.user, data__gte=inicio_mes)
-    total_mes = calc_total(registos_mes)
-    
-    return JsonResponse({
-        'sucesso': True,
-        'registos': lista_hoje,
-        'totais': {
-            'hoje': total_hoje,
-            'semana': total_semana,
-            'mes': total_mes
-        }
-    })
+    except Exception as e:
+        return JsonResponse({'sucesso': False, 'erro': str(e)}, 500)
 
 
 @require_GET
@@ -291,8 +299,8 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Não interferir com chamadas API (mantém sempre rede)
-  if (url.pathname.startsWith('/api/')) return;
+  // Não interferir com chamadas API ou Backoffice (mantém sempre rede)
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/backoffice/') || url.pathname.startsWith('/admin/')) return;
 
   // Navegação: network-first com fallback para cache (login)
   if (isNavigationRequest(request)) {
@@ -312,13 +320,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Assets: cache-first
+  // Assets: cache-first (apenas para GET)
   event.respondWith((async () => {
     const cached = await caches.match(request);
     if (cached) return cached;
+    
     const fresh = await fetch(request);
-    const cache = await caches.open(CACHE_NAME);
-    cache.put(request, fresh.clone());
+    if (request.method === 'GET') {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, fresh.clone());
+    }
     return fresh;
   })());
 });
@@ -444,13 +455,13 @@ def marcacao_list_create(request):
         }, 400)
 
     hoje = _marcacoes_hoje(user)
-    if hoje.count() >= 8:
+    if hoje.count() >= 4:
         return _json({
             'sucesso': False,
-            'mensagem': 'Limite de 8 marcações por dia atingido.',
+            'mensagem': 'Limite de 4 marcações por dia atingido.',
             'erro': 'limite_marcacoes'
         }, 400)
-    # Nota: o fluxo do UI pode ciclar tipos; aqui só garantimos limite de 8 marcações/dia.
+    # Nota: o fluxo do UI pode ciclar tipos; aqui só garantimos limite de 4 marcações/dia.
     # Se vier justificativa, guardamos; caso contrário, mantém vazio.
     justificativa = (body.get('justificativa') or '').strip()
 

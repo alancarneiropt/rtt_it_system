@@ -783,8 +783,8 @@
             <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem; text-align: left;">Novo KM Atual:</p>
             <input type="number" id="inputKM" placeholder="0" step="1" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 1rem; font-size: 1.25rem; font-weight: 700; text-align: center;">
             
-            <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem; text-align: left;">Descrição / Onde estou:</p>
-            <input type="text" id="inputKMDescricao" placeholder="Ex: Sede, Cliente X, Posto..." style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 1.5rem; font-size: 1rem;">
+            <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem; text-align: left;">Descrição / Onde estou: <span style="color: #dc2626;">*</span></p>
+            <input type="text" id="inputKMDescricao" placeholder="Obrigatório: Ex: Sede, Cliente X..." style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 1.5rem; font-size: 1rem;">
             
             <div class="modal-botoes">
                 <button type="button" class="modal-btn-cancelar" id="btnModalKMCancelar">Cancelar</button>
@@ -1078,14 +1078,23 @@
             .then(function(data) {
                 if (data.sucesso) {
                     viaturasCache = data.viaturas;
-                    select.innerHTML = '<option value="">Selecione uma viatura...</option>';
-                    data.viaturas.forEach(function(v) {
-                        var opt = document.createElement('option');
-                        opt.value = v.id;
-                        opt.textContent = v.matricula + ' (' + v.km_atual + ' KM)';
-                        select.appendChild(opt);
-                    });
+                    if (data.viaturas.length === 0) {
+                        select.innerHTML = '<option value="">Nenhuma viatura atribuída</option>';
+                    } else {
+                        select.innerHTML = '<option value="">Selecione uma viatura...</option>';
+                        data.viaturas.forEach(function(v) {
+                            var opt = document.createElement('option');
+                            opt.value = v.id;
+                            opt.textContent = v.matricula + ' (' + v.km_atual + ' KM)';
+                            select.appendChild(opt);
+                        });
+                    }
+                } else {
+                    select.innerHTML = '<option value="">Erro ao carregar</option>';
                 }
+            })
+            .catch(function(err) {
+                select.innerHTML = '<option value="">Erro de ligação</option>';
             });
     }
 
@@ -1144,14 +1153,46 @@
         document.getElementById('modalKMUltimoValor').textContent = viatura.km_atual + ' KM';
 
         input.value = '';
+        input.placeholder = viatura.km_atual;
         inputDesc.value = '';
         modal.classList.add('visible');
-        setTimeout(function() { input.focus(); }, 100);
+        
+        // Foco inicial no KM
+        setTimeout(function() { input.focus(); }, 300);
+
+        // Ao carregar "Enter" no KM, salta para a Descrição
+        var keyHandler = function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                inputDesc.focus();
+            }
+        };
+        input.addEventListener('keydown', keyHandler);
+        
+        // Ao carregar "Enter" na Descrição, tenta confirmar o registo
+        var keyHandlerDesc = function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                btnConfirmar.click();
+            }
+        };
+        inputDesc.addEventListener('keydown', keyHandlerDesc);
 
         var confirmar = function() {
             var valor = input.value;
-            var desc = inputDesc.value;
-            if (!valor) { showToast('Insira a quilometragem.', true); return; }
+            var desc = (inputDesc.value || '').trim();
+            
+            if (!valor) { 
+                showToast('Insira a quilometragem.', true); 
+                input.focus();
+                return; 
+            }
+            if (!desc) { 
+                showToast('Indique onde se encontra (Descrição).', true); 
+                inputDesc.focus();
+                return; 
+            }
+            
             var km = parseInt(valor, 10);
             
             if (km < viatura.km_atual) {
@@ -1162,6 +1203,8 @@
             modal.classList.remove('visible');
             btnConfirmar.removeEventListener('click', confirmar);
             btnCancelar.removeEventListener('click', cancelar);
+            input.removeEventListener('keydown', keyHandler);
+            inputDesc.removeEventListener('keydown', keyHandlerDesc);
 
             fetch(API_KM_REGISTO, {
                 method: 'POST',
@@ -1184,6 +1227,8 @@
             modal.classList.remove('visible');
             btnConfirmar.removeEventListener('click', confirmar);
             btnCancelar.removeEventListener('click', cancelar);
+            input.removeEventListener('keydown', keyHandler);
+            inputDesc.removeEventListener('keydown', keyHandlerDesc);
         };
 
         btnConfirmar.addEventListener('click', confirmar);

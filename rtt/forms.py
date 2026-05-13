@@ -1,7 +1,7 @@
 # Formulários do backoffice (cadastro de colaborador, departamento, jornada)
 from django import forms
 from django.contrib.auth import get_user_model
-from .models import Profile, Departamento, Jornada, Viatura, RegistroKM
+from .models import Profile, Departamento, Jornada, Viatura, RegistroKM, Marcacao
 
 User = get_user_model()
 
@@ -52,20 +52,20 @@ class ColaboradorForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['nome', 'endereco', 'data_nascimento', 'departamento', 'jornada']
+        fields = ['nome', 'endereco', 'data_nascimento', 'departamento', 'viatura']
         widgets = {
             'nome': forms.TextInput(attrs={'placeholder': 'Nome completo', 'class': 'w-full px-3 py-2 border border-slate-300 rounded-lg'}),
             'endereco': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Morada completa', 'class': 'w-full px-3 py-2 border border-slate-300 rounded-lg'}),
             'data_nascimento': forms.DateInput(attrs={'type': 'date', 'class': 'w-full px-3 py-2 border border-slate-300 rounded-lg'}),
             'departamento': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-slate-300 rounded-lg'}),
-            'jornada': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-slate-300 rounded-lg'}),
+            'viatura': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-slate-300 rounded-lg'}),
         }
 
     def __init__(self, *args, **kwargs):
         self.edit_user = kwargs.pop('edit_user', None)
         super().__init__(*args, **kwargs)
         self.fields['departamento'].queryset = Departamento.objects.filter(ativo=True).order_by('nome')
-        self.fields['jornada'].queryset = Jornada.objects.filter(ativo=True).order_by('nome')
+        self.fields['viatura'].queryset = Viatura.objects.filter(ativo=True).order_by('matricula')
         self.fields['email'].widget.attrs['class'] = 'w-full px-3 py-2 border border-slate-300 rounded-lg'
         self.fields['password'].widget.attrs['class'] = 'w-full px-3 py-2 border border-slate-300 rounded-lg'
         if self.edit_user:
@@ -114,15 +114,29 @@ class ColaboradorForm(forms.ModelForm):
 
 class ViaturaForm(forms.ModelForm):
     """Formulário para criar/editar Viaturas."""
+    colaborador_atual = forms.ModelChoiceField(
+        queryset=User.objects.none(),
+        required=False,
+        label="Colaborador a utilizar",
+        widget=forms.Select(attrs={'class': INPUT_CLASS})
+    )
+
     class Meta:
         model = Viatura
-        fields = ['matricula', 'marca_modelo', 'km_inicial', 'ativo']
+        fields = ['matricula', 'marca_modelo', 'km_inicial', 'km_atual', 'colaborador_atual', 'ativo']
         widgets = {
             'matricula': forms.TextInput(attrs={'placeholder': 'Ex: 00-AA-00', 'class': INPUT_CLASS}),
             'marca_modelo': forms.TextInput(attrs={'placeholder': 'Ex: Renault Clio', 'class': INPUT_CLASS}),
             'km_inicial': forms.NumberInput(attrs={'class': INPUT_CLASS}),
+            'km_atual': forms.NumberInput(attrs={'class': INPUT_CLASS, 'placeholder': 'KM atual da viatura'}),
             'ativo': forms.CheckboxInput(attrs={'class': 'rounded border-slate-300'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['colaborador_atual'].queryset = User.objects.filter(profile__isnull=False).order_by('profile__nome')
+        # Sobrescrever o rótulo exibido para cada opção para usar o nome do perfil
+        self.fields['colaborador_atual'].label_from_instance = lambda obj: obj.profile.nome or obj.email
 
 
 class RegistroKMForm(forms.ModelForm):
@@ -141,3 +155,36 @@ class RegistroKMForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['utilizador'].queryset = User.objects.filter(profile__isnull=False).order_by('profile__nome')
         self.fields['viatura'].queryset = Viatura.objects.filter(ativo=True).order_by('matricula')
+
+class MarcacaoForm(forms.ModelForm):
+    """Formulário para editar marcações de ponto manualmente."""
+    data = forms.DateField(label='Data', widget=forms.DateInput(attrs={'type': 'date', 'class': INPUT_CLASS}))
+    hora = forms.TimeField(label='Hora', widget=forms.TimeInput(attrs={'type': 'time', 'class': INPUT_CLASS}))
+
+    class Meta:
+        model = Marcacao
+        fields = ['tipo', 'justificativa', 'aprovado']
+        widgets = {
+            'tipo': forms.Select(attrs={'class': INPUT_CLASS}),
+            'justificativa': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Motivo da alteração', 'class': INPUT_CLASS}),
+            'aprovado': forms.CheckboxInput(attrs={'class': 'rounded border-slate-300'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            from django.utils import timezone
+            # Converter timestamp para local time antes de exibir no form
+            dt = timezone.localtime(self.instance.timestamp)
+            self.fields['data'].initial = dt.date()
+            self.fields['hora'].initial = dt.time()
+
+    def save(self, commit=True):
+        from django.utils import timezone
+        import datetime
+        data = self.cleaned_data['data']
+        hora = self.cleaned_data['hora']
+        # Combinar data e hora e tornar aware
+        dt = datetime.datetime.combine(data, hora)
+        self.instance.timestamp = timezone.make_aware(dt)
+        return super().save(commit=commit)

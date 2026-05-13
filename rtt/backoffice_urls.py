@@ -26,4 +26,6 @@ urlpatterns = [
     path('viaturas/', backoffice_views.viatura_list_view, name='backoffice_viatura_list'),
     path('viaturas/novo/', backoffice_views.viatura_create_view, name='backoffice_viatura_create'),
     path('viaturas/<int:pk>/editar/', backoffice_views.viatura_edit_view, name='backoffice_viatura_edit'),
+    path('colaboradores/ponto/<uuid:pk>/editar/', backoffice_views.ponto_edit_view, name='backoffice_ponto_edit'),
+    path('colaboradores/ponto/<uuid:pk>/excluir/', backoffice_views.ponto_delete_view, name='backoffice_ponto_delete'),
 ]

@@ -13,36 +13,38 @@
 
 <!-- Filtros -->
 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6">
-    <form method="get" class="flex flex-wrap items-end gap-4">
-        <div class="flex-1 min-w-[200px]">
-            <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase">Colaborador</label>
-            <select name="colaborador" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
-                <option value="">Todos</option>
+    <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:flex lg:items-end gap-4">
+        <div class="lg:flex-1">
+            <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Colaborador</label>
+            <select name="colaborador" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                <option value="">Todos os colaboradores</option>
                 {% for c in colaboradores %}
                 <option value="{{ c.id }}" {% if colaborador_selecionado == c.id|stringformat:"s" %}selected{% endif %}>{{ c.profile.nome }}</option>
                 {% endfor %}
             </select>
         </div>
-        <div class="flex-1 min-w-[150px]">
-            <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase">Viatura</label>
-            <select name="viatura" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
-                <option value="">Todas</option>
+        <div class="lg:flex-1">
+            <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Viatura</label>
+            <select name="viatura" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                <option value="">Todas as viaturas</option>
                 {% for v in viaturas %}
                 <option value="{{ v.id }}" {% if viatura_selecionada == v.id|stringformat:"s" %}selected{% endif %}>{{ v.matricula }}</option>
                 {% endfor %}
             </select>
         </div>
-        <div class="w-40">
-            <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase">De</label>
-            <input type="date" name="data_inicio" value="{{ data_inicio }}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+        <div class="grid grid-cols-2 gap-4 lg:w-80">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Início</label>
+                <input type="date" name="data_inicio" value="{{ data_inicio }}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Fim</label>
+                <input type="date" name="data_fim" value="{{ data_fim }}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            </div>
         </div>
-        <div class="w-40">
-            <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase">Até</label>
-            <input type="date" name="data_fim" value="{{ data_fim }}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
-        </div>
-        <div class="flex gap-2">
-            <button type="submit" class="px-4 py-2 bg-slate-700 text-white rounded-lg text-sm font-medium hover:bg-slate-800">Filtrar</button>
-            <a href="{% url 'backoffice_km_list' %}" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-200">Limpar</a>
+        <div class="flex gap-2 lg:mb-0">
+            <button type="submit" class="flex-1 lg:flex-none px-6 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-900 transition-colors">Filtrar</button>
+            <a href="{% url 'backoffice_km_list' %}" class="flex-1 lg:flex-none px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm font-bold hover:bg-slate-200 text-center transition-colors">Limpar</a>
         </div>
     </form>
 </div>

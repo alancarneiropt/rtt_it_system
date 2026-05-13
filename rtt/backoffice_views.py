@@ -203,11 +203,12 @@ def colaborador_detail_view(request, pk):
                 'dia_semana': ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'][wd],
                 'marcacoes': []
             }
-        if len(por_dia[dia]['marcacoes']) >= 8:
+        if len(por_dia[dia]['marcacoes']) >= 4:
             continue
         lat = str(m.latitude)
         lon = str(m.longitude)
         por_dia[dia]['marcacoes'].append({
+            'id': m.pk,
             'hora': ts.strftime('%H:%M'),
             'tipo': TIPO_MARCACAO_LABEL.get(m.tipo, m.get_tipo_display()),
             'latitude': lat,
@@ -220,7 +221,7 @@ def colaborador_detail_view(request, pk):
     dias = list(reversed(list(por_dia.values())))
     for d in dias:
         # preencher até 8 células vazias para manter layout
-        while len(d['marcacoes']) < 8:
+        while len(d['marcacoes']) < 4:
             d['marcacoes'].append({'hora': '—', 'tipo': '', 'latitude': '0', 'longitude': '0', 'mapa_url': '', 'tem_mapa': False})
     return render(request, 'backoffice/colaborador_detail.html', {
         'profile': profile,
@@ -272,7 +273,7 @@ def _marcacoes_ordenadas_por_dia(utilizador_id, data_inicio, data_fim):
     for m in qs:
         dt = timezone.localtime(m.timestamp)
         dia = dt.date().isoformat()
-        if len(por_dia[dia]) < 8:
+        if len(por_dia[dia]) < 4:
             por_dia[dia].append(dt.strftime('%H:%M'))
     return por_dia
 
@@ -328,9 +329,9 @@ def _calcular_total(entrada, saida, inicio_int, fim_int):
 
 def _calcular_total_por_pares(lista_horas):
     """
-    Calcula o total trabalhado a partir de uma sequência ordenada de horas (HH:MM), 1ª até 8ª.
-    Regra: soma todos os intervalos consecutivos (2ª-1ª)+(3ª-2ª)+(4ª-3ª)+...+(8ª-7ª)
-    = tempo da primeira à última marcação. Assim usa todas as marcações de 1 a 8.
+    Calcula o total trabalhado a partir de uma sequência ordenada de horas (HH:MM), Entrada até Saída.
+    Regra: soma todos os intervalos consecutivos (2ª-1ª)+(3ª-2ª)+(4ª-3ª)
+    = tempo da primeira à última marcação. Assim usa todas as marcações de 1 a 4.
     Retorna string HH:MM ou None.
     """
     def to_minutes(t):
@@ -393,7 +394,7 @@ def construir_espelho(data_inicio, data_fim, utilizadores_queryset):
             if not lista_horas:
                 continue
             # Só mostra linha quando há pelo menos uma marcação nesse dia
-            marcs_display = [lista_horas[j] if j < len(lista_horas) else '' for j in range(8)]
+            marcs_display = [lista_horas[j] if j < len(lista_horas) else '' for j in range(4)]
             ent_str = marcs_display[0] if len(marcs_display) > 0 else ''
             ini_str = marcs_display[1] if len(marcs_display) > 1 else ''
             vol_str = marcs_display[2] if len(marcs_display) > 2 else ''
@@ -427,10 +428,6 @@ def construir_espelho(data_inicio, data_fim, utilizadores_queryset):
                 'marcacao_3_status': st_vol if not is_weekend else '',
                 'marcacao_4': marcs_display[3] or traco,
                 'marcacao_4_status': st_sai if not is_weekend else '',
-                'marcacao_5': marcs_display[4] or traco,
-                'marcacao_6': marcs_display[5] or traco,
-                'marcacao_7': marcs_display[6] or traco,
-                'marcacao_8': marcs_display[7] or traco,
                 'total': total or '—',
                 'is_weekend': is_weekend,
                 'tem_alerta': (st_ent == 'atraso' or st_ent == 'falta' or st_sai == 'falta' or st_sai == 'atraso') and not is_weekend,
@@ -497,7 +494,7 @@ def backoffice_km_list_view(request):
             )
             s = 0
             for r in res:
-                if r['max_km'] and r['min_prev']:
+                if r['max_km'] is not None and r['min_prev'] is not None:
                     d = r['max_km'] - r['min_prev']
                     if d > 0: s += d
             return float(s)
@@ -510,7 +507,20 @@ def backoffice_km_list_view(request):
 
     colaboradores = User.objects.filter(profile__isnull=False).distinct().order_by('profile__nome')
     viaturas = Viatura.objects.filter(ativo=True).order_by('matricula')
-    
+
+    # Ajustes se houver colaborador selecionado
+    if colaborador_id:
+        # Filtrar viaturas: apenas as que têm registos deste colaborador
+        viaturas = viaturas.filter(registos__utilizador_id=colaborador_id).distinct()
+        
+        # Se não houver data_inicio, buscar a data do 1º registo do colaborador
+        if not data_inicio:
+            primeiro_registo = RegistroKM.objects.filter(utilizador_id=colaborador_id).order_by('data').first()
+            if primeiro_registo:
+                data_inicio = primeiro_registo.data.strftime('%Y-%m-%d')
+                # Re-filtrar os registos com a nova data_inicio
+                registos = registos.filter(data__gte=primeiro_registo.data)
+
     return render(request, 'backoffice/km_list.html', {
         'registos': registos,
         'colaboradores': colaboradores,
@@ -664,6 +674,37 @@ def adicionar_ponto_view(request):
 
 
 @backoffice_required
+def ponto_edit_view(request, pk):
+    """Permite ao administrador editar uma marcação de ponto específica."""
+    from .forms import MarcacaoForm
+    marcacao = get_object_or_404(Marcacao, pk=pk)
+    colaborador_pk = marcacao.utilizador.profile.pk
+    if request.method == 'POST':
+        form = MarcacaoForm(request.POST, instance=marcacao)
+        if form.is_valid():
+            form.save()
+            return redirect('backoffice_colaborador_detail', pk=colaborador_pk)
+    else:
+        form = MarcacaoForm(instance=marcacao)
+    return render(request, 'backoffice/ponto_form.html', {
+        'form': form, 
+        'titulo': 'Editar Marcação', 
+        'marcacao': marcacao,
+        'colaborador_pk': colaborador_pk
+    })
+
+
+@backoffice_required
+@require_POST
+def ponto_delete_view(request, pk):
+    """Permite ao administrador excluir uma marcação de ponto."""
+    marcacao = get_object_or_404(Marcacao, pk=pk)
+    colaborador_pk = marcacao.utilizador.profile.pk
+    marcacao.delete()
+    return redirect('backoffice_colaborador_detail', pk=colaborador_pk)
+
+
+@backoffice_required
 @require_GET
 def indicadores_view(request):
     """Indicadores BI: absenteísmo por departamento, alertas de inconsistência."""
@@ -724,16 +765,18 @@ def export_espelho_excel_view(request):
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = 'Espelho de Ponto'
-    headers = ['Data', 'Colaborador', '1ª marcação', '2ª marcação', '3ª marcação', '4ª marcação', '5ª marcação', '6ª marcação', '7ª marcação', '8ª marcação', 'Total']
+    headers = ['Data', 'Colaborador', 'Entrada', 'Almoço', 'Volta', 'Saída', 'Total']
     for c, h in enumerate(headers, 1):
         ws.cell(row=1, column=c, value=h)
         ws.cell(row=1, column=c).font = Font(bold=True)
     for row_idx, ln in enumerate(linhas, 2):
         ws.cell(row=row_idx, column=1, value=ln['data_str'])
         ws.cell(row=row_idx, column=2, value=ln['nome'])
-        for k in range(8):
-            ws.cell(row=row_idx, column=3 + k, value=ln[f'marcacao_{k+1}'])
-        ws.cell(row=row_idx, column=11, value=ln['total'])
+        ws.cell(row=row_idx, column=3, value=ln['marcacao_1'])
+        ws.cell(row=row_idx, column=4, value=ln['marcacao_2'])
+        ws.cell(row=row_idx, column=5, value=ln['marcacao_3'])
+        ws.cell(row=row_idx, column=6, value=ln['marcacao_4'])
+        ws.cell(row=row_idx, column=7, value=ln['total'])
     from io import BytesIO
     buf = BytesIO()
     wb.save(buf)
@@ -779,13 +822,24 @@ def export_espelho_pdf_view(request):
     doc = SimpleDocTemplate(buf, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm)
     styles = getSampleStyleSheet()
     elements = [Paragraph('Espelho de Ponto', styles['Title']), Spacer(1, 0.5*cm)]
-    table_data = [['Data', 'Colaborador', '1ª', '2ª', '3ª', '4ª', '5ª', '6ª', '7ª', '8ª', 'Total']]
+    table_data = [['Data', 'Colaborador', 'Entrada', 'Almoço', 'Volta', 'Saída', 'Total']]
     for ln in linhas:
-        table_data.append([ln['data_str'], ln['nome'][:20],
-                          ln['marcacao_1'], ln['marcacao_2'], ln['marcacao_3'], ln['marcacao_4'],
-                          ln['marcacao_5'], ln['marcacao_6'], ln['marcacao_7'], ln['marcacao_8'], ln['total']])
-    t = Table(table_data, colWidths=[2*cm, 3*cm] + [1.2*cm]*8 + [1.2*cm])
-    t.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, 0), colors.grey), ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke), ('FONTSIZE', (0, 0), (-1, -1), 8), ('GRID', (0, 0), (-1, -1), 0.5, colors.grey)]))
+        table_data.append([
+            ln['data_str'],
+            ln['nome'][:20],
+            ln['marcacao_1'],
+            ln['marcacao_2'],
+            ln['marcacao_3'],
+            ln['marcacao_4'],
+            ln['total']
+        ])
+    t = Table(table_data, colWidths=[2.5*cm, 4*cm] + [2*cm]*4 + [2*cm])
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey)
+    ]))
     elements.append(t)
     doc.build(elements)
     buf.seek(0)
@@ -797,9 +851,14 @@ def export_espelho_pdf_view(request):
 # ---------- Viaturas ----------
 @backoffice_required
 def viatura_list_view(request):
-    """Lista viaturas com link para novo e editar."""
+    """Lista viaturas com modal para novo."""
+    from .forms import ViaturaForm
     viaturas = Viatura.objects.all().order_by('matricula')
-    return render(request, 'backoffice/viatura_list.html', {'viaturas': viaturas})
+    form = ViaturaForm()
+    return render(request, 'backoffice/viatura_list.html', {
+        'viaturas': viaturas,
+        'form': form
+    })
 
 
 @backoffice_required

@@ -69,6 +69,13 @@ class Profile(models.Model):
         blank=True,
         related_name='colaboradores'
     )
+    viatura = models.ForeignKey(
+        'Viatura',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='colaboradores'
+    )
 
     class Meta:
         verbose_name = 'Perfil'
@@ -100,7 +107,7 @@ class Marcacao(models.Model):
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(default=timezone.now)
     aprovado = models.BooleanField(default=False)
     aprovado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -131,6 +138,13 @@ class Viatura(models.Model):
     km_inicial = models.IntegerField(default=0, help_text="KM no momento do cadastro no sistema")
     km_atual = models.IntegerField(default=0, help_text="KM atualizado automaticamente")
     ativo = models.BooleanField(default=True)
+    colaborador_atual = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='viaturas_atuais'
+    )
 
     class Meta:
         verbose_name = 'Viatura'
@@ -139,11 +153,24 @@ class Viatura(models.Model):
     def __str__(self):
         return f"{self.matricula} ({self.km_atual} KM)"
 
+    @property
+    def km_percorrido(self):
+        return (self.km_atual or 0) - (self.km_inicial or 0)
+
     def save(self, *args, **kwargs):
         if not self.pk:
-            # No primeiro cadastro, o km_atual é o km_inicial
-            self.km_atual = self.km_inicial
+            # No primeiro cadastro, o km_atual segue o km_inicial
+            if not self.km_atual:
+                self.km_atual = self.km_inicial
+        else:
+            # Garante que o KM atual nunca seja inferior ao inicial (correção de erro de digitação)
+            if self.km_atual < self.km_inicial:
+                self.km_atual = self.km_inicial
         super().save(*args, **kwargs)
+
+    def get_ultimo_registo(self):
+        """Retorna o último registo de KM desta viatura."""
+        return self.registos.order_by('-timestamp').first()
 
 
 class RegistroKM(models.Model):
