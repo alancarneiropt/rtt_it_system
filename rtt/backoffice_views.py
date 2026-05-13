@@ -762,6 +762,9 @@ def export_espelho_excel_view(request):
     if cid:
         colaboradores = colaboradores.filter(pk=cid)
     linhas = construir_espelho(di, df, colaboradores)
+    # Ordenação cronológica para exportação (dia 1 -> dia 31)
+    linhas.sort(key=lambda x: (x['data'], (x['nome'] or '').lower()))
+    
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = 'Espelho de Ponto'
@@ -817,6 +820,9 @@ def export_espelho_pdf_view(request):
     if cid:
         colaboradores = colaboradores.filter(pk=cid)
     linhas = construir_espelho(di, df, colaboradores)
+    # Ordenação cronológica para exportação (dia 1 -> dia 31)
+    linhas.sort(key=lambda x: (x['data'], (x['nome'] or '').lower()))
+    
     from io import BytesIO
     buf = BytesIO()
     doc = SimpleDocTemplate(buf, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm)
@@ -844,7 +850,8 @@ def export_espelho_pdf_view(request):
     doc.build(elements)
     buf.seek(0)
     response = HttpResponse(buf.read(), content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="espelho_ponto_{data_inicio}_{data_fim}.pdf"'
+    # Content-Disposition: inline permite pré-visualização no navegador
+    response['Content-Disposition'] = f'inline; filename="espelho_ponto_{data_inicio}_{data_fim}.pdf"'
     return response
 
 
