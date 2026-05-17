@@ -79,51 +79,28 @@
                 <div class="p-4">
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         {% for m in d.marcacoes %}
-                        <div class="rounded-lg border border-slate-200 bg-white px-3 py-2">
-                            <div class="flex items-center justify-between gap-2">
-                                <div class="min-w-0">
-                                    <div class="text-sm font-semibold text-slate-800 whitespace-nowrap">{{ m.hora }}</div>
-                                    {% if m.tipo %}
-                                    <div class="text-[11px] text-slate-500 truncate">{{ m.tipo }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="flex items-center gap-1 flex-shrink-0">
-                                    {% if m.id %}
-                                    <a href="{% url 'backoffice_ponto_edit' m.id %}" 
-                                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                                       title="Editar marcação">
-                                        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M12 20h9"></path>
-                                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                                        </svg>
-                                    </a>
-                                    {% endif %}
-                                    
-                                    {% if m.tem_mapa %}
-                                    <a href="{{ m.mapa_url }}" target="_blank" rel="noopener"
-                                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
-                                       title="Ver no mapa">
-                                        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M21 10c0 6-9 13-9 13S3 16 3 10a9 9 0 1 1 18 0Z"></path>
-                                            <circle cx="12" cy="10" r="3"></circle>
-                                        </svg>
-                                    </a>
-                                    {% else %}
-                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white text-slate-200" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M21 10c0 6-9 13-9 13S3 16 3 10a9 9 0 1 1 18 0Z"></path>
-                                            <circle cx="12" cy="10" r="3"></circle>
-                                        </svg>
-                                    </span>
-                                    {% endif %}
-                                </div>
+                        <div class="rounded-lg border border-slate-200 bg-white px-3 py-2 flex items-center justify-between gap-2">
+                            <div class="min-w-0">
+                                <div class="text-sm font-black {% if m.tipo == 'entrada' %}text-emerald-600{% else %}text-rose-600{% endif %}">{{ m.hora }}</div>
+                                <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{{ m.tipo_display }}</div>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                {% if m.id %}
+                                <a href="{% url 'backoffice_ponto_edit' m.id %}" 
+                                   class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-50 text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                   title="Editar">
+                                    <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 20h9"></path>
+                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                    </svg>
+                                </a>
+                                {% endif %}
                             </div>
                         </div>
                         {% endfor %}
-                    </div>
                 </div>
             </section>
-            {% empty %}
+{% empty %}
             <div class="px-4 py-8 text-center text-slate-500">Nenhuma marcação encontrada.</div>
             {% endfor %}
         </div>

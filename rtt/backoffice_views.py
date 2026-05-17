@@ -386,31 +386,26 @@ def construir_espelho(data_inicio, data_fim, utilizadores_queryset):
             planejado_str = '08:00'
             h_ent, h_sai, h_ini, h_fim = time(8, 0), time(18, 0), time(12, 0), time(13, 0)
 
-        marcs_ord = _marcacoes_ordenadas_por_dia(user.id, data_inicio, data_fim)
         for i in range(delta):
             dia = data_inicio + timedelta(days=i)
-            dia_str = dia.isoformat()
-            lista_horas = marcs_ord.get(dia_str, [])
-            if not lista_horas:
+            qs_dia = Marcacao.objects.filter(utilizador=user, timestamp__date=dia).order_by('timestamp')
+            if not qs_dia.exists():
                 continue
-            # Só mostra linha quando há pelo menos uma marcação nesse dia
-            marcs_display = [lista_horas[j] if j < len(lista_horas) else '' for j in range(4)]
-            ent_str = marcs_display[0] if len(marcs_display) > 0 else ''
-            ini_str = marcs_display[1] if len(marcs_display) > 1 else ''
-            vol_str = marcs_display[2] if len(marcs_display) > 2 else ''
-            sai_str = marcs_display[3] if len(marcs_display) > 3 else ''
 
-            st_ent = _status_celula(ent_str, h_ent, 'entrada')
-            st_sai = _status_celula(sai_str, h_sai, 'saida')
-            st_ini = 'falta' if not ini_str else 'ok'
-            st_vol = 'falta' if not vol_str else 'ok'
+            detalhes_marcs = []
+            horas_sozinhos = []
+            for m in qs_dia:
+                h_str = timezone.localtime(m.timestamp).strftime('%H:%M')
+                detalhes_marcs.append({
+                    'hora': h_str,
+                    'tipo': m.tipo,
+                    'tipo_display': m.get_tipo_display()
+                })
+                horas_sozinhos.append(h_str)
 
-            # Total instantâneo: assim que existirem 2 marcações (1ª e 2ª), já calcula.
-            # Com 4 marcações, calcula (2ª-1ª) + (4ª-3ª), descontando o intervalo.
-            total = _calcular_total_por_pares(lista_horas)
+            total = _calcular_total_por_pares(horas_sozinhos)
             wd = dia.weekday()
             is_weekend = wd >= 5
-            traco = '—' if not is_weekend else '—'
 
             linhas.append({
                 'utilizador': user,
@@ -420,29 +415,13 @@ def construir_espelho(data_inicio, data_fim, utilizadores_queryset):
                 'dia_semana': ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'][wd],
                 'jornada_nome': jornada_nome,
                 'planejado': planejado_str,
-                'marcacao_1': marcs_display[0] or traco,
-                'marcacao_1_status': st_ent if not is_weekend else '',
-                'marcacao_2': marcs_display[1] or traco,
-                'marcacao_2_status': st_ini if not is_weekend else '',
-                'marcacao_3': marcs_display[2] or traco,
-                'marcacao_3_status': st_vol if not is_weekend else '',
-                'marcacao_4': marcs_display[3] or traco,
-                'marcacao_4_status': st_sai if not is_weekend else '',
+                'marcacoes': detalhes_marcs,
                 'total': total or '—',
                 'is_weekend': is_weekend,
-                'tem_alerta': (st_ent == 'atraso' or st_ent == 'falta' or st_sai == 'falta' or st_sai == 'atraso') and not is_weekend,
             })
-    # Ordenação para visualização tipo "linha do tempo":
-    # - mais recente primeiro (hoje no topo)
-    # - por nome do colaborador dentro do dia
-    linhas.sort(
-        key=lambda x: (
-            x.get('data'),
-            (x.get('nome') or '').lower(),
-            x.get('utilizador').pk if x.get('utilizador') else 0
-        ),
-        reverse=True
-    )
+    
+    # Ordenação (mais recente primeiro)
+    linhas.sort(key=lambda x: (x['data'], (x['nome'] or '').lower()), reverse=True)
     return linhas
 
 
@@ -817,35 +796,71 @@ def export_espelho_pdf_view(request):
     User = __import__('django.contrib.auth', fromlist=['get_user_model']).get_user_model()
     colaboradores = User.objects.filter(profile__isnull=False).distinct().order_by('profile__nome')
     cid = request.GET.get('colaborador')
-    if cid:
-        colaboradores = colaboradores.filter(pk=cid)
+    
+    if not cid:
+        return HttpResponse('É necessário selecionar um colaborador para exportar o PDF individual.', status=400)
+        
+    colaboradores = colaboradores.filter(pk=cid)
     linhas = construir_espelho(di, df, colaboradores)
     # Ordenação cronológica para exportação (dia 1 -> dia 31)
     linhas.sort(key=lambda x: (x['data'], (x['nome'] or '').lower()))
     
     from io import BytesIO
     buf = BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm)
+    doc = SimpleDocTemplate(buf, pagesize=A4, rightMargin=1*cm, leftMargin=1*cm, topMargin=1.5*cm, bottomMargin=1.5*cm)
     styles = getSampleStyleSheet()
-    elements = [Paragraph('Espelho de Ponto', styles['Title']), Spacer(1, 0.5*cm)]
-    table_data = [['Data', 'Colaborador', 'Entrada', 'Almoço', 'Volta', 'Saída', 'Total']]
+    
+    # Estilos customizados
+    header_info_style = styles['Normal']
+    header_info_style.fontSize = 11
+    
+    # Elementos do PDF
+    elements = []
+    
+    # Info do Funcionário e Mês
+    nome_colab = "Colaborador não encontrado"
+    mes_ref = di.strftime('%m/%Y')
+    if colaboradores.exists():
+        nome_colab = colaboradores.first().profile.nome or colaboradores.first().email
+        
+    elements.append(Paragraph(f"<b>Funcionário:</b> {nome_colab} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>Mês:</b> {mes_ref}", header_info_style))
+    elements.append(Spacer(1, 0.5*cm))
+    
+    # Definição da Tabela (2 níveis de cabeçalho)
+    table_data = [
+        ['', '1º PERÍODO', '', '2º PERÍODO', '', '', ''],
+        ['Data', 'Entrada / Rubrica', 'Saída / Rubrica', 'Entrada / Rubrica', 'Saída / Rubrica', 'Total Horas', 'Observações']
+    ]
+    
     for ln in linhas:
         table_data.append([
             ln['data_str'],
-            ln['nome'][:20],
             ln['marcacao_1'],
             ln['marcacao_2'],
             ln['marcacao_3'],
             ln['marcacao_4'],
-            ln['total']
+            ln['total'],
+            '' # Observações vazia para preenchimento
         ])
-    t = Table(table_data, colWidths=[2.5*cm, 4*cm] + [2*cm]*4 + [2*cm])
+    
+    # Larguras
+    col_widths = [2.2*cm, 2.7*cm, 2.7*cm, 2.7*cm, 2.7*cm, 2.2*cm, 3.8*cm]
+    
+    t = Table(table_data, colWidths=col_widths, repeatRows=2)
+    
     t.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('FONTSIZE', (0, 0), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey)
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('SPAN', (1, 0), (2, 0)),
+        ('SPAN', (3, 0), (4, 0)),
+        ('BACKGROUND', (0, 0), (-1, 1), colors.lightgrey),
+        ('FONTNAME', (0, 0), (-1, 1), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 1), 6),
+        ('TOPPADDING', (0, 0), (-1, 1), 6),
     ]))
+    
     elements.append(t)
     doc.build(elements)
     buf.seek(0)
@@ -895,3 +910,67 @@ def viatura_edit_view(request, pk):
     else:
         form = ViaturaForm(instance=viatura)
     return render(request, 'backoffice/viatura_form.html', {'form': form, 'titulo': 'Editar viatura', 'viatura': viatura})
+
+
+from .models import Abastecimento
+
+@backoffice_required
+def backoffice_abastecimento_list_view(request):
+    """Listagem de abastecimentos no Backoffice com filtros de status e totais do mês."""
+    status_filter = request.GET.get('status')
+    
+    abastecimentos = Abastecimento.objects.all().order_by('-timestamp')
+    if status_filter in ['pendente', 'aprovado', 'rejeitado']:
+        abastecimentos = abastecimentos.filter(status=status_filter)
+        
+    # Calcular estatísticas do mês atual
+    from django.utils import timezone
+    from django.db.models import Sum
+    agora = timezone.localtime(timezone.now())
+    primeiro_dia = agora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    total_gasto_mes = Abastecimento.objects.filter(
+        status='aprovado',
+        timestamp__gte=primeiro_dia
+    ).aggregate(Sum('valor'))['valor__sum'] or 0.0
+    
+    total_pendente_mes = Abastecimento.objects.filter(
+        status='pendente'
+    ).count()
+
+    total_litros_mes = Abastecimento.objects.filter(
+        status='aprovado',
+        timestamp__gte=primeiro_dia
+    ).aggregate(Sum('litros'))['litros__sum'] or 0.0
+
+    return render(request, 'backoffice/abastecimento_list.html', {
+        'abastecimentos': abastecimentos,
+        'status_filter': status_filter,
+        'total_gasto_mes': total_gasto_mes,
+        'total_pendente_mes': total_pendente_mes,
+        'total_litros_mes': total_litros_mes
+    })
+
+
+@backoffice_required
+def backoffice_abastecimento_aprovar_view(request, pk):
+    """Aprovar um abastecimento."""
+    if request.method == 'POST':
+        abast = get_object_or_404(Abastecimento, pk=pk)
+        abast.status = 'aprovado'
+        abast.save()
+    return redirect('backoffice_abastecimento_list')
+
+
+@backoffice_required
+def backoffice_abastecimento_rejeitar_view(request, pk):
+    """Rejeitar um abastecimento indicando justificativa."""
+    if request.method == 'POST':
+        abast = get_object_or_404(Abastecimento, pk=pk)
+        justificativa = request.POST.get('justificativa_admin')
+        if not justificativa:
+            justificativa = "Rejeitado pela administração."
+        abast.status = 'rejeitado'
+        abast.justificativa_admin = justificativa
+        abast.save()
+    return redirect('backoffice_abastecimento_list')

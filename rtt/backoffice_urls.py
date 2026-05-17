@@ -28,4 +28,9 @@ urlpatterns = [
     path('viaturas/<int:pk>/editar/', backoffice_views.viatura_edit_view, name='backoffice_viatura_edit'),
     path('colaboradores/ponto/<uuid:pk>/editar/', backoffice_views.ponto_edit_view, name='backoffice_ponto_edit'),
     path('colaboradores/ponto/<uuid:pk>/excluir/', backoffice_views.ponto_delete_view, name='backoffice_ponto_delete'),
+    
+    # Gestão de Combustível / Abastecimentos
+    path('abastecimentos/', backoffice_views.backoffice_abastecimento_list_view, name='backoffice_abastecimento_list'),
+    path('abastecimentos/<int:pk>/aprovar/', backoffice_views.backoffice_abastecimento_aprovar_view, name='backoffice_abastecimento_aprovar'),
+    path('abastecimentos/<int:pk>/rejeitar/', backoffice_views.backoffice_abastecimento_rejeitar_view, name='backoffice_abastecimento_rejeitar'),
 ]

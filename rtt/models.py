@@ -89,9 +89,7 @@ class Marcacao(models.Model):
     """Registo de presença com localização, tipo e estado de aprovação."""
     TIPO_CHOICES = [
         ('entrada', 'Entrada'),
-        ('inicio_almoco', 'Início Almoço'),
-        ('fim_almoco', 'Fim Almoço'),
-        ('fim_jornada', 'Fim Jornada'),
+        ('saida', 'Saída'),
     ]
 
     id = models.UUIDField(
@@ -204,3 +202,50 @@ class RegistroKM(models.Model):
         # Para lógica de histórico, o percorrido seria o KM atual menos o KM anterior do mesmo utilizador
         # Mas para simplificar, se for só um log, o cálculo de distância pode ser feito via query
         return None
+
+
+class Abastecimento(models.Model):
+    STATUS_CHOICES = [
+        ('pendente', 'Pendente de Aprovação'),
+        ('aprovado', 'Aprovado'),
+        ('rejeitado', 'Rejeitado'),
+    ]
+
+    utilizador = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='abastecimentos'
+    )
+    viatura = models.ForeignKey(
+        Viatura, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='abastecimentos'
+    )
+    timestamp = models.DateTimeField(default=timezone.now)
+    data = models.DateField(auto_now_add=True)
+    km = models.IntegerField(help_text="KM no momento do abastecimento")
+    valor = models.DecimalField(max_digits=8, decimal_places=2, help_text="Valor gasto (€)")
+    litros = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, help_text="Litros abastecidos")
+    comprovativo = models.FileField(upload_to='comprovativos_abastecimento/', null=True, blank=True)
+    comprovativo_texto_ocr = models.TextField(blank=True, help_text="Texto extraído por OCR da fatura/recibo")
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pendente')
+    aprovado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='abastecimentos_aprovados'
+    )
+    aprovado_em = models.DateTimeField(null=True, blank=True)
+    justificativa_admin = models.TextField(blank=True, help_text="Observações da aprovação/rejeição")
+
+    class Meta:
+        verbose_name = 'Abastecimento de Combustível'
+        verbose_name_plural = 'Abastecimentos de Combustível'
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.utilizador} - €{self.valor} ({self.timestamp.strftime('%d/%m/%Y')})"

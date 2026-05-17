@@ -134,6 +134,7 @@ def area_utilizador_view(request):
 
 
 @require_GET
+@never_cache
 def viaturas_api_view(request):
     """Retorna a lista de viaturas ativas."""
     if not request.user.is_authenticated:
@@ -169,8 +170,8 @@ def km_registo_view(request):
         viatura_id = data.get('viatura_id')
         descricao = data.get('descricao', '')
         
-        if km_valor is None or not viatura_id or not (descricao or '').strip():
-            return JsonResponse({'sucesso': False, 'erro': 'KM, Viatura e Descrição são obrigatórios.'}, 400)
+        if km_valor is None or not viatura_id:
+            return JsonResponse({'sucesso': False, 'erro': 'KM e Viatura são obrigatórios.'}, 400)
             
         viatura = get_object_or_404(Viatura, pk=viatura_id)
         
@@ -200,6 +201,7 @@ def km_registo_view(request):
 
 
 @require_GET
+@never_cache
 def km_status_view(request):
     """Retorna a lista de registos de KM de hoje e totais (dia, semana, mês)."""
     try:
@@ -237,16 +239,39 @@ def km_status_view(request):
                         soma += diff
             return float(soma)
 
+        # Busca a data do primeiríssimo registo do utilizador para ser a base das médias
+        primeiro_registo = RegistroKM.objects.filter(utilizador=request.user).order_by('data').first()
+        data_inicio_real = primeiro_registo.data if primeiro_registo else hoje
+
+        # Função auxiliar para calcular dias úteis/corridos para a média
+        def calc_dias_periodo(inicio_periodo, data_base_sistema, data_hoje):
+            # A data de início para a média deve ser a maior entre o início do período (ex: dia 1) e o primeiro registo
+            inicio_efetivo = max(inicio_periodo, data_base_sistema)
+            return (data_hoje - inicio_efetivo).days + 1
+
         # Totais
         total_hoje = calc_total(registos_hoje)
         
+        # Semana (segunda a hoje)
         inicio_semana = hoje - timezone.timedelta(days=hoje.weekday())
         registos_semana = RegistroKM.objects.filter(utilizador=request.user, data__gte=inicio_semana)
         total_semana = calc_total(registos_semana)
+        dias_semana = calc_dias_periodo(inicio_semana, data_inicio_real, hoje)
+        media_semana = total_semana / dias_semana if dias_semana > 0 else 0
         
+        # Mês (dia 1 a hoje)
         inicio_mes = hoje.replace(day=1)
         registos_mes = RegistroKM.objects.filter(utilizador=request.user, data__gte=inicio_mes)
         total_mes = calc_total(registos_mes)
+        dias_mes = calc_dias_periodo(inicio_mes, data_inicio_real, hoje)
+        media_mes = total_mes / dias_mes if dias_mes > 0 else 0
+
+        # Ano (jan 1 a hoje)
+        inicio_ano = hoje.replace(month=1, day=1)
+        registos_ano = RegistroKM.objects.filter(utilizador=request.user, data__gte=inicio_ano)
+        total_ano = calc_total(registos_ano)
+        dias_ano = calc_dias_periodo(inicio_ano, data_inicio_real, hoje)
+        media_ano = total_ano / dias_ano if dias_ano > 0 else 0
         
         return JsonResponse({
             'sucesso': True,
@@ -254,7 +279,13 @@ def km_status_view(request):
             'totais': {
                 'hoje': total_hoje,
                 'semana': total_semana,
-                'mes': total_mes
+                'mes': total_mes,
+                'ano': total_ano
+            },
+            'medias': {
+                'semana': round(media_semana, 1),
+                'mes': round(media_mes, 1),
+                'ano': round(media_ano, 1)
             }
         })
     except Exception as e:
@@ -481,6 +512,7 @@ def marcacao_list_create(request):
 
 
 @require_http_methods(["GET"])
+@never_cache
 def minhas_marcacoes(request):
     """GET /api/marcacoes/minhas/ - lista marcações do utilizador logado, mais recentes primeiro."""
     user, err = _require_auth(request)
@@ -573,7 +605,7 @@ def relatorios_marcacoes(request):
     return _json(lista)
 
 
-@require_http_methods(["GET"])
+@require_GET
 def relatorios_exportar_csv(request):
     """GET /api/relatorios/exportar_csv/?utilizador_id=&data_inicio=&data_fim= - exportar CSV."""
     user, err = _require_auth(request)
@@ -597,3 +629,192 @@ def relatorios_exportar_csv(request):
             str(m.longitude),
         ])
     return response
+
+
+@require_GET
+@never_cache
+def km_registos_todos_view(request):
+    """Retorna todos os registos de KM do utilizador logado."""
+    user, err = _require_auth(request)
+    if err:
+        return err
+    registos = RegistroKM.objects.filter(utilizador=user).order_by('-timestamp')
+    lista = []
+    for r in registos:
+        lista.append({
+            'id': r.id,
+            'data': timezone.localtime(r.timestamp).strftime('%Y-%m-%d'),
+            'timestamp': timezone.localtime(r.timestamp).strftime('%H:%M'),
+            'km': r.km,
+            'viatura': r.viatura.matricula if r.viatura else '---',
+            'descricao': r.descricao,
+            'percorrido': r.distancia
+        })
+    return _json(lista)
+
+
+@require_GET
+@never_cache
+def km_historico_view(request):
+    """Retorna o histórico completo de KM agrupado por dia."""
+    user, err = _require_auth(request)
+    if err:
+        return err
+    
+    from django.db.models import Max, Min
+    from django.db.models.functions import TruncDate
+    
+    # Busca todos os registos do utilizador
+    registos = RegistroKM.objects.filter(utilizador=user).annotate(
+        dia=TruncDate('timestamp')
+    ).values('dia', 'viatura', 'viatura__matricula').annotate(
+        max_km=Max('km'),
+        min_prev=Min('km_anterior')
+    ).order_by('-dia')
+    
+    # Agrupar por dia (um dia pode ter várias viaturas)
+    historico_dict = {}
+    for r in registos:
+        dia_str = r['dia'].strftime('%Y-%m-%d')
+        dist = (r['max_km'] or 0) - (r['min_prev'] or 0)
+        if dist < 0: dist = 0
+        
+        if dia_str not in historico_dict:
+            historico_dict[dia_str] = {
+                'data': r['dia'].strftime('%d/%m/%Y'),
+                'total_km': 0,
+                'detalhes': []
+            }
+        
+        historico_dict[dia_str]['total_km'] += dist
+        historico_dict[dia_str]['detalhes'].append({
+            'viatura': r['viatura__matricula'],
+            'distancia': dist
+        })
+    
+    # Converter para lista ordenada
+    resultado = sorted(historico_dict.values(), key=lambda x: x['data'], reverse=True)
+    
+    return _json(resultado)
+
+
+from .utils_ocr import processar_recibo_ocr
+from .models import Abastecimento
+
+@csrf_exempt
+@require_POST
+def abastecimento_registar_view(request):
+    """POST /api/abastecimento/registar/ - Registar um abastecimento de combustível."""
+    user, err = _require_auth(request)
+    if err:
+        return err
+
+    try:
+        viatura_id = request.POST.get('viatura_id')
+        km = request.POST.get('km')
+        valor = request.POST.get('valor')
+        litros = request.POST.get('litros')
+        comprovativo = request.FILES.get('comprovativo')
+
+        if not viatura_id or not km or not valor:
+            return _json({'sucesso': False, 'erro': 'Campos obrigatórios em falta.'})
+
+        # Obter viatura
+        try:
+            viatura = Viatura.objects.get(id=viatura_id)
+        except Viatura.DoesNotExist:
+            return _json({'sucesso': False, 'erro': 'Viatura não encontrada.'})
+
+        # Validar quilometragem
+        km_val = int(km)
+        if km_val < viatura.km_atual:
+            return _json({'sucesso': False, 'erro': f'KM não pode ser menor que o atual ({viatura.km_atual}).'})
+
+        # Validar valor
+        valor_val = Decimal(str(valor).replace(',', '.'))
+        if valor_val <= 0:
+            return _json({'sucesso': False, 'erro': 'O valor deve ser superior a zero.'})
+
+        litros_val = None
+        if litros:
+            litros_val = Decimal(str(litros).replace(',', '.'))
+
+        # Criação do abastecimento
+        abast = Abastecimento(
+            utilizador=user,
+            viatura=viatura,
+            km=km_val,
+            valor=valor_val,
+            litros=litros_val,
+            comprovativo=comprovativo,
+            status='pendente'
+        )
+
+        # Se houver comprovativo, corre OCR
+        if comprovativo:
+            comprovativo.seek(0)
+            ocr_res = processar_recibo_ocr(comprovativo)
+            abast.comprovativo_texto_ocr = ocr_res.get('texto_ocr', '')
+            
+        abast.save()
+
+        # Atualiza a quilometragem da viatura também se o KM do abastecimento for maior
+        if km_val > viatura.km_atual:
+            viatura.km_atual = km_val
+            viatura.save()
+
+        return _json({'sucesso': True, 'mensagem': 'Pedido de abastecimento registado e enviado para aprovação!'})
+
+    except Exception as e:
+        return _json({'sucesso': False, 'erro': str(e)})
+
+
+@require_GET
+@never_cache
+def abastecimento_minhas_view(request):
+    """GET /api/abastecimento/minhas/ - Listar todos os abastecimentos do utilizador logado."""
+    user, err = _require_auth(request)
+    if err:
+        return err
+
+    abastecimentos = Abastecimento.objects.filter(utilizador=user).order_by('-timestamp')
+    lista = []
+    for a in abastecimentos:
+        lista.append({
+            'id': a.id,
+            'data': timezone.localtime(a.timestamp).strftime('%d/%m/%Y'),
+            'hora': timezone.localtime(a.timestamp).strftime('%H:%M'),
+            'km': a.km,
+            'valor': float(a.valor),
+            'litros': float(a.litros) if a.litros else None,
+            'comprovativo_url': a.comprovativo.url if a.comprovativo else None,
+            'status': a.status,
+            'status_label': a.get_status_display(),
+            'justificativa_admin': a.justificativa_admin or '',
+            'viatura': a.viatura.matricula if a.viatura else '---'
+        })
+    return _json(lista)
+
+
+@csrf_exempt
+@require_POST
+def abastecimento_ocr_view(request):
+    """POST /api/abastecimento/ocr/ - Analisar comprovativo em background via OCR."""
+    user, err = _require_auth(request)
+    if err:
+        return err
+
+    comprovativo = request.FILES.get('comprovativo')
+    if not comprovativo:
+        return _json({'sucesso': False, 'erro': 'Nenhum ficheiro enviado.'})
+
+    try:
+        ocr_res = processar_recibo_ocr(comprovativo)
+        return _json({
+            'sucesso': True,
+            'valor': ocr_res.get('valor'),
+            'litros': ocr_res.get('litros'),
+            'texto_ocr': ocr_res.get('texto_ocr', '')
+        })
+    except Exception as e:
+        return _json({'sucesso': False, 'erro': str(e)})

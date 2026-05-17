@@ -1,0 +1,249 @@
+{% extends 'backoffice/base.html' %}
+{% load static %}
+
+{% block title %}Aprovação de Abastecimentos{% endblock %}
+
+{% block content %}
+<div class="space-y-6" x-data="{ 
+    modalRecibo: false, 
+    reciboUrl: '', 
+    ocrTexto: '', 
+    modalRejeitar: false, 
+    rejeitarUrl: '',
+    abrirZoom(url, ocr) {
+        this.reciboUrl = url;
+        this.ocrTexto = ocr || 'Nenhum texto OCR disponível.';
+        this.modalRecibo = true;
+    },
+    abrirRejeitar(url) {
+        this.rejeitarUrl = url;
+        this.modalRejeitar = true;
+    }
+}">
+    <!-- Header/Títulos -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-slate-900">⛽ Aprovação de Combustível</h2>
+            <p class="text-xs text-slate-500 mt-1">Gerir os pedidos de reembolso e abastecimentos de viaturas.</p>
+        </div>
+    </div>
+
+    <!-- Estatísticas de Consumo -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Card 1 -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase">Gasto Aprovado (Mês)</p>
+                <h3 class="text-2xl font-bold text-emerald-600 mt-1">€ {{ total_gasto_mes|floatformat:2 }}</h3>
+            </div>
+            <div class="w-12 h-12 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-500 text-xl font-bold">
+                €
+            </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase">Pedidos Pendentes</p>
+                <h3 class="text-2xl font-bold text-amber-600 mt-1">{{ total_pendente_mes }}</h3>
+            </div>
+            <div class="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center text-amber-500 text-xl">
+                ⏳
+            </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase">Total Abastecido (Mês)</p>
+                <h3 class="text-2xl font-bold text-blue-600 mt-1">{{ total_litros_mes|floatformat:1 }} L</h3>
+            </div>
+            <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center text-blue-500 text-xl">
+                ⛽
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros de Estado -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-1">
+        <a href="?" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if not status_filter %}bg-slate-800 text-white shadow-sm{% else %}bg-white border border-slate-200 text-slate-600 hover:bg-slate-50{% endif %}">
+            Todos
+        </a>
+        <a href="?status=pendente" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if status_filter == 'pendente' %}bg-amber-600 text-white shadow-sm{% else %}bg-white border border-slate-200 text-amber-600 hover:bg-amber-50{% endif %}">
+            Pendentes
+        </a>
+        <a href="?status=aprovado" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if status_filter == 'aprovado' %}bg-emerald-600 text-white shadow-sm{% else %}bg-white border border-slate-200 text-emerald-600 hover:bg-emerald-50{% endif %}">
+            Aprovados
+        </a>
+        <a href="?status=rejeitado" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if status_filter == 'rejeitado' %}bg-red-600 text-white shadow-sm{% else %}bg-white border border-slate-200 text-red-600 hover:bg-red-50{% endif %}">
+            Rejeitados
+        </a>
+    </div>
+
+    <!-- Tabela de Abastecimentos -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <th class="p-4">Colaborador</th>
+                        <th class="p-4">Viatura</th>
+                        <th class="p-4">Data / Hora</th>
+                        <th class="p-4 text-center">KM</th>
+                        <th class="p-4 text-center">Litros</th>
+                        <th class="p-4 text-right">Valor Gasto</th>
+                        <th class="p-4 text-center">Comprovativo / OCR</th>
+                        <th class="p-4 text-center">Estado</th>
+                        <th class="p-4 text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
+                    {% for a in abastecimentos %}
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-4 font-semibold text-slate-900">
+                            {{ a.utilizador.profile.nome|default:a.utilizador.email }}
+                        </td>
+                        <td class="p-4 text-xs font-bold text-slate-500">
+                            {{ a.viatura.matricula }}
+                        </td>
+                        <td class="p-4 text-xs text-slate-500">
+                            {{ a.timestamp|date:"d/m/Y H:i" }}
+                        </td>
+                        <td class="p-4 text-center font-semibold text-xs">
+                            {{ a.km }}
+                        </td>
+                        <td class="p-4 text-center font-semibold text-xs">
+                            {% if a.litros %}{{ a.litros|floatformat:2 }}{% else %}---{% endif %}
+                        </td>
+                        <td class="p-4 text-right font-extrabold text-emerald-700">
+                            € {{ a.valor|floatformat:2 }}
+                        </td>
+                        <td class="p-4 text-center">
+                            {% if a.comprovativo %}
+                            <button type="button" 
+                                    @click="abrirZoom('{{ a.comprovativo.url }}', '{{ a.comprovativo_texto_ocr|escapejs }}')"
+                                    class="px-2.5 py-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-bold transition-all">
+                                📄 Ver Recibo
+                            </button>
+                            {% else %}
+                            <span class="text-xs text-slate-400">Sem comprovativo</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-center">
+                            {% if a.status == 'aprovado' %}
+                            <span class="px-2 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wide">
+                                Aprovado
+                            </span>
+                            {% elif a.status == 'rejeitado' %}
+                            <div class="flex flex-col items-center">
+                                <span class="px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 uppercase tracking-wide">
+                                    Rejeitado
+                                </span>
+                                {% if a.justificativa_admin %}
+                                <span class="text-[10px] text-red-500 mt-1 max-w-[120px] truncate" title="{{ a.justificativa_admin }}">
+                                    {{ a.justificativa_admin }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span class="px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 uppercase tracking-wide">
+                                Pendente
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-right">
+                            {% if a.status == 'pendente' %}
+                            <div class="flex items-center justify-end gap-1.5">
+                                <!-- Botão Aprovar -->
+                                <form action="{% url 'backoffice_abastecimento_aprovar' a.id %}" method="POST" onsubmit="return confirm('Deseja de facto APROVAR esta despesa?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-bold transition-all">
+                                        Aprovar
+                                    </button>
+                                </form>
+                                <!-- Botão Rejeitar -->
+                                <button type="button" 
+                                        @click="abrirRejeitar('{% url 'backoffice_abastecimento_rejeitar' a.id %}')"
+                                        class="px-2.5 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 text-xs font-bold transition-all">
+                                    Rejeitar
+                                </button>
+                            </div>
+                            {% else %}
+                            <span class="text-xs text-slate-400 font-semibold">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="p-8 text-center text-slate-500">
+                            Nenhum pedido de abastecimento encontrado com os filtros selecionados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Zoom Recibo com OCR Inteligente -->
+    <div x-show="modalRecibo" 
+         x-cloak 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+         @keydown.escape.window="modalRecibo = false">
+        <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col md:flex-row overflow-hidden shadow-2xl" @click.away="modalRecibo = false">
+            <!-- Imagem à Esquerda -->
+            <div class="md:w-1/2 bg-slate-100 p-4 flex items-center justify-center border-r border-slate-200 min-h-[300px]">
+                <img :src="reciboUrl" alt="Recibo Comprovativo" class="max-w-full max-h-[70vh] object-contain rounded-lg shadow">
+            </div>
+            <!-- OCR Info à Direita -->
+            <div class="md:w-1/2 p-6 flex flex-col justify-between">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-slate-900">📄 Leitura Digital (IA OCR)</h3>
+                        <button type="button" @click="modalRecibo = false" class="text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Abaixo está o log de leitura bruto obtido pelo processamento de imagem automatizado. Utilize-o para confirmar os valores faturados.
+                    </p>
+                    
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono text-xs text-slate-600 max-h-[40vh] overflow-y-auto whitespace-pre-wrap" x-text="ocrTexto">
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button type="button" @click="modalRecibo = false" class="px-5 py-2 rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300 text-xs font-bold transition-all">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Form de Rejeição -->
+    <div x-show="modalRejeitar" 
+         x-cloak 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+         @keydown.escape.window="modalRejeitar = false">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4" @click.away="modalRejeitar = false">
+            <h3 class="text-lg font-bold text-slate-900">🚫 Rejeitar Abastecimento</h3>
+            <p class="text-xs text-slate-500">Por favor, descreva o motivo da rejeição administrativa. O colaborador poderá ver esta mensagem na sua secção de despesas.</p>
+            
+            <form :action="rejeitarUrl" method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Motivo / Justificação</label>
+                    <textarea name="justificativa_admin" required placeholder="Ex.: O comprovativo enviado não corresponde à fatura pedida ou o valor não está legível."
+                        class="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-red-500/20 focus:border-red-500" rows="3"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-2">
+                    <button type="button" @click="modalRejeitar = false" class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition-all">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-xs font-bold transition-all">
+                        Confirmar Rejeição
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
