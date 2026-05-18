@@ -1,0 +1,114 @@
+{% extends "backoffice/base.html" %}
+{% block title %}Cartões de Combustível{% endblock %}
+{% block extrahead %}
+<style>
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:1000; align-items:center; justify-content:center; padding:1rem; }
+    .modal-overlay.active { display:flex; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <h1 class="text-2xl font-bold text-slate-800">Cartões de Combustível</h1>
+    <button type="button" onclick="openModal()" class="inline-flex items-center px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-medium hover:bg-slate-800 transition-all shadow-sm">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Novo cartão
+    </button>
+</div>
+
+<!-- Modal Novo Cartão -->
+<div id="modalCartao" class="modal-overlay" onclick="closeModal(event)">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onclick="event.stopPropagation()">
+        <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-slate-800">Cadastrar Novo Cartão</h3>
+            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+        </div>
+        <form action="{% url 'backoffice_cartao_create' %}" method="post" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Identificação / Nome</label>{{ form.nome }}</div>
+            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Número Completo do Cartão</label>{{ form.numero }}<p class="text-[10px] text-slate-400 mt-1 italic">Será verificado com base nos 4 últimos dígitos introduzidos pelo utilizador.</p></div>
+            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">{{ form.colaborador_atual.label }}</label>{{ form.colaborador_atual }}</div>
+            <div class="flex items-center gap-2 pt-2">{{ form.ativo }}<label class="text-sm font-semibold text-slate-700">Cartão Ativo</label></div>
+            <div class="pt-4"><button type="submit" class="w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all">Cadastrar Cartão</button></div>
+        </form>
+    </div>
+</div>
+
+<!-- Mobile Cards -->
+<div class="md:hidden space-y-3 mb-4">
+    {% for c in cartoes %}
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <div class="flex items-start justify-between mb-2">
+            <div>
+                <div class="font-bold text-slate-900 text-sm">{{ c.nome }}</div>
+                <div class="font-mono text-xs text-slate-500 mt-0.5">{{ c.numero }}</div>
+            </div>
+            {% if c.ativo %}<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 shrink-0">Ativo</span>
+            {% else %}<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 shrink-0">Inativo</span>{% endif %}
+        </div>
+        <div class="flex items-center gap-2 mb-3">
+            <span class="bg-blue-50 text-blue-700 font-bold font-mono text-xs px-2 py-1 rounded">💳 ...{{ c.numero|slice:"-4:" }}</span>
+        </div>
+        <div class="text-xs text-slate-500 mb-3">
+            {% if c.colaborador_atual %}<span class="font-semibold text-slate-700">👤 {{ c.colaborador_atual.profile.nome|default:c.colaborador_atual.email }}</span>
+            {% else %}<span class="italic text-slate-400">Não atribuído</span>{% endif %}
+        </div>
+        <a href="{% url 'backoffice_cartao_edit' c.pk %}" class="w-full inline-flex items-center justify-center px-3 py-2 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold hover:bg-blue-600 hover:text-white transition-all">Editar</a>
+    </div>
+    {% empty %}
+    <div class="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-500">
+        <p>Nenhum cartão cadastrado.</p>
+        <button type="button" onclick="openModal()" class="mt-2 text-blue-600 font-bold hover:underline text-sm">Adicionar o primeiro</button>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Desktop Table -->
+<div class="hidden md:block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase tracking-wider text-[11px]">Identificação</th>
+                    <th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase tracking-wider text-[11px]">Número do Cartão</th>
+                    <th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase tracking-wider text-[11px]">Últimos 4 Dígitos</th>
+                    <th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase tracking-wider text-[11px]">Utilizador Atribuído</th>
+                    <th class="px-6 py-4 text-left font-semibold text-slate-600 uppercase tracking-wider text-[11px]">Status</th>
+                    <th class="px-6 py-4 w-24"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for c in cartoes %}
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 font-bold text-slate-700 whitespace-nowrap">{{ c.nome }}</td>
+                    <td class="px-6 py-4 text-slate-600 font-mono whitespace-nowrap">{{ c.numero }}</td>
+                    <td class="px-6 py-4 text-blue-600 font-bold font-mono whitespace-nowrap">...{{ c.numero|slice:"-4:" }}</td>
+                    <td class="px-6 py-4 text-slate-600 whitespace-nowrap">
+                        {% if c.colaborador_atual %}
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600">{{ c.colaborador_atual.profile.nome|slice:":1"|default:c.colaborador_atual.email|slice:":1"|upper }}</div>
+                            <span class="font-medium text-slate-700">{{ c.colaborador_atual.profile.nome|default:c.colaborador_atual.email }}</span>
+                        </div>
+                        {% else %}<span class="text-slate-400 italic text-xs">Não atribuído</span>{% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if c.ativo %}<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Ativo</span>
+                        {% else %}<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">Inativo</span>{% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                        <a href="{% url 'backoffice_cartao_edit' c.pk %}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold hover:bg-blue-600 hover:text-white transition-all">Editar</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="px-6 py-12 text-center text-slate-500">Nenhum cartão cadastrado. <button type="button" onclick="openModal()" class="text-blue-600 font-bold hover:underline">Adicionar o primeiro</button>.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    function openModal() { document.getElementById('modalCartao').classList.add('active'); }
+    function closeModal(e) { document.getElementById('modalCartao').classList.remove('active'); }
+</script>
+{% endblock %}

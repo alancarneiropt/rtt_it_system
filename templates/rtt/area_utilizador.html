@@ -1030,6 +1030,36 @@
             background: #ffffff;
         }
 
+        .folhinha-card.com-abast {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-color: #bbf7d0;
+            color: #166534;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.06);
+        }
+
+        .folhinha-card.com-abast:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #059669;
+            color: #ffffff;
+            box-shadow: 0 8px 15px -3px rgba(16, 185, 129, 0.2);
+        }
+
+        .folhinha-card.com-abast::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        .folhinha-card.com-abast:hover::after {
+            background: #ffffff;
+        }
+
         .folhinha-card.selecionado {
             outline: 2px solid #2563eb;
             outline-offset: 2px;
@@ -1167,12 +1197,15 @@
             <h2 id="titulo-km" class="sec-titulo" style="margin-top: 1rem; padding: 0 1rem;">Registo & Gastos</h2>
             <div class="card-sec" style="padding: 1.25rem;">
                 
-                <!-- Sub-abas de Navegação Segmentada -->
-                <div class="km-tabs-container" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; background: #e2e8f0; padding: 0.25rem; border-radius: 12px;">
-                    <button type="button" id="tab-km-deslocamentos" class="km-tab-btn active-tab" style="flex: 1; padding: 0.65rem; border: none; border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;">
+                <!-- Sub-abas de Navegação Segmentada (Sliding Switch) -->
+                <div class="km-tabs-container" style="display: flex; gap: 0.25rem; margin-bottom: 1.25rem; background: #e2e8f0; padding: 0.25rem; border-radius: 12px; position: relative;">
+                    <!-- Sliding background para as abas de topo -->
+                    <div id="km-tabs-bg" style="position: absolute; top: 0.25rem; bottom: 0.25rem; left: 0.25rem; width: calc(50% - 0.25rem); background: white; border-radius: 9px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1;"></div>
+                    
+                    <button type="button" id="tab-km-deslocamentos" style="flex: 1; padding: 0.65rem; border: none; background: transparent; border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; position: relative; z-index: 2; color: #1e293b; transition: color 0.2s;">
                         🚗 Deslocamentos
                     </button>
-                    <button type="button" id="tab-km-gastos" class="km-tab-btn" style="flex: 1; padding: 0.65rem; border: none; border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;">
+                    <button type="button" id="tab-km-gastos" style="flex: 1; padding: 0.65rem; border: none; background: transparent; border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; position: relative; z-index: 2; color: #64748b; transition: color 0.2s;">
                         ⛽ Combustível & Gastos
                     </button>
                 </div>
@@ -1210,28 +1243,38 @@
                         </div>
                     </div>
                     
-                    <div class="form-group" style="margin-bottom: 1.5rem;">
-                        <label
-                            style="display:block; margin-bottom:0.5rem; font-weight:600; font-size:0.9rem; color:#475569;">Viatura</label>
-                        <select id="km-viatura-select" class="input-km"
-                            style="border: 1px solid #cbd5e1; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); background: white; width: 100%; padding: 0.75rem; border-radius: 8px; font-weight: 600; color: #1e293b;">
-                            <option value="">Carregando viaturas...</option>
-                        </select>
+                    <!-- Segmented Switch (Registar vs Histórico) -->
+                    <div class="km-switch-container" style="display: flex; gap: 0.25rem; margin-top: 0.5rem; margin-bottom: 1.25rem; background: #e2e8f0; padding: 0.25rem; border-radius: 12px; position: relative;">
+                        <!-- O sliding background do switch -->
+                        <div id="km-switch-bg" style="position: absolute; top: 0.25rem; bottom: 0.25rem; left: 0.25rem; width: calc(50% - 0.25rem); background: white; border-radius: 9px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1;"></div>
+                        
+                        <button type="button" id="btn-switch-registrar" style="flex: 1; padding: 0.65rem; border: none; background: transparent; border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; position: relative; z-index: 2; color: #1e293b; transition: color 0.2s;">
+                            🚗 Registar KM
+                        </button>
+                        <button type="button" id="btn-switch-historico" style="flex: 1; padding: 0.65rem; border: none; background: transparent; border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; position: relative; z-index: 2; color: #64748b; transition: color 0.2s;">
+                            📅 Histórico (KM)
+                        </button>
                     </div>
 
-                    <button type="button" class="btn-km" id="btn-km-registrar"
-                        style="width: 100%; padding: 1rem; background: #2563eb; color: white; border: none; border-radius: 12px; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; transition: opacity 0.2s;"
-                        onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-                        🚗 Registar KM Atual
-                    </button>
+                    <!-- Lado 1: Registo de Quilometragem -->
+                    <div id="km-registrar-seccao">
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label
+                                style="display:block; margin-bottom:0.5rem; font-weight:600; font-size:0.9rem; color:#475569;">Viatura</label>
+                            <select id="km-viatura-select" class="input-km"
+                                style="border: 1px solid #cbd5e1; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); background: white; width: 100%; padding: 0.75rem; border-radius: 8px; font-weight: 600; color: #1e293b;">
+                                <option value="">Carregando viaturas...</option>
+                            </select>
+                        </div>
 
-                    <button type="button" class="btn-km" id="btn-km-ver-registros"
-                        style="width: 100%; padding: 1rem; background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; border-radius: 12px; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; transition: all 0.2s;"
-                        onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
-                        📅 Ver Registos (KM)
-                    </button>
+                        <button type="button" class="btn-km" id="btn-km-registrar"
+                            style="width: 100%; padding: 1rem; background: #2563eb; color: white; border: none; border-radius: 12px; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                            🚗 Registar KM Atual
+                        </button>
+                    </div>
 
-                    <!-- Container do Calendário de KM -->
+                    <!-- Container do Calendário de KM (Histórico) -->
                     <div id="km-calendario-container" style="display: none; border-top: 1px solid #f1f5f9; padding-top: 1.25rem; margin-bottom: 1.5rem;">
                         <div class="calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
                             <button type="button" id="km-mes-prev" class="btn-mes-nav" aria-label="Mês anterior">‹</button>
@@ -1262,32 +1305,76 @@
                 <!-- CONTEÚDO 2: COMBUSTÍVEL & GASTOS -->
                 <div id="km-tab-content-gastos" style="display: none;">
                     <!-- Resumo Financeiro -->
-                    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1.5rem;">
+                        <div style="background: #eff6ff; padding: 0.75rem; border-radius: 12px; text-align: center; border: 1px solid #dbeafe; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <div style="font-size: 0.6rem; color: #1e40af; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Semana</div>
+                            <div style="font-size: 1.1rem; font-weight: 800; color: #1e3a8a; line-height: 1;" id="gastos-total-semana">€ 0.00</div>
+                            <div style="font-size: 0.5rem; color: #60a5fa; margin-top: 4px;">Aprovado</div>
+                        </div>
                         <div style="background: #f0fdf4; padding: 0.75rem; border-radius: 12px; text-align: center; border: 1px solid #bbf7d0; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                            <div style="font-size: 0.6rem; color: #15803d; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Gasto no Mês</div>
-                            <div style="font-size: 1.15rem; font-weight: 800; color: #166534; line-height: 1;" id="gastos-total-mes">€ 0.00</div>
+                            <div style="font-size: 0.6rem; color: #15803d; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Mês</div>
+                            <div style="font-size: 1.1rem; font-weight: 800; color: #166534; line-height: 1;" id="gastos-total-mes">€ 0.00</div>
                             <div style="font-size: 0.5rem; color: #22c55e; margin-top: 4px;">Aprovado</div>
                         </div>
                         <div style="background: #fffbeb; padding: 0.75rem; border-radius: 12px; text-align: center; border: 1px solid #fde68a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                             <div style="font-size: 0.6rem; color: #b45309; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Pendentes</div>
-                            <div style="font-size: 1.15rem; font-weight: 800; color: #92400e; line-height: 1;" id="gastos-total-pendentes">0</div>
+                            <div style="font-size: 1.1rem; font-weight: 800; color: #92400e; line-height: 1;" id="gastos-total-pendentes">0</div>
                             <div style="font-size: 0.5rem; color: #f59e0b; margin-top: 4px;">Em Aprovação</div>
                         </div>
                     </div>
 
-                    <button type="button" class="btn-km" id="btn-gastos-registrar"
-                        style="width: 100%; padding: 1rem; background: #10b981; color: white; border: none; border-radius: 12px; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; transition: opacity 0.2s;"
-                        onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-                        <span style="font-size:1.2rem;">⛽</span> Registar Abastecimento
-                    </button>
+                    <!-- Segmented Switch (Registar vs Histórico) -->
+                    <div class="abast-switch-container" style="display: flex; gap: 0.25rem; margin-top: 0.5rem; margin-bottom: 1.25rem; background: #e2e8f0; padding: 0.25rem; border-radius: 12px; position: relative;">
+                        <!-- O sliding background do switch -->
+                        <div id="abast-switch-bg" style="position: absolute; top: 0.25rem; bottom: 0.25rem; left: 0.25rem; width: calc(50% - 0.25rem); background: white; border-radius: 9px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1;"></div>
+                        
+                        <button type="button" id="btn-abast-switch-registrar" style="flex: 1; padding: 0.65rem; border: none; background: transparent; border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; position: relative; z-index: 2; color: #1e293b; transition: color 0.2s;">
+                            ⛽ Registar Abast.
+                        </button>
+                        <button type="button" id="btn-abast-switch-historico" style="flex: 1; padding: 0.65rem; border: none; background: transparent; border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; position: relative; z-index: 2; color: #64748b; transition: color 0.2s;">
+                            📅 Histórico (Abast)
+                        </button>
+                    </div>
 
-                    <!-- Lista de Abastecimentos Recentes -->
-                    <div style="border-top: 1px solid #f1f5f9; padding-top: 1.25rem;">
-                        <h4 style="margin: 0 0 0.75rem 0; font-size: 0.95rem; color: #1e293b; font-weight: 800;">Histórico de Abastecimentos</h4>
-                        <div id="gastos-historico-lista" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                            <!-- Inserido via JS -->
-                            <div style="text-align: center; padding: 1.5rem; color: #94a3b8; font-size: 0.85rem;">
-                                Nenhuma despesa registada ainda.
+                    <!-- Lado 1: Registo de Abastecimento -->
+                    <div id="abast-registrar-seccao">
+                        <button type="button" class="btn-km" id="btn-gastos-registrar"
+                            style="width: 100%; padding: 1rem; background: #10b981; color: white; border: none; border-radius: 12px; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                            <span style="font-size:1.2rem;">⛽</span> Registar Abastecimento
+                        </button>
+
+                        <!-- Lista de Abastecimentos Recentes -->
+                        <div style="border-top: 1px solid #f1f5f9; padding-top: 1.25rem;">
+                            <h4 style="margin: 0 0 0.75rem 0; font-size: 0.95rem; color: #1e293b; font-weight: 800;">Abastecimentos Recentes</h4>
+                            <div id="gastos-historico-lista" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <!-- Inserido via JS -->
+                                <div style="text-align: center; padding: 1.5rem; color: #94a3b8; font-size: 0.85rem;">
+                                    Nenhuma despesa registada ainda.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Container do Calendário de Abastecimento (Histórico) -->
+                    <div id="abast-calendario-container" style="display: none; border-top: 1px solid #f1f5f9; padding-top: 1.25rem; margin-bottom: 1.5rem;">
+                        <div class="calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                            <button type="button" id="abast-mes-prev" class="btn-mes-nav" aria-label="Mês anterior">‹</button>
+                            <span id="abast-mes-label" style="font-weight: 800; font-size: 1.1rem; color: #0f172a; text-transform: capitalize;">—</span>
+                            <button type="button" id="abast-mes-next" class="btn-mes-nav" aria-label="Próximo mês">›</button>
+                        </div>
+                        <div class="calendar-weekdays" style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 700; font-size: 0.75rem; color: #64748b; margin-bottom: 0.75rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem;">
+                            <div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div><div>Dom</div>
+                        </div>
+                        <div id="abast-calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
+                            <!-- Dias injetados via JS -->
+                        </div>
+
+                        <!-- Detalhes do dia de Abastecimento selecionado -->
+                        <div id="abast-detalhes-container" style="display: none; background: #f8fafc; padding: 1.25rem; border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.3s ease;">
+                            <h4 id="abast-detalhes-titulo" style="margin: 0 0 0.75rem; font-size: 0.95rem; color: #1e293b; font-weight: 800;">Registos do dia</h4>
+                            <div id="abast-detalhes-lista" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <!-- Inserido dinamicamente via JS -->
                             </div>
                         </div>
                     </div>
@@ -1362,6 +1449,19 @@
             <div class="modal-botoes">
                 <button type="button" class="modal-btn-confirmar" id="btnModalRegistroOk">OK</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal de Carregamento (Loading Screen) -->
+    <div class="modal-overlay" id="loadingOverlay" role="dialog" aria-modal="true" style="backdrop-filter: blur(8px); background: rgba(15, 23, 42, 0.65); z-index: 9999;">
+        <div style="background: #ffffff; border-radius: 24px; padding: 2.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); max-width: 300px; width: 100%; text-align: center; border: 1px solid rgba(255, 255, 255, 0.2);">
+            <div style="position: relative; width: 80px; height: 80px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center;">
+                <div style="position: absolute; border: 4px solid #f1f5f9; border-radius: 50%; width: 100%; height: 100%;"></div>
+                <div style="position: absolute; border: 4px solid transparent; border-top-color: #2563eb; border-right-color: #2563eb; border-radius: 50%; width: 100%; height: 100%; animation: spin 0.8s linear infinite;"></div>
+                <div style="font-size: 2rem; animation: pulse 1.5s ease-in-out infinite;">📍</div>
+            </div>
+            <h4 style="margin: 0 0 0.5rem; font-size: 1.25rem; color: #1e293b; font-weight: 800; letter-spacing: -0.025em;">A registar ponto...</h4>
+            <p id="loadingOverlayTexto" style="margin: 0; font-size: 0.875rem; color: #64748b; font-weight: 500; line-height: 1.4;">A obter geolocalização e a comunicar com o servidor.</p>
         </div>
     </div>
 
@@ -1456,14 +1556,37 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                     <div class="form-group">
                         <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color:#475569;">Valor Gasto (€)</label>
-                        <input type="text" id="abast-valor-input" placeholder="0.00" required
-                            style="width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; font-weight: 700; text-align: center; color: #047857; background: #f0fdf4;">
-                    </div>
-                    <div class="form-group">
-                        <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color:#475569;">Litros (Opcional)</label>
-                        <input type="text" id="abast-litros-input" placeholder="0.00"
+                        <input type="text" id="abast-valor-input" placeholder="Ex: 50.00" required
                             style="width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; font-weight: 700; text-align: center;">
                     </div>
+                    <div class="form-group">
+                        <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color:#475569;">Litros</label>
+                        <input type="text" id="abast-litros-input" placeholder="Ex: 40.25" required
+                            style="width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; font-weight: 700; text-align: center;">
+                    </div>
+                </div>
+
+                <!-- Método de Pagamento -->
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color:#475569;">Método de Pagamento</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                        <button type="button" id="btn-pag-dinheiro"
+                            style="padding: 0.6rem; border: 2px solid #3b82f6; background: #eff6ff; color: #1d4ed8; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+                            💶 Dinheiro (€)
+                        </button>
+                        <button type="button" id="btn-pag-cartao"
+                            style="padding: 0.6rem; border: 2px solid #cbd5e1; background: #ffffff; color: #475569; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+                            💳 Cartão
+                        </button>
+                    </div>
+                    <input type="hidden" id="abast-metodo-pagamento" value="dinheiro">
+                </div>
+
+                <!-- Campo Nº do Cartão Utilizado -->
+                <div class="form-group" id="abast-cartao-container" style="display: none;">
+                    <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color:#475569;">Nº do Cartão Utilizado (4 últimos dígitos)</label>
+                    <input type="text" id="abast-cartao-input" placeholder="Ex: 8900" maxlength="4"
+                        style="width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; font-weight: 700; text-align: center;">
                 </div>
 
                 <div class="modal-botoes" style="margin-top: 1rem;">
@@ -1490,6 +1613,10 @@
     <style>
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.12); opacity: 0.85; }
         }
     </style>
     <nav class="nav-bottom" aria-label="Navegação principal">
@@ -1651,10 +1778,25 @@
                     return;
                 }
                 btn.disabled = true;
+                
+                var loadingOverlay = document.getElementById('loadingOverlay');
+                var loadingText = document.getElementById('loadingOverlayTexto');
+                if (loadingOverlay) {
+                    if (loadingText) {
+                        loadingText.textContent = 'A obter geolocalização e a comunicar com o servidor.';
+                    }
+                    loadingOverlay.classList.add('visible');
+                }
+
                 navigator.geolocation.getCurrentPosition(
                     function (pos) {
                         var payload = { tipo_marcacao: tipo, latitude: pos.coords.latitude, longitude: pos.coords.longitude };
                         if (tipo === 'fim_jornada' && justificativa) payload.justificativa = justificativa;
+                        
+                        if (loadingText) {
+                            loadingText.textContent = 'A comunicar com o servidor...';
+                        }
+
                         fetch(API_MARCAR, {
                             method: 'POST',
                             credentials: 'same-origin',
@@ -1670,16 +1812,32 @@
                                     var dataHora = data.data_hora || '—';
                                     var el = document.getElementById('modalRegistroDataHora');
                                     if (el) el.textContent = dataHora;
+                                    
+                                    if (loadingOverlay) {
+                                        loadingOverlay.classList.remove('visible');
+                                    }
+
                                     var overlay = document.getElementById('modalRegistroSucesso');
                                     if (overlay) overlay.classList.add('visible');
                                 } else {
+                                    if (loadingOverlay) {
+                                        loadingOverlay.classList.remove('visible');
+                                    }
                                     showToast(data.mensagem || data.erro || 'Erro ao marcar.', true);
                                 }
                             })
-                            .catch(function () { showToast('Erro de ligação.', true); })
+                            .catch(function () { 
+                                if (loadingOverlay) {
+                                    loadingOverlay.classList.remove('visible');
+                                }
+                                showToast('Erro de ligação.', true); 
+                            })
                             .finally(function () { btn.disabled = false; });
                     },
                     function () {
+                        if (loadingOverlay) {
+                            loadingOverlay.classList.remove('visible');
+                        }
                         showToast('Não foi possível obter a localização.', true);
                         btn.disabled = false;
                     },
@@ -1974,25 +2132,30 @@
             var API_ABASTECIMENTO_MINHAS = '/api/abastecimento/minhas/';
             var API_ABASTECIMENTO_OCR = '/api/abastecimento/ocr/';
 
-            // Eventos das sub-abas
+            // Eventos das sub-abas (Sliding Switch)
             var tabKMDeslocamentos = document.getElementById('tab-km-deslocamentos');
             var tabKMGastos = document.getElementById('tab-km-gastos');
+            var tabsBg = document.getElementById('km-tabs-bg');
             var contentKMDeslocamentos = document.getElementById('km-tab-content-deslocamentos');
             var contentKMGastos = document.getElementById('km-tab-content-gastos');
 
-            if (tabKMDeslocamentos && tabKMGastos) {
+            if (tabKMDeslocamentos && tabKMGastos && tabsBg) {
                 tabKMDeslocamentos.addEventListener('click', function () {
-                    tabKMDeslocamentos.classList.add('active-tab');
-                    tabKMGastos.classList.remove('active-tab');
-                    contentKMDeslocamentos.style.display = 'block';
-                    contentKMGastos.style.display = 'none';
+                    tabsBg.style.transform = 'translateX(0)';
+                    tabKMDeslocamentos.style.color = '#1e293b';
+                    tabKMGastos.style.color = '#64748b';
+                    
+                    if (contentKMDeslocamentos) contentKMDeslocamentos.style.display = 'block';
+                    if (contentKMGastos) contentKMGastos.style.display = 'none';
                 });
 
                 tabKMGastos.addEventListener('click', function () {
-                    tabKMGastos.classList.add('active-tab');
-                    tabKMDeslocamentos.classList.remove('active-tab');
-                    contentKMGastos.style.display = 'block';
-                    contentKMDeslocamentos.style.display = 'none';
+                    tabsBg.style.transform = 'translateX(100%)';
+                    tabKMDeslocamentos.style.color = '#64748b';
+                    tabKMGastos.style.color = '#1e293b';
+                    
+                    if (contentKMGastos) contentKMGastos.style.display = 'block';
+                    if (contentKMDeslocamentos) contentKMDeslocamentos.style.display = 'none';
                     carregarAbastecimentos();
                 });
             }
@@ -2009,6 +2172,57 @@
             var inputAbastKM = document.getElementById('abast-km-input');
             var inputAbastValor = document.getElementById('abast-valor-input');
             var inputAbastLitros = document.getElementById('abast-litros-input');
+            var inputAbastCartao = document.getElementById('abast-cartao-input');
+
+            var btnPagDinheiro = document.getElementById('btn-pag-dinheiro');
+            var btnPagCartao = document.getElementById('btn-pag-cartao');
+            var inputMetodoPagamento = document.getElementById('abast-metodo-pagamento');
+            var cartaoContainer = document.getElementById('abast-cartao-container');
+
+            function selecionarMetodoPagamento(metodo) {
+                if (metodo === 'dinheiro') {
+                    if (btnPagDinheiro) {
+                        btnPagDinheiro.style.border = '2px solid #3b82f6';
+                        btnPagDinheiro.style.background = '#eff6ff';
+                        btnPagDinheiro.style.color = '#1d4ed8';
+                    }
+                    if (btnPagCartao) {
+                        btnPagCartao.style.border = '2px solid #cbd5e1';
+                        btnPagCartao.style.background = '#ffffff';
+                        btnPagCartao.style.color = '#475569';
+                    }
+                    if (inputMetodoPagamento) inputMetodoPagamento.value = 'dinheiro';
+                    if (cartaoContainer) cartaoContainer.style.display = 'none';
+                    if (inputAbastCartao) {
+                        inputAbastCartao.removeAttribute('required');
+                        inputAbastCartao.value = '';
+                    }
+                } else {
+                    if (btnPagCartao) {
+                        btnPagCartao.style.border = '2px solid #3b82f6';
+                        btnPagCartao.style.background = '#eff6ff';
+                        btnPagCartao.style.color = '#1d4ed8';
+                    }
+                    if (btnPagDinheiro) {
+                        btnPagDinheiro.style.border = '2px solid #cbd5e1';
+                        btnPagDinheiro.style.background = '#ffffff';
+                        btnPagDinheiro.style.color = '#475569';
+                    }
+                    if (inputMetodoPagamento) inputMetodoPagamento.value = 'cartao';
+                    if (cartaoContainer) cartaoContainer.style.display = 'block';
+                    if (inputAbastCartao) {
+                        inputAbastCartao.setAttribute('required', 'required');
+                        inputAbastCartao.value = '';
+                    }
+                }
+            }
+
+            if (btnPagDinheiro) {
+                btnPagDinheiro.addEventListener('click', function() { selecionarMetodoPagamento('dinheiro'); });
+            }
+            if (btnPagCartao) {
+                btnPagCartao.addEventListener('click', function() { selecionarMetodoPagamento('cartao'); });
+            }
 
             if (document.getElementById('btn-gastos-registrar')) {
                 document.getElementById('btn-gastos-registrar').addEventListener('click', function () {
@@ -2016,19 +2230,24 @@
                     inputAbastKM.value = '';
                     inputAbastValor.value = '';
                     inputAbastLitros.value = '';
+                    if (inputAbastCartao) inputAbastCartao.value = '';
+                    selecionarMetodoPagamento('dinheiro');
                     fileInput.value = '';
                     if (previewContainer) previewContainer.style.display = 'none';
                     if (ocrSpinner) ocrSpinner.style.display = 'none';
 
-                    // Prefill KM da viatura selecionada
+                    // Prefill KM da viatura selecionada (apenas placeholder, valor vazio!)
                     var select = document.getElementById('km-viatura-select');
                     var viaturaId = select ? select.value : '';
                     if (viaturaId && viaturasCache) {
                         var viatura = viaturasCache.find(function (v) { return v.id == viaturaId; });
                         if (viatura) {
-                            inputAbastKM.value = viatura.km_atual;
-                            inputAbastKM.placeholder = viatura.km_atual;
+                            inputAbastKM.placeholder = 'Atual: ' + viatura.km_atual;
+                        } else {
+                            inputAbastKM.placeholder = 'Ex: 142500';
                         }
+                    } else {
+                        inputAbastKM.placeholder = 'Ex: 142500';
                     }
                     
                     if (modalAbast) modalAbast.classList.add('visible');
@@ -2106,13 +2325,28 @@
                         return;
                     }
 
-                    var km = inputAbastKM.value;
-                    var valor = inputAbastValor.value;
-                    var litros = inputAbastLitros.value;
+                    var km = inputAbastKM.value.trim();
+                    var valor = inputAbastValor.value.trim();
+                    var litros = inputAbastLitros.value.trim();
+                    var metodo = inputMetodoPagamento ? inputMetodoPagamento.value : 'dinheiro';
+                    var cartao = inputAbastCartao ? inputAbastCartao.value.trim() : '';
 
-                    if (!km || !valor) {
-                        showToast('Por favor, preencha a quilometragem e o valor gasto.', true);
+                    if (!km || !valor || !litros) {
+                        showToast('Por favor, preencha todos os campos obrigatórios (KM, Valor e Litros).', true);
                         return;
+                    }
+
+                    if (metodo === 'cartao') {
+                        if (!cartao) {
+                            showToast('Por favor, indique os 4 últimos dígitos do cartão.', true);
+                            return;
+                        }
+                        if (cartao.length !== 4 || isNaN(cartao)) {
+                            showToast('O número de cartão deve ter exatamente os 4 últimos dígitos.', true);
+                            return;
+                        }
+                    } else {
+                        cartao = '';
                     }
 
                     // Validação de quilometragem mínima
@@ -2128,7 +2362,9 @@
                     fd.append('viatura_id', viaturaId);
                     fd.append('km', km);
                     fd.append('valor', valor);
-                    if (litros) fd.append('litros', litros);
+                    fd.append('litros', litros);
+                    fd.append('metodo_pagamento', metodo);
+                    fd.append('cartao', cartao);
                     if (fileInput.files && fileInput.files[0]) {
                         fd.append('comprovativo', fileInput.files[0]);
                     }
@@ -2176,6 +2412,12 @@
                 }
             }
 
+            // --- Variáveis do Calendário de Abastecimento ---
+            var abastViewYear = null;
+            var abastViewMonth = null;
+            var abastRegistrosCache = {};
+            var abastDataSelecionada = null;
+
             // Carregar Abastecimentos
             function carregarAbastecimentos() {
                 var listaContainer = document.getElementById('gastos-historico-lista');
@@ -2184,14 +2426,49 @@
                 fetch(API_ABASTECIMENTO_MINHAS + '?_=' + Date.now(), { credentials: 'same-origin', cache: 'no-store' })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
-                    var totalAprovado = 0;
+                    var totalMesAprovado = 0;
+                    var totalSemanaAprovado = 0;
                     var totalPendente = 0;
+
+                    // Obter a data civil atual do servidor para os cálculos
+                    var hojeStr = hojeISO(); // YYYY-MM-DD
+                    var partsHoje = hojeStr.split('-');
+                    var curY = parseInt(partsHoje[0], 10);
+                    var curM = parseInt(partsHoje[1], 10);
+
+                    // Obter a segunda-feira e os dias da semana atual
+                    var monISO = getMondayOfWeek(new Date(serverInstantMs()));
+                    var currentWeekDates = getWeekDates(monISO);
+
+                    // Resetar a cache do calendário
+                    abastRegistrosCache = {};
                     listaContainer.innerHTML = '';
 
                     if (data && data.length > 0) {
                         data.forEach(function (a) {
+                            // Converter data de dd/mm/yyyy para yyyy-mm-dd para agrupamento
+                            var dateISO = a.data_iso || (a.data ? a.data.split('/').reverse().join('-') : '');
+                            
+                            if (dateISO) {
+                                if (!abastRegistrosCache[dateISO]) abastRegistrosCache[dateISO] = [];
+                                abastRegistrosCache[dateISO].push(a);
+                            }
+
+                            // Calcular totais
                             if (a.status === 'aprovado') {
-                                totalAprovado += a.valor;
+                                var partsA = dateISO.split('-');
+                                var aY = parseInt(partsA[0], 10);
+                                var aM = parseInt(partsA[1], 10);
+
+                                // Se no mês corrente
+                                if (aY === curY && aM === curM) {
+                                    totalMesAprovado += a.valor;
+                                }
+
+                                // Se na semana corrente
+                                if (currentWeekDates.indexOf(dateISO) !== -1) {
+                                    totalSemanaAprovado += a.valor;
+                                }
                             } else if (a.status === 'pendente') {
                                 totalPendente++;
                             }
@@ -2223,7 +2500,8 @@
                             var rowData = document.createElement('div');
                             rowData.style.fontSize = '0.75rem';
                             rowData.style.color = '#64748b';
-                            rowData.textContent = a.data + ' às ' + a.hora + (a.litros ? ' • ' + a.litros + ' Litros' : '');
+                            var pagTexto = (a.metodo_pagamento === 'dinheiro') ? '💶 Dinheiro (€)' : ('💳 Cartão (' + (a.cartao || '---') + ')');
+                            rowData.textContent = a.data + ' às ' + a.hora + (a.litros ? ' • ' + a.litros + ' Litros' : '') + ' • ' + pagTexto;
                             colLeft.appendChild(rowData);
 
                             // Status Badge
@@ -2304,12 +2582,262 @@
                     }
 
                     // Atualizar totais no dashboard de gastos
-                    document.getElementById('gastos-total-mes').textContent = '€ ' + totalAprovado.toFixed(2);
+                    document.getElementById('gastos-total-semana').textContent = '€ ' + totalSemanaAprovado.toFixed(2);
+                    document.getElementById('gastos-total-mes').textContent = '€ ' + totalMesAprovado.toFixed(2);
                     document.getElementById('gastos-total-pendentes').textContent = totalPendente;
+
+                    // Atualizar calendário se estiver visível
+                    var calendarContainer = document.getElementById('abast-calendario-container');
+                    if (calendarContainer && calendarContainer.style.display !== 'none') {
+                        renderizarAbastCalendario();
+                        if (abastDataSelecionada) {
+                            mostrarDetalhesAbastDia(abastDataSelecionada);
+                        }
+                    }
                 })
                 .catch(function () {
                     listaContainer.innerHTML = '<div style="text-align: center; padding: 1.5rem; color: #ef4444; font-size: 0.85rem;">Erro ao obter histórico.</div>';
                 });
+            }
+
+            // --- Lógica e Navegação do Calendário de Abastecimento ---
+            function inicializarAbastCalendario() {
+                var btnPrev = document.getElementById('abast-mes-prev');
+                var btnNext = document.getElementById('abast-mes-next');
+                if (btnPrev && btnNext) {
+                    btnPrev.onclick = function() {
+                        abastViewMonth--;
+                        if (abastViewMonth < 0) {
+                            abastViewMonth = 11;
+                            abastViewYear--;
+                        }
+                        renderizarAbastCalendario();
+                    };
+                    btnNext.onclick = function() {
+                        abastViewMonth++;
+                        if (abastViewMonth > 11) {
+                            abastViewMonth = 0;
+                            abastViewYear++;
+                        }
+                        renderizarAbastCalendario();
+                    };
+                }
+
+                var btnSwitchRegistrar = document.getElementById('btn-abast-switch-registrar');
+                var btnSwitchHistorico = document.getElementById('btn-abast-switch-historico');
+                var switchBg = document.getElementById('abast-switch-bg');
+                
+                var registrarSeccao = document.getElementById('abast-registrar-seccao');
+                var calendarioContainer = document.getElementById('abast-calendario-container');
+                var detalhesContainer = document.getElementById('abast-detalhes-container');
+
+                if (btnSwitchRegistrar && btnSwitchHistorico && switchBg) {
+                    btnSwitchRegistrar.onclick = function() {
+                        switchBg.style.transform = 'translateX(0)';
+                        btnSwitchRegistrar.style.color = '#1e293b';
+                        btnSwitchHistorico.style.color = '#64748b';
+                        
+                        if (registrarSeccao) registrarSeccao.style.display = 'block';
+                        if (calendarioContainer) calendarioContainer.style.display = 'none';
+                        if (detalhesContainer) detalhesContainer.style.display = 'none';
+                    };
+
+                    btnSwitchHistorico.onclick = function() {
+                        switchBg.style.transform = 'translateX(100%)';
+                        btnSwitchRegistrar.style.color = '#64748b';
+                        btnSwitchHistorico.style.color = '#1e293b';
+                        
+                        if (registrarSeccao) registrarSeccao.style.display = 'none';
+                        if (calendarioContainer) calendarioContainer.style.display = 'block';
+                        
+                        carregarAbastCalendario();
+                    };
+                }
+            }
+
+            function carregarAbastCalendario() {
+                if (abastViewYear === null || abastViewMonth === null) {
+                    var sTime = new Date(serverInstantMs());
+                    abastViewYear = sTime.getFullYear();
+                    abastViewMonth = sTime.getMonth();
+                }
+                carregarAbastecimentos();
+            }
+
+            function renderizarAbastCalendario() {
+                var grid = document.getElementById('abast-calendar-grid');
+                var label = document.getElementById('abast-mes-label');
+                if (!grid || !label) return;
+
+                label.textContent = NOMES_MESES[abastViewMonth] + ' ' + abastViewYear;
+                grid.innerHTML = '';
+
+                var primeiroDiaSemana = new Date(abastViewYear, abastViewMonth, 1).getDay();
+                var indexSeg = primeiroDiaSemana === 0 ? 6 : primeiroDiaSemana - 1;
+
+                var totalDiasMes = new Date(abastViewYear, abastViewMonth + 1, 0).getDate();
+
+                for (var i = 0; i < indexSeg; i++) {
+                    var empty = document.createElement('div');
+                    empty.className = 'folhinha-card out-month';
+                    grid.appendChild(empty);
+                }
+
+                for (var dia = 1; dia <= totalDiasMes; dia++) {
+                    var diaStr = String(dia).padStart(2, '0');
+                    var mesStr = String(abastViewMonth + 1).padStart(2, '0');
+                    var isoDate = abastViewYear + '-' + mesStr + '-' + diaStr;
+
+                    var card = document.createElement('div');
+                    card.className = 'folhinha-card';
+                    card.textContent = dia;
+                    card.setAttribute('data-date', isoDate);
+
+                    if (abastRegistrosCache[isoDate] && abastRegistrosCache[isoDate].length > 0) {
+                        card.classList.add('com-abast');
+                        card.onclick = (function(date) {
+                            return function() {
+                                document.querySelectorAll('#abast-calendar-grid .folhinha-card').forEach(function(c) {
+                                    c.classList.remove('selecionado');
+                                });
+                                this.classList.add('selecionado');
+                                mostrarDetalhesAbastDia(date);
+                            };
+                        })(isoDate);
+                    }
+
+                    if (abastDataSelecionada === isoDate) {
+                        card.classList.add('selecionado');
+                    }
+
+                    grid.appendChild(card);
+                }
+            }
+
+            function mostrarDetalhesAbastDia(dateISO) {
+                var container = document.getElementById('abast-detalhes-container');
+                var titulo = document.getElementById('abast-detalhes-titulo');
+                var listaEl = document.getElementById('abast-detalhes-lista');
+                if (!container || !titulo || !listaEl) return;
+
+                abastDataSelecionada = dateISO;
+                titulo.textContent = 'Registros de ' + formatDiaCurtoPtFromIso(dateISO);
+                listaEl.innerHTML = '';
+
+                var registros = abastRegistrosCache[dateISO] || [];
+                if (registros.length === 0) {
+                    container.style.display = 'none';
+                    return;
+                }
+
+                registros.forEach(function (a) {
+                    var card = document.createElement('div');
+                    card.style.background = '#ffffff';
+                    card.style.border = '1px solid #e2e8f0';
+                    card.style.borderRadius = '12px';
+                    card.style.padding = '0.9rem';
+                    card.style.display = 'flex';
+                    card.style.justifyContent = 'space-between';
+                    card.style.alignItems = 'center';
+                    card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.02)';
+                    card.style.marginBottom = '0.5rem';
+
+                    // Detalhes (esquerda)
+                    var colLeft = document.createElement('div');
+                    colLeft.style.display = 'flex';
+                    colLeft.style.flexDirection = 'column';
+                    colLeft.style.gap = '2px';
+
+                    var rowViatura = document.createElement('div');
+                    rowViatura.style.fontWeight = '700';
+                    rowViatura.style.fontSize = '0.85rem';
+                    rowViatura.style.color = '#1e293b';
+                    rowViatura.textContent = a.viatura + ' • ' + a.km + ' KM';
+                    colLeft.appendChild(rowViatura);
+
+                    var rowData = document.createElement('div');
+                    rowData.style.fontSize = '0.75rem';
+                    rowData.style.color = '#64748b';
+                    var pagTexto = (a.metodo_pagamento === 'dinheiro') ? '💶 Dinheiro (€)' : ('💳 Cartão (' + (a.cartao || '---') + ')');
+                    rowData.textContent = a.hora + (a.litros ? ' • ' + a.litros + ' Litros' : '') + ' • ' + pagTexto;
+                    colLeft.appendChild(rowData);
+
+                    // Status Badge
+                    var badge = document.createElement('span');
+                    badge.style.display = 'inline-block';
+                    badge.style.alignSelf = 'flex-start';
+                    badge.style.marginTop = '4px';
+                    badge.style.fontSize = '0.65rem';
+                    badge.style.fontWeight = '800';
+                    badge.style.padding = '2px 8px';
+                    badge.style.borderRadius = '20px';
+                    badge.style.textTransform = 'uppercase';
+
+                    if (a.status === 'aprovado') {
+                        badge.style.background = '#dcfce7';
+                        badge.style.color = '#166534';
+                        badge.textContent = 'Aprovado';
+                    } else if (a.status === 'rejeitado') {
+                        badge.style.background = '#fee2e2';
+                        badge.style.color = '#991b1b';
+                        badge.textContent = 'Rejeitado';
+                    } else {
+                        badge.style.background = '#fef3c7';
+                        badge.style.color = '#92400e';
+                        badge.textContent = 'Pendente';
+                    }
+                    colLeft.appendChild(badge);
+
+                    if (a.status === 'rejeitado' && a.justificativa_admin) {
+                        var rowJust = document.createElement('div');
+                        rowJust.style.fontSize = '0.7rem';
+                        rowJust.style.color = '#ef4444';
+                        rowJust.style.marginTop = '4px';
+                        rowJust.style.fontWeight = '600';
+                        rowJust.textContent = 'Motivo: ' + a.justificativa_admin;
+                        colLeft.appendChild(rowJust);
+                    }
+
+                    card.appendChild(colLeft);
+
+                    // Preço e Recibo (direita)
+                    var colRight = document.createElement('div');
+                    colRight.style.display = 'flex';
+                    colRight.style.flexDirection = 'column';
+                    colRight.style.alignItems = 'flex-end';
+                    colRight.style.gap = '6px';
+
+                    var rowValor = document.createElement('div');
+                    rowValor.style.fontWeight = '800';
+                    rowValor.style.fontSize = '1.05rem';
+                    rowValor.style.color = '#047857';
+                    rowValor.textContent = '€ ' + a.valor.toFixed(2);
+                    colRight.appendChild(rowValor);
+
+                    if (a.comprovativo_url) {
+                        var btnRecibo = document.createElement('button');
+                        btnRecibo.type = 'button';
+                        btnRecibo.textContent = '📄 Ver Recibo';
+                        btnRecibo.style.border = 'none';
+                        btnRecibo.style.background = '#f1f5f9';
+                        btnRecibo.style.color = '#334155';
+                        btnRecibo.style.fontSize = '0.7rem';
+                        btnRecibo.style.fontWeight = '700';
+                        btnRecibo.style.padding = '3px 8px';
+                        btnRecibo.style.borderRadius = '6px';
+                        btnRecibo.style.cursor = 'pointer';
+                        btnRecibo.addEventListener('click', function () {
+                            abrirReciboZoom(a.comprovativo_url);
+                        });
+                        colRight.appendChild(btnRecibo);
+                    }
+
+                    card.appendChild(colRight);
+                    listaEl.appendChild(card);
+                });
+
+                container.style.display = 'block';
+                container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
 
             if (document.getElementById('btn-km-registrar')) document.getElementById('btn-km-registrar').addEventListener('click', registrarKm);
@@ -2506,7 +3034,7 @@
                 registros.forEach(function (reg) {
                     var div = document.createElement('div');
                     div.className = 'timeline-item registado';
-                    div.innerHTML = '<div class="label"><div class="icon-wrap">' + ICONE_MARCACAO + '</div><span class="timeline-item-texto">' + reg.tipo + '</span></div><span class="hora">' + reg.time + '</span>';
+                    div.innerHTML = '<div class="label"><div class="icon-wrap">' + ICONE_MARCACAO + '</div></div><span class="hora">' + reg.time + '</span>';
                     listaEl.appendChild(div);
                 });
 
@@ -2542,25 +3070,34 @@
                     };
                 }
 
-                var btnVer = document.getElementById('btn-km-ver-registros');
-                var container = document.getElementById('km-calendario-container');
-                if (btnVer && container) {
-                    btnVer.onclick = function() {
-                        if (container.style.display === 'none') {
-                            container.style.display = 'block';
-                            btnVer.textContent = '📅 Ocultar Histórico (KM)';
-                            btnVer.style.background = '#f1f5f9';
-                            btnVer.style.color = '#475569';
-                            btnVer.style.borderColor = '#cbd5e1';
-                            carregarKMCalendario();
-                        } else {
-                            container.style.display = 'none';
-                            btnVer.textContent = '📅 Ver Registros (KM)';
-                            btnVer.style.background = '#eff6ff';
-                            btnVer.style.color = '#1e40af';
-                            btnVer.style.borderColor = '#bfdbfe';
-                            document.getElementById('km-detalhes-container').style.display = 'none';
-                        }
+                var btnSwitchRegistrar = document.getElementById('btn-switch-registrar');
+                var btnSwitchHistorico = document.getElementById('btn-switch-historico');
+                var switchBg = document.getElementById('km-switch-bg');
+                
+                var registrarSeccao = document.getElementById('km-registrar-seccao');
+                var calendarioContainer = document.getElementById('km-calendario-container');
+                var detalhesContainer = document.getElementById('km-detalhes-container');
+
+                if (btnSwitchRegistrar && btnSwitchHistorico && switchBg) {
+                    btnSwitchRegistrar.onclick = function() {
+                        switchBg.style.transform = 'translateX(0)';
+                        btnSwitchRegistrar.style.color = '#1e293b';
+                        btnSwitchHistorico.style.color = '#64748b';
+                        
+                        if (registrarSeccao) registrarSeccao.style.display = 'block';
+                        if (calendarioContainer) calendarioContainer.style.display = 'none';
+                        if (detalhesContainer) detalhesContainer.style.display = 'none';
+                    };
+
+                    btnSwitchHistorico.onclick = function() {
+                        switchBg.style.transform = 'translateX(100%)';
+                        btnSwitchRegistrar.style.color = '#64748b';
+                        btnSwitchHistorico.style.color = '#1e293b';
+                        
+                        if (registrarSeccao) registrarSeccao.style.display = 'none';
+                        if (calendarioContainer) calendarioContainer.style.display = 'block';
+                        
+                        carregarKMCalendario();
                     };
                 }
             }
@@ -2674,6 +3211,7 @@
 
             // Inicialização na carga da página
             inicializarKMCalendario();
+            inicializarAbastCalendario();
 
             function secFromHash() {
                 var h = (window.location.hash || '#hoje').replace('#', '');

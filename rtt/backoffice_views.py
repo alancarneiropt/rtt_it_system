@@ -26,6 +26,13 @@ TIPO_MARCACAO_LABEL = {
     'fim_jornada': '4ª marcação',
 }
 
+TIPO_FRIENDLY_LABEL = {
+    'entrada': 'Entrada',
+    'inicio_almoco': 'Início Almoço',
+    'fim_almoco': 'Volta Almoço',
+    'fim_jornada': 'Saída',
+}
+
 BACKOFFICE_LOGIN_URL = '/'
 
 
@@ -211,10 +218,11 @@ def colaborador_detail_view(request, pk):
             'id': m.pk,
             'hora': ts.strftime('%H:%M'),
             'tipo': TIPO_MARCACAO_LABEL.get(m.tipo, m.get_tipo_display()),
+            'tipo_raw': m.tipo,
             'latitude': lat,
             'longitude': lon,
             'mapa_url': f'https://www.google.com/maps?q={lat},{lon}',
-            'tem_mapa': (lat != "0" or lon != "0"),
+            'tem_mapa': (m.latitude and m.longitude and float(m.latitude) != 0.0 and float(m.longitude) != 0.0),
         })
 
     # Mais recente em cima
@@ -396,10 +404,16 @@ def construir_espelho(data_inicio, data_fim, utilizadores_queryset):
             horas_sozinhos = []
             for m in qs_dia:
                 h_str = timezone.localtime(m.timestamp).strftime('%H:%M')
+                lat = str(m.latitude)
+                lon = str(m.longitude)
                 detalhes_marcs.append({
                     'hora': h_str,
                     'tipo': m.tipo,
-                    'tipo_display': m.get_tipo_display()
+                    'tipo_display': TIPO_FRIENDLY_LABEL.get(m.tipo, m.get_tipo_display()),
+                    'latitude': lat,
+                    'longitude': lon,
+                    'mapa_url': f'https://www.google.com/maps?q={lat},{lon}',
+                    'tem_mapa': (m.latitude and m.longitude and float(m.latitude) != 0.0 and float(m.longitude) != 0.0),
                 })
                 horas_sozinhos.append(h_str)
 
@@ -534,6 +548,40 @@ def backoffice_km_create_view(request):
     else:
         form = RegistroKMForm()
     return render(request, 'backoffice/km_form.html', {'form': form, 'titulo': 'Lançar Registro de KM'})
+
+
+@backoffice_required
+@require_POST
+def backoffice_km_delete_view(request, pk):
+    """Eliminar registo de KM com confirmação por senha (senha: 1143)."""
+    registo = get_object_or_404(RegistroKM, pk=pk)
+    senha_inserida = request.POST.get('senha', '').strip()
+    SENHA_ELIMINACAO = '1143'
+
+    # Construir URL de retorno com os filtros anteriores se existirem
+    referer = request.POST.get('referer', '')
+    redirect_url = referer if referer else '/backoffice/km-registros/'
+
+    if senha_inserida != SENHA_ELIMINACAO:
+        # Senha errada — redirecionar com erro
+        from urllib.parse import urlencode, urlparse, parse_qs, urlunparse
+        parsed = urlparse(redirect_url)
+        params = parse_qs(parsed.query)
+        params['erro_senha'] = ['1']
+        new_query = urlencode({k: v[0] for k, v in params.items()})
+        return redirect(urlunparse(parsed._replace(query=new_query)))
+
+    # Senha correta — eliminar o registo
+    registo.delete()
+
+    # Redirecionar com mensagem de sucesso
+    from urllib.parse import urlencode, urlparse, parse_qs, urlunparse
+    parsed = urlparse(redirect_url)
+    params = parse_qs(parsed.query)
+    params.pop('erro_senha', None)
+    params['eliminado'] = ['1']
+    new_query = urlencode({k: v[0] for k, v in params.items()})
+    return redirect(urlunparse(parsed._replace(query=new_query)))
 
 
 @backoffice_required
@@ -752,12 +800,15 @@ def export_espelho_excel_view(request):
         ws.cell(row=1, column=c, value=h)
         ws.cell(row=1, column=c).font = Font(bold=True)
     for row_idx, ln in enumerate(linhas, 2):
+        marcs = ln.get('marcacoes', [])
+        def _hora(i, _m=marcs):
+            return _m[i]['hora'] if i < len(_m) else '—'
         ws.cell(row=row_idx, column=1, value=ln['data_str'])
         ws.cell(row=row_idx, column=2, value=ln['nome'])
-        ws.cell(row=row_idx, column=3, value=ln['marcacao_1'])
-        ws.cell(row=row_idx, column=4, value=ln['marcacao_2'])
-        ws.cell(row=row_idx, column=5, value=ln['marcacao_3'])
-        ws.cell(row=row_idx, column=6, value=ln['marcacao_4'])
+        ws.cell(row=row_idx, column=3, value=_hora(0))
+        ws.cell(row=row_idx, column=4, value=_hora(1))
+        ws.cell(row=row_idx, column=5, value=_hora(2))
+        ws.cell(row=row_idx, column=6, value=_hora(3))
         ws.cell(row=row_idx, column=7, value=ln['total'])
     from io import BytesIO
     buf = BytesIO()
@@ -833,14 +884,17 @@ def export_espelho_pdf_view(request):
     ]
     
     for ln in linhas:
+        marcs = ln.get('marcacoes', [])
+        def _get_hora(idx, _marcs=marcs):
+            return _marcs[idx]['hora'] if idx < len(_marcs) else ''
         table_data.append([
             ln['data_str'],
-            ln['marcacao_1'],
-            ln['marcacao_2'],
-            ln['marcacao_3'],
-            ln['marcacao_4'],
+            _get_hora(0),
+            _get_hora(1),
+            _get_hora(2),
+            _get_hora(3),
             ln['total'],
-            '' # Observações vazia para preenchimento
+            ''  # Observações vazia para preenchimento
         ])
     
     # Larguras
@@ -909,7 +963,93 @@ def viatura_edit_view(request, pk):
             return redirect('backoffice_viatura_list')
     else:
         form = ViaturaForm(instance=viatura)
-    return render(request, 'backoffice/viatura_form.html', {'form': form, 'titulo': 'Editar viatura', 'viatura': viatura})
+        
+    atribuicoes = viatura.historico_atribuicoes.select_related('colaborador__profile').all()
+    registos_km = viatura.registos.select_related('utilizador__profile').all().order_by('-timestamp')
+    abastecimentos = viatura.abastecimentos.select_related('utilizador__profile').all().order_by('-timestamp')
+    
+    return render(request, 'backoffice/viatura_form.html', {
+        'form': form, 
+        'titulo': 'Editar viatura', 
+        'viatura': viatura,
+        'atribuicoes': atribuicoes,
+        'registos_km': registos_km,
+        'abastecimentos': abastecimentos
+    })
+
+
+# ---------- Cartões de Combustível ----------
+@backoffice_required
+def cartao_list_view(request):
+    """Lista cartões com modal para novo."""
+    from .forms import CartaoForm
+    from .models import Cartao
+    cartoes = Cartao.objects.all().order_by('nome')
+    form = CartaoForm()
+    return render(request, 'backoffice/cartao_list.html', {
+        'cartoes': cartoes,
+        'form': form
+    })
+
+
+@backoffice_required
+def cartao_create_view(request):
+    """Formulário para cadastrar novo cartão."""
+    from .forms import CartaoForm
+    from .models import Cartao
+    if request.method == 'POST':
+        form = CartaoForm(request.POST)
+        if form.is_valid():
+            cartao_inst = form.save()
+            # Se foi atribuído um colaborador ao cartão, atualiza o perfil dele
+            colab = form.cleaned_data.get('colaborador_atual')
+            if colab and hasattr(colab, 'profile'):
+                colab.profile.cartao = cartao_inst
+                colab.profile.save()
+            return redirect('backoffice_cartao_list')
+    else:
+        form = CartaoForm()
+    return render(request, 'backoffice/cartao_form.html', {'form': form, 'titulo': 'Novo Cartão de Combustível'})
+
+
+@backoffice_required
+def cartao_edit_view(request, pk):
+    """Formulário para editar cartão."""
+    from .forms import CartaoForm
+    from .models import Cartao
+    cartao_inst = get_object_or_404(Cartao, pk=pk)
+    old_colab = cartao_inst.colaborador_atual
+    
+    if request.method == 'POST':
+        form = CartaoForm(request.POST, instance=cartao_inst)
+        if form.is_valid():
+            cartao_inst = form.save()
+            
+            # Limpa o cartão do colaborador antigo se mudou
+            colab = form.cleaned_data.get('colaborador_atual')
+            if old_colab and old_colab != colab and hasattr(old_colab, 'profile') and old_colab.profile.cartao == cartao_inst:
+                old_colab.profile.cartao = None
+                old_colab.profile.save()
+                
+            # Associa ao colaborador novo
+            if colab and hasattr(colab, 'profile'):
+                colab.profile.cartao = cartao_inst
+                colab.profile.save()
+                
+            return redirect('backoffice_cartao_list')
+    else:
+        form = CartaoForm(instance=cartao_inst)
+        
+    atribuicoes = cartao_inst.historico_atribuicoes.select_related('colaborador__profile').all()
+    abastecimentos = cartao_inst.abastecimentos.select_related('utilizador__profile', 'viatura').all().order_by('-timestamp')
+    
+    return render(request, 'backoffice/cartao_form.html', {
+        'form': form, 
+        'titulo': 'Editar Cartão', 
+        'cartao': cartao_inst,
+        'atribuicoes': atribuicoes,
+        'abastecimentos': abastecimentos
+    })
 
 
 from .models import Abastecimento
@@ -974,3 +1114,370 @@ def backoffice_abastecimento_rejeitar_view(request, pk):
         abast.justificativa_admin = justificativa
         abast.save()
     return redirect('backoffice_abastecimento_list')
+
+
+def _obter_dados_historico(request):
+    from .models import Viatura, Cartao, ViaturaHistoricoAtribuicao, CartaoHistoricoAtribuicao, Abastecimento, RegistroKM
+    from django.contrib.auth import get_user_model
+    from datetime import datetime
+    from django.utils import timezone
+    from django.utils.timezone import make_aware
+    from django.db.models import Q
+    
+    User = get_user_model()
+    
+    data_inicio_str = request.GET.get('data_inicio')
+    data_fim_str = request.GET.get('data_fim')
+    viatura_id = request.GET.get('viatura')
+    cartao_id = request.GET.get('cartao')
+    colaborador_id = request.GET.get('colaborador')
+    
+    today = timezone.localdate()
+    if not data_inicio_str:
+        data_inicio = today.replace(day=1)
+    else:
+        data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d').date()
+        
+    if not data_fim_str:
+        data_fim = today
+    else:
+        data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d').date()
+        
+    start_dt = make_aware(datetime.combine(data_inicio, datetime.min.time()))
+    end_dt = make_aware(datetime.combine(data_fim, datetime.max.time()))
+    
+    atrib_viaturas = ViaturaHistoricoAtribuicao.objects.select_related('viatura', 'colaborador__profile').filter(
+        data_atribuicao__lte=end_dt
+    ).filter(Q(data_remocao__isnull=True) | Q(data_remocao__gte=start_dt))
+    
+    atrib_cartoes = CartaoHistoricoAtribuicao.objects.select_related('cartao', 'colaborador__profile').filter(
+        data_atribuicao__lte=end_dt
+    ).filter(Q(data_remocao__isnull=True) | Q(data_remocao__gte=start_dt))
+    
+    abastecimentos = Abastecimento.objects.select_related('viatura', 'utilizador__profile', 'cartao_ref').filter(
+        timestamp__range=(start_dt, end_dt)
+    )
+    
+    registos_km = RegistroKM.objects.select_related('viatura', 'utilizador__profile').filter(
+        timestamp__range=(start_dt, end_dt)
+    )
+    
+    if viatura_id:
+        atrib_viaturas = atrib_viaturas.filter(viatura_id=viatura_id)
+        abastecimentos = abastecimentos.filter(viatura_id=viatura_id)
+        registos_km = registos_km.filter(viatura_id=viatura_id)
+        if not cartao_id:
+            atrib_cartoes = atrib_cartoes.none()
+            
+    if cartao_id:
+        atrib_cartoes = atrib_cartoes.filter(cartao_id=cartao_id)
+        abastecimentos = abastecimentos.filter(cartao_ref_id=cartao_id)
+        if not viatura_id:
+            atrib_viaturas = atrib_viaturas.none()
+            registos_km = registos_km.none()
+            
+    if colaborador_id:
+        atrib_viaturas = atrib_viaturas.filter(colaborador_id=colaborador_id)
+        atrib_cartoes = atrib_cartoes.filter(colaborador_id=colaborador_id)
+        abastecimentos = abastecimentos.filter(utilizador_id=colaborador_id)
+        registos_km = registos_km.filter(utilizador_id=colaborador_id)
+        
+    consolidated_logs = []
+    
+    for av in atrib_viaturas:
+        colab_name = av.colaborador.profile.nome or av.colaborador.email
+        status_str = "Ativo" if not av.data_remocao else f"até {timezone.localtime(av.data_remocao).strftime('%d/%m/%Y %H:%M')}"
+        consolidated_logs.append({
+            'tipo': 'atribuicao_viatura',
+            'tipo_label': 'Atribuição Viatura',
+            'data': av.data_atribuicao,
+            'colaborador': colab_name,
+            'recurso': f"Viatura {av.viatura.matricula}",
+            'descricao': f"Viatura {av.viatura.matricula} atribuída a {colab_name} ({status_str})",
+            'detalhes': f"Início: {timezone.localtime(av.data_atribuicao).strftime('%d/%m/%Y %H:%M')} | Fim: {status_str}"
+        })
+        
+    for ac in atrib_cartoes:
+        colab_name = ac.colaborador.profile.nome or ac.colaborador.email
+        status_str = "Ativo" if not ac.data_remocao else f"até {timezone.localtime(ac.data_remocao).strftime('%d/%m/%Y %H:%M')}"
+        consolidated_logs.append({
+            'tipo': 'atribuicao_cartao',
+            'tipo_label': 'Atribuição Cartão',
+            'data': ac.data_atribuicao,
+            'colaborador': colab_name,
+            'recurso': f"Cartão {ac.cartao.nome} ({ac.cartao.numero[-4:] if len(ac.cartao.numero) >= 4 else ac.cartao.numero})",
+            'descricao': f"Cartão {ac.cartao.nome} atribuído a {colab_name} ({status_str})",
+            'detalhes': f"Início: {timezone.localtime(ac.data_atribuicao).strftime('%d/%m/%Y %H:%M')} | Fim: {status_str}"
+        })
+        
+    for ab in abastecimentos:
+        colab_name = ab.utilizador.profile.nome or ab.utilizador.email
+        viatura_str = f"Viatura {ab.viatura.matricula}" if ab.viatura else "Sem Viatura"
+        pagamento_str = "Cartão" if ab.metodo_pagamento == 'cartao' else "Dinheiro (€)"
+        consolidated_logs.append({
+            'tipo': 'abastecimento',
+            'tipo_label': 'Abastecimento',
+            'data': ab.timestamp,
+            'colaborador': colab_name,
+            'recurso': viatura_str,
+            'descricao': f"Abastecimento na {viatura_str} via {pagamento_str}: {ab.litros or 0}L (€{ab.valor})",
+            'detalhes': f"Valor: €{ab.valor} | Volume: {ab.litros or 0}L | Cartão: {ab.cartao or 'Não aplicado'} | Status: {ab.get_status_display()}"
+        })
+        
+    for km in registos_km:
+        colab_name = km.utilizador.profile.nome or km.utilizador.email
+        consolidated_logs.append({
+            'tipo': 'registro_km',
+            'tipo_label': 'Registo de KM',
+            'data': km.timestamp,
+            'colaborador': colab_name,
+            'recurso': f"Viatura {km.viatura.matricula}",
+            'descricao': f"Registo de KM na Viatura {km.viatura.matricula}: {km.km} KM",
+            'detalhes': f"Leitura de KM: {km.km} KM"
+        })
+        
+    consolidated_logs.sort(key=lambda x: x['data'], reverse=True)
+    return consolidated_logs, data_inicio, data_fim
+
+
+@backoffice_required
+def backoffice_historico_view(request):
+    from .models import Viatura, Cartao
+    from django.contrib.auth import get_user_model
+    
+    User = get_user_model()
+    
+    viatura_id = request.GET.get('viatura')
+    cartao_id = request.GET.get('cartao')
+    colaborador_id = request.GET.get('colaborador')
+    
+    consolidated_logs, data_inicio, data_fim = _obter_dados_historico(request)
+    
+    tab_atribuicoes = [log for log in consolidated_logs if log['tipo'] in ['atribuicao_viatura', 'atribuicao_cartao']]
+    tab_abastecimentos = [log for log in consolidated_logs if log['tipo'] == 'abastecimento']
+    tab_km = [log for log in consolidated_logs if log['tipo'] == 'registro_km']
+    
+    viaturas_list = Viatura.objects.filter(ativo=True).order_by('matricula')
+    cartoes_list = Cartao.objects.filter(ativo=True).order_by('nome')
+    colaboradores_list = User.objects.filter(profile__isnull=False).distinct().order_by('profile__nome')
+    
+    return render(request, 'backoffice/historico_dashboard.html', {
+        'data_inicio': data_inicio,
+        'data_fim': data_fim,
+        'viatura_selecionada': viatura_id,
+        'cartao_selecionado': cartao_id,
+        'colaborador_selecionado': colaborador_id,
+        
+        'viaturas': viaturas_list,
+        'cartoes': cartoes_list,
+        'colaboradores': colaboradores_list,
+        
+        'consolidated_logs': consolidated_logs,
+        'tab_atribuicoes': tab_atribuicoes,
+        'tab_abastecimentos': tab_abastecimentos,
+        'tab_km': tab_km
+    })
+
+
+@backoffice_required
+def export_historico_excel_view(request):
+    try:
+        import openpyxl
+        from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+    except ImportError:
+        return HttpResponse('openpyxl não está instalado.', status=500)
+        
+    logs, di, df = _obter_dados_historico(request)
+    
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Consolidado"
+    
+    # Styling definitions
+    font_title = Font(name="Arial", size=14, bold=True, color="1E293B")
+    font_header = Font(name="Arial", size=10, bold=True, color="FFFFFF")
+    font_body = Font(name="Arial", size=10, color="000000")
+    fill_header = PatternFill(start_color="1E293B", end_color="1E293B", fill_type="solid")
+    align_center = Alignment(horizontal="center", vertical="center")
+    align_left = Alignment(horizontal="left", vertical="center")
+    thin_border = Border(
+        left=Side(style='thin', color='CBD5E1'),
+        right=Side(style='thin', color='CBD5E1'),
+        top=Side(style='thin', color='CBD5E1'),
+        bottom=Side(style='thin', color='CBD5E1')
+    )
+    
+    # Title
+    ws.merge_cells("A1:F1")
+    ws["A1"] = f"Relatório de Auditoria e Histórico ({di.strftime('%d/%m/%Y')} - {df.strftime('%d/%m/%Y')})"
+    ws["A1"].font = font_title
+    ws["A1"].alignment = align_left
+    ws.row_dimensions[1].height = 30
+    
+    # Blank row
+    ws.append([])
+    
+    # Headers
+    headers = ["Data/Hora", "Tipo de Registo", "Colaborador", "Recurso", "Descrição", "Detalhes Adicionais"]
+    ws.append(headers)
+    ws.row_dimensions[3].height = 24
+    
+    for col_idx, header in enumerate(headers, 1):
+        cell = ws.cell(row=3, column=col_idx)
+        cell.font = font_header
+        cell.fill = fill_header
+        cell.alignment = align_center
+        cell.border = thin_border
+        
+    # Data Rows
+    from django.utils import timezone
+    for log in logs:
+        local_dt = timezone.localtime(log['data'])
+        dt_str = local_dt.strftime('%d/%m/%Y %H:%M:%S')
+        
+        row_data = [
+            dt_str,
+            log['tipo_label'],
+            log['colaborador'],
+            log['recurso'],
+            log['descricao'],
+            log['detalhes']
+        ]
+        ws.append(row_data)
+        
+    # Styling and auto-fit columns
+    for row in ws.iter_rows(min_row=4, max_row=ws.max_row, min_col=1, max_col=6):
+        ws.row_dimensions[row[0].row].height = 20
+        for cell in row:
+            cell.font = font_body
+            cell.border = thin_border
+            if cell.column in [1, 2]:
+                cell.alignment = align_center
+            else:
+                cell.alignment = align_left
+                
+    for col in ws.columns:
+        max_len = max(len(str(cell.value or '')) for cell in col)
+        col_letter = openpyxl.utils.get_column_letter(col[0].column)
+        ws.column_dimensions[col_letter].width = max(max_len + 3, 12)
+        
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="historico_auditoria_{di}_{df}.xlsx"'
+    wb.save(response)
+    return response
+
+
+@backoffice_required
+def export_historico_pdf_view(request):
+    try:
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4, landscape
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import cm
+        from io import BytesIO
+    except ImportError:
+        return HttpResponse('reportlab não está instalado.', status=500)
+        
+    logs, di, df = _obter_dados_historico(request)
+    
+    buf = BytesIO()
+    doc = SimpleDocTemplate(
+        buf,
+        pagesize=landscape(A4),
+        rightMargin=1*cm,
+        leftMargin=1*cm,
+        topMargin=1.2*cm,
+        bottomMargin=1.2*cm
+    )
+    
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle(
+        'DocTitle',
+        parent=styles['Heading1'],
+        fontName='Helvetica-Bold',
+        fontSize=14,
+        leading=16,
+        textColor=colors.HexColor('#1E293B'),
+        spaceAfter=15
+    )
+    
+    header_style = ParagraphStyle(
+        'HeaderStyle',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=8,
+        leading=10,
+        textColor=colors.white,
+        alignment=1
+    )
+    
+    cell_style = ParagraphStyle(
+        'CellStyle',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=8,
+        leading=10,
+        textColor=colors.HexColor('#334155')
+    )
+    
+    cell_center_style = ParagraphStyle(
+        'CellCenterStyle',
+        parent=cell_style,
+        alignment=1
+    )
+    
+    elements = []
+    
+    elements.append(Paragraph(f"Relatório de Auditoria e Histórico ({di.strftime('%d/%m/%Y')} - {df.strftime('%d/%m/%Y')})", title_style))
+    elements.append(Spacer(1, 10))
+    
+    table_data = [[
+        Paragraph("Data/Hora", header_style),
+        Paragraph("Tipo de Registo", header_style),
+        Paragraph("Colaborador", header_style),
+        Paragraph("Recurso", header_style),
+        Paragraph("Descrição", header_style),
+        Paragraph("Detalhes Adicionais", header_style)
+    ]]
+    
+    from django.utils import timezone
+    for log in logs:
+        local_dt = timezone.localtime(log['data'])
+        dt_str = local_dt.strftime('%d/%m/%Y %H:%M')
+        
+        table_data.append([
+            Paragraph(dt_str, cell_center_style),
+            Paragraph(log['tipo_label'], cell_center_style),
+            Paragraph(log['colaborador'], cell_style),
+            Paragraph(log['recurso'], cell_style),
+            Paragraph(log['descricao'], cell_style),
+            Paragraph(log['detalhes'], cell_style)
+        ])
+        
+    col_widths = [95, 95, 110, 110, 225, 150]
+    
+    t = Table(table_data, colWidths=col_widths, repeatRows=1)
+    
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1E293B')),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CBD5E1')),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    
+    for i in range(1, len(table_data)):
+        bg_color = colors.HexColor('#F8FAFC') if i % 2 == 0 else colors.white
+        t.setStyle(TableStyle([('BACKGROUND', (0, i), (-1, i), bg_color)]))
+        
+    elements.append(t)
+    doc.build(elements)
+    
+    buf.seek(0)
+    response = HttpResponse(buf.read(), content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="historico_auditoria_{di}_{df}.pdf"'
+    return response

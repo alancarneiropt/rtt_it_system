@@ -10,6 +10,8 @@
     ocrTexto: '', 
     modalRejeitar: false, 
     rejeitarUrl: '',
+    modalAprovar: false,
+    aprovarUrl: '',
     abrirZoom(url, ocr) {
         this.reciboUrl = url;
         this.ocrTexto = ocr || 'Nenhum texto OCR disponível.';
@@ -18,6 +20,10 @@
     abrirRejeitar(url) {
         this.rejeitarUrl = url;
         this.modalRejeitar = true;
+    },
+    abrirAprovar(url) {
+        this.aprovarUrl = url;
+        this.modalAprovar = true;
     }
 }">
     <!-- Header/Títulos -->
@@ -63,23 +69,71 @@
     </div>
 
     <!-- Filtros de Estado -->
-    <div class="flex items-center gap-2 overflow-x-auto pb-1">
-        <a href="?" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if not status_filter %}bg-slate-800 text-white shadow-sm{% else %}bg-white border border-slate-200 text-slate-600 hover:bg-slate-50{% endif %}">
+    <div class="flex items-center gap-2 overflow-x-auto pb-1 flex-nowrap">
+        <a href="?" class="whitespace-nowrap px-4 py-2 rounded-lg text-xs font-bold transition-all {% if not status_filter %}bg-slate-800 text-white shadow-sm{% else %}bg-white border border-slate-200 text-slate-600 hover:bg-slate-50{% endif %}">
             Todos
         </a>
-        <a href="?status=pendente" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if status_filter == 'pendente' %}bg-amber-600 text-white shadow-sm{% else %}bg-white border border-slate-200 text-amber-600 hover:bg-amber-50{% endif %}">
+        <a href="?status=pendente" class="whitespace-nowrap px-4 py-2 rounded-lg text-xs font-bold transition-all {% if status_filter == 'pendente' %}bg-amber-600 text-white shadow-sm{% else %}bg-white border border-slate-200 text-amber-600 hover:bg-amber-50{% endif %}">
             Pendentes
         </a>
-        <a href="?status=aprovado" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if status_filter == 'aprovado' %}bg-emerald-600 text-white shadow-sm{% else %}bg-white border border-slate-200 text-emerald-600 hover:bg-emerald-50{% endif %}">
+        <a href="?status=aprovado" class="whitespace-nowrap px-4 py-2 rounded-lg text-xs font-bold transition-all {% if status_filter == 'aprovado' %}bg-emerald-600 text-white shadow-sm{% else %}bg-white border border-slate-200 text-emerald-600 hover:bg-emerald-50{% endif %}">
             Aprovados
         </a>
-        <a href="?status=rejeitado" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if status_filter == 'rejeitado' %}bg-red-600 text-white shadow-sm{% else %}bg-white border border-slate-200 text-red-600 hover:bg-red-50{% endif %}">
+        <a href="?status=rejeitado" class="whitespace-nowrap px-4 py-2 rounded-lg text-xs font-bold transition-all {% if status_filter == 'rejeitado' %}bg-red-600 text-white shadow-sm{% else %}bg-white border border-slate-200 text-red-600 hover:bg-red-50{% endif %}">
             Rejeitados
         </a>
     </div>
 
-    <!-- Tabela de Abastecimentos -->
-    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+    <!-- Mobile Cards -->
+    <div class="md:hidden space-y-3">
+        {% for a in abastecimentos %}
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+            <div class="flex items-start justify-between mb-2">
+                <div>
+                    <div class="font-bold text-slate-900 text-sm">{{ a.utilizador.profile.nome|default:a.utilizador.email }}</div>
+                    <div class="text-xs text-slate-400 mt-0.5">{{ a.timestamp|date:"d/m/Y H:i" }}</div>
+                </div>
+                <div class="text-right shrink-0 ml-2">
+                    <div class="font-extrabold text-emerald-700 text-base">€ {{ a.valor|floatformat:2 }}</div>
+                    {% if a.status == 'aprovado' %}<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase">Aprovado</span>
+                    {% elif a.status == 'rejeitado' %}<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 uppercase">Rejeitado</span>
+                    {% else %}<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase">Pendente</span>{% endif %}
+                </div>
+            </div>
+            <div class="text-xs text-slate-500 mb-1">🚗 <span class="font-semibold">{{ a.viatura.matricula }}</span></div>
+            {% if a.metodo_pagamento == 'dinheiro' %}
+            <div class="text-xs text-emerald-600 font-semibold mb-1">💶 Dinheiro (€)</div>
+            {% elif a.cartao %}
+            <div class="text-xs text-blue-600 font-semibold mb-1">💳 Cartão ({{ a.cartao }})</div>
+            {% else %}
+            <div class="text-xs text-blue-600 font-semibold mb-1">💳 Cartão</div>
+            {% endif %}
+            {% if a.litros %}<div class="text-xs text-slate-400 mb-2">⛽ {{ a.litros|floatformat:2 }} L</div>{% endif %}
+            {% if a.status == 'rejeitado' and a.justificativa_admin %}
+            <div class="text-xs text-red-500 font-semibold mb-2">Motivo: {{ a.justificativa_admin }}</div>
+            {% endif %}
+            <div class="flex gap-2 mt-2">
+                {% if a.comprovativo %}
+                <button type="button" @click="abrirZoom('{{ a.comprovativo.url }}', '{{ a.comprovativo_texto_ocr|escapejs }}')"
+                    class="flex-1 px-2 py-1.5 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-bold transition-all">📄 Ver Recibo</button>
+                {% endif %}
+                {% if a.status == 'pendente' %}
+                <button type="button" @click="abrirAprovar('{% url 'backoffice_abastecimento_aprovar' a.id %}')"
+                    class="flex-1 px-2 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-bold transition-all">Aprovar</button>
+                <button type="button" @click="abrirRejeitar('{% url 'backoffice_abastecimento_rejeitar' a.id %}')"
+                    class="flex-1 px-2 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 text-xs font-bold transition-all">Rejeitar</button>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-500">
+            Nenhum pedido de abastecimento encontrado.
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Tabela de Abastecimentos (Desktop) -->
+    <div class="hidden md:block bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
@@ -102,7 +156,14 @@
                             {{ a.utilizador.profile.nome|default:a.utilizador.email }}
                         </td>
                         <td class="p-4 text-xs font-bold text-slate-500">
-                            {{ a.viatura.matricula }}
+                            <div>{{ a.viatura.matricula }}</div>
+                            {% if a.metodo_pagamento == 'dinheiro' %}
+                            <div class="text-[10px] text-emerald-600 font-semibold mt-0.5">💶 Dinheiro (€)</div>
+                            {% elif a.cartao %}
+                            <div class="text-[10px] text-blue-600 font-semibold mt-0.5">💳 Cartão ({{ a.cartao }})</div>
+                            {% else %}
+                            <div class="text-[10px] text-blue-600 font-semibold mt-0.5">💳 Cartão</div>
+                            {% endif %}
                         </td>
                         <td class="p-4 text-xs text-slate-500">
                             {{ a.timestamp|date:"d/m/Y H:i" }}
@@ -153,12 +214,11 @@
                             {% if a.status == 'pendente' %}
                             <div class="flex items-center justify-end gap-1.5">
                                 <!-- Botão Aprovar -->
-                                <form action="{% url 'backoffice_abastecimento_aprovar' a.id %}" method="POST" onsubmit="return confirm('Deseja de facto APROVAR esta despesa?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-bold transition-all">
-                                        Aprovar
-                                    </button>
-                                </form>
+                                <button type="button" 
+                                        @click="abrirAprovar('{% url 'backoffice_abastecimento_aprovar' a.id %}')"
+                                        class="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-bold transition-all">
+                                    Aprovar
+                                </button>
                                 <!-- Botão Rejeitar -->
                                 <button type="button" 
                                         @click="abrirRejeitar('{% url 'backoffice_abastecimento_rejeitar' a.id %}')"
@@ -242,6 +302,32 @@
                         Confirmar Rejeição
                     </button>
                 </div>
+            </form>
+        </div>
+    </div>
+    <!-- Modal Form de Confirmação de Aprovação -->
+    <div x-show="modalAprovar" 
+         x-cloak 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+         @keydown.escape.window="modalAprovar = false">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4" @click.away="modalAprovar = false">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                    ⛽
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Confirmar Aprovação</h3>
+            </div>
+            
+            <p class="text-sm text-slate-500">Deseja de facto <strong>APROVAR</strong> esta despesa de abastecimento?</p>
+            
+            <form :action="aprovarUrl" method="POST" class="flex items-center justify-end gap-2 pt-2">
+                {% csrf_token %}
+                <button type="button" @click="modalAprovar = false" class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition-all">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-bold transition-all">
+                    Confirmar
+                </button>
             </form>
         </div>
     </div>

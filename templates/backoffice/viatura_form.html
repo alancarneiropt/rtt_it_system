@@ -100,4 +100,99 @@
     </div>
 </div>
 {% endif %}
+
+{% if viatura %}
+<div class="mt-8 bg-white rounded-xl border border-slate-200 p-6 max-w-2xl">
+    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4">Histórico Geral da Viatura</h3>
+    
+    <!-- Abas Menores -->
+    <div class="border-b border-slate-100 mb-4 flex gap-4">
+        <button type="button" onclick="switchViaturaTab('atrib')" id="vtab-btn-atrib" class="vtab-btn border-b-2 border-blue-600 pb-2 text-xs font-bold text-blue-600">🔑 Condutores</button>
+        <button type="button" onclick="switchViaturaTab('km')" id="vtab-btn-km" class="vtab-btn border-b-2 border-transparent pb-2 text-xs font-medium text-slate-500 hover:text-slate-700">📈 Leitura KM</button>
+        <button type="button" onclick="switchViaturaTab('abast')" id="vtab-btn-abast" class="vtab-btn border-b-2 border-transparent pb-2 text-xs font-medium text-slate-500 hover:text-slate-700">⛽ Abastecimentos</button>
+    </div>
+
+    <!-- Condutores -->
+    <div id="vtab-content-atrib" class="vtab-pane space-y-3">
+        {% if atribuicoes %}
+            {% for at in atribuicoes %}
+            <div class="text-xs border-b border-slate-50 pb-2">
+                <div class="flex justify-between font-bold text-slate-700">
+                    <span>👤 {{ at.colaborador.profile.nome|default:at.colaborador.email }}</span>
+                    <span class="text-[10px] {% if not at.data_remocao %}text-emerald-600 bg-emerald-50{% else %}text-slate-400{% endif %} px-1.5 py-0.5 rounded">
+                        {% if not at.data_remocao %}Ativo atualmente{% else %}Concluído{% endif %}
+                    </span>
+                </div>
+                <div class="text-[10px] text-slate-400 mt-0.5">
+                    De: {{ at.data_atribuicao|date:"d/m/Y H:i" }} {% if at.data_remocao %} Até: {{ at.data_remocao|date:"d/m/Y H:i" }}{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-xs text-slate-400 py-2">Sem histórico de condutores.</p>
+        {% endif %}
+    </div>
+
+    <!-- Leitura KM -->
+    <div id="vtab-content-km" class="vtab-pane space-y-3 hidden">
+        {% if registos_km %}
+            {% for rk in registos_km %}
+            <div class="text-xs border-b border-slate-50 pb-2 flex justify-between items-center">
+                <div>
+                    <div class="font-bold text-slate-700">⚡ {{ rk.km }} KM</div>
+                    <div class="text-[10px] text-slate-400 mt-0.5">Por: {{ rk.utilizador.profile.nome|default:rk.utilizador.email }}</div>
+                </div>
+                <span class="text-[10px] text-slate-400 font-medium">📅 {{ rk.timestamp|date:"d/m/Y H:i" }}</span>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-xs text-slate-400 py-2">Nenhuma leitura de KM encontrada.</p>
+        {% endif %}
+    </div>
+
+    <!-- Abastecimentos -->
+    <div id="vtab-content-abast" class="vtab-pane space-y-3 hidden">
+        {% if abastecimentos %}
+            {% for ab in abastecimentos %}
+            <div class="text-xs border-b border-slate-50 pb-2">
+                <div class="flex justify-between font-bold text-slate-700">
+                    <span>⛽ {{ ab.litros|default:"0.0" }}L (€{{ ab.valor }})</span>
+                    <span class="text-[10px] text-slate-400 font-medium">📅 {{ ab.timestamp|date:"d/m/Y H:i" }}</span>
+                </div>
+                <div class="text-[10px] text-slate-400 mt-0.5">
+                    Pago via: {{ ab.get_metodo_pagamento_display }} | Cartão: {{ ab.cartao|default:"N/D" }}
+                </div>
+                <div class="text-[10px] text-slate-500 mt-0.5 font-semibold">
+                    Por: {{ ab.utilizador.profile.nome|default:ab.utilizador.email }}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-xs text-slate-400 py-2">Nenhum abastecimento registado para esta viatura.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function switchViaturaTab(tabId) {
+    const panes = document.querySelectorAll('.vtab-pane');
+    panes.forEach(pane => pane.classList.add('hidden'));
+    document.getElementById('vtab-content-' + tabId).classList.remove('hidden');
+
+    const btns = document.querySelectorAll('.vtab-btn');
+    btns.forEach(btn => {
+        btn.classList.remove('border-blue-600', 'text-blue-600');
+        btn.classList.add('border-transparent', 'text-slate-500');
+        btn.classList.remove('font-bold');
+        btn.classList.add('font-medium');
+    });
+
+    const activeBtn = document.getElementById('vtab-btn-' + tabId);
+    activeBtn.classList.remove('border-transparent', 'text-slate-500');
+    activeBtn.classList.add('border-blue-600', 'text-blue-600');
+    activeBtn.classList.remove('font-medium');
+    activeBtn.classList.add('font-bold');
+}
+</script>
+{% endif %}
 {% endblock %}

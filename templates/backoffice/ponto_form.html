@@ -57,14 +57,39 @@
             </div>
         </form>
 
-        <div class="mt-10 pt-6 border-t border-slate-100">
+        <div class="mt-10 pt-6 border-t border-slate-100" x-data="{ modalEliminar: false }">
             <h3 class="text-sm font-bold text-red-600 uppercase tracking-wider mb-3">Zona de Perigo</h3>
-            <form action="{% url 'backoffice_ponto_delete' marcacao.pk %}" method="post" onsubmit="return confirm('Tem a certeza que deseja eliminar esta marcação permanentemente?')">
-                {% csrf_token %}
-                <button type="submit" class="text-xs font-semibold text-red-500 hover:text-red-700 underline">
-                    Eliminar marcação permanentemente
-                </button>
-            </form>
+            
+            <button type="button" @click="modalEliminar = true" class="text-xs font-semibold text-red-500 hover:text-red-700 underline">
+                Eliminar marcação permanentemente
+            </button>
+
+            <!-- Modal Form de Confirmação de Eliminação -->
+            <div x-show="modalEliminar" 
+                 x-cloak 
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+                 @keydown.escape.window="modalEliminar = false">
+                <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4 text-left" @click.away="modalEliminar = false">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center text-xl font-bold">
+                            ⚠️
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900">Confirmar Eliminação</h3>
+                    </div>
+                    
+                    <p class="text-sm text-slate-500">Tem a certeza que deseja eliminar esta marcação permanentemente? Esta ação é <strong>irreversível</strong>.</p>
+                    
+                    <form action="{% url 'backoffice_ponto_delete' marcacao.pk %}" method="post" class="flex items-center justify-end gap-2 pt-2">
+                        {% csrf_token %}
+                        <button type="button" @click="modalEliminar = false" class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition-all">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-xs font-bold transition-all">
+                            Confirmar
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>

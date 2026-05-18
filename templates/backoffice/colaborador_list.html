@@ -12,19 +12,54 @@
 </div>
 
 <form method="get" class="mb-6 flex flex-col sm:flex-row gap-2">
-    <div class="relative flex-1 max-w-md">
+    <div class="relative flex-1">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
         </div>
         <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Pesquisar por nome ou email..."
-            class="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
+            class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
     </div>
-    <button type="submit" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-slate-600 text-white text-sm font-medium hover:bg-slate-700 transition-colors">
+    <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-slate-600 text-white text-sm font-medium hover:bg-slate-700 transition-colors">
         Pesquisar
     </button>
 </form>
 
-<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+<!-- Mobile Cards (visíveis só em mobile) -->
+<div class="md:hidden space-y-3 mb-4">
+    {% for p in perfis %}
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <div class="flex items-center justify-between mb-3">
+            <div>
+                <div class="font-bold text-slate-900 text-sm">{{ p.nome }}</div>
+                <div class="text-xs text-slate-500 mt-0.5 break-all">{{ p.user.email }}</div>
+            </div>
+            {% if p.user.is_staff %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 shrink-0">Admin</span>
+            {% else %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 shrink-0">Colaborador</span>
+            {% endif %}
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'backoffice_colaborador_detail' p.pk %}"
+               class="flex-1 inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-medium hover:bg-slate-50 transition-colors">
+                Ver marcações
+            </a>
+            <a href="{% url 'backoffice_colaborador_edit' p.pk %}"
+               class="flex-1 inline-flex items-center justify-center px-3 py-2 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 transition-colors">
+                Editar
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-500">
+        <p>Nenhum colaborador encontrado.</p>
+        <a href="{% url 'backoffice_colaborador_create' %}" class="mt-2 inline-block text-blue-600 hover:underline text-sm">Cadastrar o primeiro</a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Desktop Table (oculta em mobile) -->
+<div class="hidden md:block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-slate-200 text-sm">
             <thead class="bg-slate-50">
@@ -38,16 +73,16 @@
             <tbody class="divide-y divide-slate-100">
                 {% for p in perfis %}
                 <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">{{ p.nome }}</td>
-                    <td class="px-6 py-4 text-slate-600 whitespace-nowrap">{{ p.user.email }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 font-medium text-slate-900">{{ p.nome }}</td>
+                    <td class="px-6 py-4 text-slate-600">{{ p.user.email }}</td>
+                    <td class="px-6 py-4">
                         {% if p.user.is_staff %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Sim</span>
                         {% else %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">Não</span>
                         {% endif %}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                    <td class="px-6 py-4 text-right">
                         <div class="flex items-center gap-2 justify-end">
                             <a href="{% url 'backoffice_colaborador_detail' p.pk %}"
                                class="inline-flex items-center px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 text-xs font-medium hover:bg-slate-50 transition-colors">

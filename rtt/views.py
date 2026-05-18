@@ -168,7 +168,6 @@ def km_registo_view(request):
         data = json.loads(request.body)
         km_valor = data.get('km')
         viatura_id = data.get('viatura_id')
-        descricao = data.get('descricao', '')
         
         if km_valor is None or not viatura_id:
             return JsonResponse({'sucesso': False, 'erro': 'KM e Viatura são obrigatórios.'}, 400)
@@ -182,13 +181,12 @@ def km_registo_view(request):
                 'erro': f'KM inválido. O KM atual da viatura ({viatura.matricula}) é {viatura.km_atual}.'
             }, 400)
             
-        # Criar registro guardando o KM anterior da viatura
+        # Criar registo guardando o KM anterior da viatura
         RegistroKM.objects.create(
             utilizador=request.user,
             km=km_valor,
             km_anterior=viatura.km_atual,
             viatura=viatura,
-            descricao=descricao
         )
         
         # Atualizar KM atual da viatura
@@ -219,7 +217,6 @@ def km_status_view(request):
                 'timestamp': timezone.localtime(r.timestamp).strftime('%H:%M'),
                 'km': r.km,
                 'viatura': r.viatura.matricula if r.viatura else '---',
-                'descricao': r.descricao,
                 'percorrido': r.distancia
             })
 
@@ -647,7 +644,6 @@ def km_registos_todos_view(request):
             'timestamp': timezone.localtime(r.timestamp).strftime('%H:%M'),
             'km': r.km,
             'viatura': r.viatura.matricula if r.viatura else '---',
-            'descricao': r.descricao,
             'percorrido': r.distancia
         })
     return _json(lista)
@@ -699,7 +695,7 @@ def km_historico_view(request):
 
 
 from .utils_ocr import processar_recibo_ocr
-from .models import Abastecimento
+from .models import Abastecimento, Cartao
 
 @csrf_exempt
 @require_POST
@@ -714,10 +710,35 @@ def abastecimento_registar_view(request):
         km = request.POST.get('km')
         valor = request.POST.get('valor')
         litros = request.POST.get('litros')
+        metodo_pagamento = request.POST.get('metodo_pagamento', 'dinheiro')
+        cartao = request.POST.get('cartao')
         comprovativo = request.FILES.get('comprovativo')
 
-        if not viatura_id or not km or not valor:
-            return _json({'sucesso': False, 'erro': 'Campos obrigatórios em falta.'})
+        if not viatura_id or not km or not valor or not litros:
+            return _json({'sucesso': False, 'erro': 'Campos obrigatórios em falta: Viatura, KM, Valor e Litros são todos obrigatórios.'})
+
+        # Validar método de pagamento e cartão
+        cartao_obj = None
+        if metodo_pagamento == 'cartao':
+            if not cartao:
+                return _json({'sucesso': False, 'erro': 'Por favor, indique os 4 últimos dígitos do cartão utilizado.'})
+            cartao_clean = str(cartao).strip()
+            if len(cartao_clean) != 4 or not cartao_clean.isdigit():
+                return _json({'sucesso': False, 'erro': 'O número de cartão deve ter exatamente os 4 últimos dígitos.'})
+            
+            # Verificar se utilizador tem cartão ativo associado
+            cartao_obj = Cartao.objects.filter(colaborador_atual=user, ativo=True).first()
+            if not cartao_obj:
+                return _json({'sucesso': False, 'erro': 'Não tem nenhum cartão de combustível ativo associado à sua conta. Por favor, contacte o administrador.'})
+            
+            # Validar os 4 últimos dígitos
+            db_numero = str(cartao_obj.numero).strip()
+            if len(db_numero) < 4 or db_numero[-4:] != cartao_clean:
+                return _json({'sucesso': False, 'erro': 'Os 4 últimos dígitos introduzidos não correspondem ao seu cartão associado.'})
+            
+            cartao_final_str = f"{cartao_obj.nome} (...{cartao_clean})"
+        else:
+            cartao_final_str = "Dinheiro (€)"
 
         # Obter viatura
         try:
@@ -735,9 +756,13 @@ def abastecimento_registar_view(request):
         if valor_val <= 0:
             return _json({'sucesso': False, 'erro': 'O valor deve ser superior a zero.'})
 
-        litros_val = None
-        if litros:
+        # Validar litros
+        try:
             litros_val = Decimal(str(litros).replace(',', '.'))
+            if litros_val <= 0:
+                return _json({'sucesso': False, 'erro': 'A quantidade de litros deve ser superior a zero.'})
+        except (TypeError, ValueError, InvalidOperation):
+            return _json({'sucesso': False, 'erro': 'Quantidade de litros inválida.'})
 
         # Criação do abastecimento
         abast = Abastecimento(
@@ -746,6 +771,9 @@ def abastecimento_registar_view(request):
             km=km_val,
             valor=valor_val,
             litros=litros_val,
+            metodo_pagamento=metodo_pagamento,
+            cartao=cartao_final_str,
+            cartao_ref=cartao_obj,
             comprovativo=comprovativo,
             status='pendente'
         )
@@ -783,10 +811,13 @@ def abastecimento_minhas_view(request):
         lista.append({
             'id': a.id,
             'data': timezone.localtime(a.timestamp).strftime('%d/%m/%Y'),
+            'data_iso': timezone.localtime(a.timestamp).strftime('%Y-%m-%d'),
             'hora': timezone.localtime(a.timestamp).strftime('%H:%M'),
             'km': a.km,
             'valor': float(a.valor),
             'litros': float(a.litros) if a.litros else None,
+            'metodo_pagamento': a.metodo_pagamento or 'dinheiro',
+            'cartao': a.cartao or '---',
             'comprovativo_url': a.comprovativo.url if a.comprovativo else None,
             'status': a.status,
             'status_label': a.get_status_display(),

@@ -11,6 +11,18 @@
     <a href="{% url 'backoffice_km_create' %}" class="inline-flex items-center px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-medium hover:bg-slate-800">+ Novo Registo</a>
 </div>
 
+<!-- Alertas de feedback -->
+{% if request.GET.eliminado %}
+<div class="mb-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center gap-2">
+    ✅ Registo eliminado com sucesso.
+</div>
+{% endif %}
+{% if request.GET.erro_senha %}
+<div class="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm font-semibold flex items-center gap-2">
+    🔒 Senha incorreta. O registo não foi eliminado.
+</div>
+{% endif %}
+
 <!-- Filtros -->
 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6">
     <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:flex lg:items-end gap-4">
@@ -75,7 +87,68 @@
 </div>
 {% endif %}
 
-<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+<!-- Modal de Confirmação de Eliminação com Senha -->
+<div id="modalEliminar" style="display:none; position:fixed; inset:0; z-index:1000; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:1rem;" aria-modal="true">
+    <div style="background:#fff; border-radius:1rem; width:100%; max-width:420px; padding:1.5rem; box-shadow:0 25px 50px rgba(0,0,0,0.25);">
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem;">
+            <span style="font-size:1.5rem;">🔒</span>
+            <h3 style="font-size:1.1rem; font-weight:800; color:#1e293b; margin:0;">Confirmar Eliminação</h3>
+        </div>
+        <p style="font-size:0.85rem; color:#64748b; margin-bottom:1.25rem; line-height:1.6;">
+            Esta ação é <strong>irreversível</strong>. Para confirmar a eliminação do registo, introduza a senha de administrador.
+        </p>
+        <form id="formEliminar" method="POST" action="">
+            {% csrf_token %}
+            <input type="hidden" name="referer" id="eliminarReferer" value="">
+            <div style="margin-bottom:1rem;">
+                <label style="display:block; font-size:0.75rem; font-weight:700; color:#475569; text-transform:uppercase; margin-bottom:0.4rem; letter-spacing:0.05em;">Senha de Confirmação</label>
+                <input type="password" name="senha" id="inputSenhaEliminar" autocomplete="off" placeholder="••••"
+                    style="width:100%; padding:0.75rem; border:1.5px solid #e2e8f0; border-radius:8px; font-size:1.1rem; font-weight:700; text-align:center; letter-spacing:0.25em; outline:none; box-sizing:border-box;"
+                    onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
+                <p id="erroSenhaModal" style="display:none; color:#ef4444; font-size:0.8rem; margin-top:0.4rem; font-weight:600;">⚠️ Senha incorreta. Tente novamente.</p>
+            </div>
+            <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+                <button type="button" onclick="fecharModalEliminar()"
+                    style="padding:0.65rem 1.25rem; background:#f1f5f9; color:#475569; border:none; border-radius:8px; font-weight:700; font-size:0.9rem; cursor:pointer;">
+                    Cancelar
+                </button>
+                <button type="submit"
+                    style="padding:0.65rem 1.25rem; background:#ef4444; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:0.9rem; cursor:pointer;">
+                    🗑️ Eliminar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Mobile Cards -->
+<div class="md:hidden space-y-3 mb-4">
+    {% for r in registos %}
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <div class="flex items-start justify-between mb-2">
+            <div>
+                <div class="font-bold text-slate-900 text-sm">{{ r.utilizador.profile.nome }}</div>
+                <div class="text-xs text-slate-400 mt-0.5">{{ r.timestamp|date:"d/m/Y" }} às {{ r.timestamp|date:"H:i" }}</div>
+            </div>
+            <span class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-black shrink-0">{{ r.km }} KM</span>
+        </div>
+        <div class="text-xs text-slate-500 mb-3">
+            🚗 <span class="font-semibold">{{ r.viatura.matricula|default:"---" }}</span>
+        </div>
+        <button type="button" onclick="abrirModalEliminar('{% url 'backoffice_km_delete' r.pk %}')"
+            class="w-full px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold border border-red-200 transition-all">
+            🗑️ Eliminar Registo
+        </button>
+    </div>
+    {% empty %}
+    <div class="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-500">
+        Nenhum registo de KM encontrado.
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Desktop Table -->
+<div class="hidden md:block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-slate-200 text-sm">
             <thead class="bg-slate-50">
@@ -83,8 +156,8 @@
                     <th class="px-6 py-3 text-left font-semibold text-slate-600">Data/Hora</th>
                     <th class="px-6 py-3 text-left font-semibold text-slate-600">Colaborador</th>
                     <th class="px-6 py-3 text-left font-semibold text-slate-600">Veículo</th>
-                    <th class="px-6 py-3 text-left font-semibold text-slate-600">Descrição</th>
                     <th class="px-6 py-3 text-center font-semibold text-slate-600">KM</th>
+                    <th class="px-6 py-3 text-center font-semibold text-slate-600">Ações</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -96,18 +169,60 @@
                     </td>
                     <td class="px-6 py-4 text-slate-600">{{ r.utilizador.profile.nome }}</td>
                     <td class="px-6 py-4 text-slate-500 font-mono text-xs">{{ r.viatura.matricula|default:"---" }}</td>
-                    <td class="px-6 py-4 text-slate-600 text-xs">{{ r.descricao|default:"---" }}</td>
                     <td class="px-6 py-4 text-center">
                         <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-bold">{{ r.km }}</span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <button type="button"
+                            onclick="abrirModalEliminar('{% url 'backoffice_km_delete' r.pk %}')"
+                            title="Eliminar este registo"
+                            class="px-2.5 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold border border-red-200 transition-all">
+                            🗑️ Eliminar
+                        </button>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="px-6 py-12 text-center text-slate-500">Nenhum registo de KM encontrado para os filtros selecionados.</td>
+                    <td colspan="5" class="px-6 py-12 text-center text-slate-500">Nenhum registo de KM encontrado para os filtros selecionados.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+    var modal = document.getElementById('modalEliminar');
+
+    function abrirModalEliminar(actionUrl) {
+        document.getElementById('formEliminar').action = actionUrl;
+        document.getElementById('eliminarReferer').value = window.location.href;
+        document.getElementById('inputSenhaEliminar').value = '';
+        document.getElementById('erroSenhaModal').style.display = 'none';
+        modal.style.display = 'flex';
+        setTimeout(function() { document.getElementById('inputSenhaEliminar').focus(); }, 150);
+    }
+
+    function fecharModalEliminar() {
+        modal.style.display = 'none';
+    }
+
+    // Fechar ao clicar fora do modal
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) fecharModalEliminar();
+    });
+
+    // Fechar com Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') fecharModalEliminar();
+    });
+
+    // Auto-focar no campo de senha ao abrir o modal via Enter
+    document.getElementById('inputSenhaEliminar').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('formEliminar').dispatchEvent(new Event('submit'));
+        }
+    });
+</script>
 {% endblock %}
