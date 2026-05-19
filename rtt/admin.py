@@ -94,3 +94,27 @@ class MarcacaoAdmin(admin.ModelAdmin):
             )
         return '-'
     link_mapa.short_description = 'Mapa'
+
+
+from .models import Viatura, RegistroKM, Abastecimento
+
+@admin.register(Viatura)
+class ViaturaAdmin(admin.ModelAdmin):
+    list_display = ('matricula', 'marca_modelo', 'km_inicial', 'km_atual', 'ativo')
+    list_editable = ('km_atual', 'ativo')
+    search_fields = ('matricula', 'marca_modelo')
+
+
+@admin.register(RegistroKM)
+class RegistroKMAdmin(admin.ModelAdmin):
+    list_display = ('utilizador', 'viatura', 'km', 'km_anterior', 'timestamp')
+    list_filter = ('utilizador', 'viatura')
+    search_fields = ('utilizador__email', 'viatura__matricula')
+
+
+@admin.register(Abastecimento)
+class AbastecimentoAdmin(admin.ModelAdmin):
+    list_display = ('utilizador', 'viatura', 'valor', 'litros', 'km', 'status', 'timestamp')
+    list_filter = ('status', 'utilizador', 'viatura')
+    list_editable = ('status',)
+    search_fields = ('utilizador__email', 'viatura__matricula')

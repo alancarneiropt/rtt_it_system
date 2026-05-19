@@ -1,7 +1,7 @@
 # Formulários do backoffice (cadastro de colaborador, departamento, jornada)
 from django import forms
 from django.contrib.auth import get_user_model
-from .models import Profile, Departamento, Jornada
+from .models import Profile, Departamento, Jornada, Viatura, RegistroKM, Marcacao, Cartao
 
 User = get_user_model()
 
@@ -52,20 +52,24 @@ class ColaboradorForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['nome', 'endereco', 'data_nascimento', 'departamento', 'jornada']
+        fields = ['nome', 'endereco', 'data_nascimento', 'departamento', 'viatura', 'cartao']
         widgets = {
             'nome': forms.TextInput(attrs={'placeholder': 'Nome completo', 'class': 'w-full px-3 py-2 border border-slate-300 rounded-lg'}),
             'endereco': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Morada completa', 'class': 'w-full px-3 py-2 border border-slate-300 rounded-lg'}),
             'data_nascimento': forms.DateInput(attrs={'type': 'date', 'class': 'w-full px-3 py-2 border border-slate-300 rounded-lg'}),
             'departamento': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-slate-300 rounded-lg'}),
-            'jornada': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-slate-300 rounded-lg'}),
+            'viatura': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-slate-300 rounded-lg'}),
+            'cartao': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-slate-300 rounded-lg'}),
         }
 
     def __init__(self, *args, **kwargs):
         self.edit_user = kwargs.pop('edit_user', None)
         super().__init__(*args, **kwargs)
         self.fields['departamento'].queryset = Departamento.objects.filter(ativo=True).order_by('nome')
-        self.fields['jornada'].queryset = Jornada.objects.filter(ativo=True).order_by('nome')
+        self.fields['viatura'].queryset = Viatura.objects.filter(ativo=True).order_by('matricula')
+        self.fields['cartao'].queryset = Cartao.objects.filter(ativo=True).order_by('nome')
+        self.fields['cartao'].required = False
+        self.fields['cartao'].label = "Cartão de Combustível"
         self.fields['email'].widget.attrs['class'] = 'w-full px-3 py-2 border border-slate-300 rounded-lg'
         self.fields['password'].widget.attrs['class'] = 'w-full px-3 py-2 border border-slate-300 rounded-lg'
         if self.edit_user:
@@ -83,7 +87,7 @@ class ColaboradorForm(forms.ModelForm):
                 raise forms.ValidationError("Este email já está registado no sistema.")
         return email
 
-    def save(self, commit=True):
+    def save(self, commit=True, request=None):
         email = self.cleaned_data.get('email')
         password = self.cleaned_data.get('password')
         acesso_backoffice = self.cleaned_data.get('acesso_backoffice', False)
@@ -91,10 +95,23 @@ class ColaboradorForm(forms.ModelForm):
         if self.edit_user:
             profile = super().save(commit=False)
             user = self.edit_user
+            user_changed = False
+
             if password:
                 user.set_password(password)
-            user.is_staff = acesso_backoffice
-            user.save()
+                user_changed = True
+                # Se temos acesso ao request, manter a sessão do admin válida
+                if request and request.user == user:
+                    from django.contrib.auth import update_session_auth_hash
+                    update_session_auth_hash(request, user)
+
+            if user.is_staff != acesso_backoffice:
+                user.is_staff = acesso_backoffice
+                user_changed = True
+
+            if user_changed:
+                user.save()
+
             if commit:
                 profile.save()
             return profile
@@ -110,3 +127,104 @@ class ColaboradorForm(forms.ModelForm):
             if commit:
                 profile.save()
             return profile
+
+
+class ViaturaForm(forms.ModelForm):
+    """Formulário para criar/editar Viaturas."""
+    colaborador_atual = forms.ModelChoiceField(
+        queryset=User.objects.none(),
+        required=False,
+        label="Colaborador a utilizar",
+        widget=forms.Select(attrs={'class': INPUT_CLASS})
+    )
+
+    class Meta:
+        model = Viatura
+        fields = ['matricula', 'marca_modelo', 'km_inicial', 'km_atual', 'colaborador_atual', 'ativo']
+        widgets = {
+            'matricula': forms.TextInput(attrs={'placeholder': 'Ex: 00-AA-00', 'class': INPUT_CLASS}),
+            'marca_modelo': forms.TextInput(attrs={'placeholder': 'Ex: Renault Clio', 'class': INPUT_CLASS}),
+            'km_inicial': forms.NumberInput(attrs={'class': INPUT_CLASS}),
+            'km_atual': forms.NumberInput(attrs={'class': INPUT_CLASS, 'placeholder': 'KM atual da viatura'}),
+            'ativo': forms.CheckboxInput(attrs={'class': 'rounded border-slate-300'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['colaborador_atual'].queryset = User.objects.filter(profile__isnull=False).order_by('profile__nome')
+        # Sobrescrever o rótulo exibido para cada opção para usar o nome do perfil
+        self.fields['colaborador_atual'].label_from_instance = lambda obj: obj.profile.nome or obj.email
+
+
+class CartaoForm(forms.ModelForm):
+    """Formulário para criar/editar Cartões de Combustível."""
+    colaborador_atual = forms.ModelChoiceField(
+        queryset=User.objects.none(),
+        required=False,
+        label="Colaborador a utilizar",
+        widget=forms.Select(attrs={'class': INPUT_CLASS})
+    )
+
+    class Meta:
+        model = Cartao
+        fields = ['nome', 'numero', 'colaborador_atual', 'ativo']
+        widgets = {
+            'nome': forms.TextInput(attrs={'placeholder': 'Ex: Galp Frota', 'class': INPUT_CLASS}),
+            'numero': forms.TextInput(attrs={'placeholder': 'Ex: 1234567890', 'class': INPUT_CLASS}),
+            'ativo': forms.CheckboxInput(attrs={'class': 'rounded border-slate-300'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['colaborador_atual'].queryset = User.objects.filter(profile__isnull=False).order_by('profile__nome')
+        self.fields['colaborador_atual'].label_from_instance = lambda obj: obj.profile.nome or obj.email
+
+
+class RegistroKMForm(forms.ModelForm):
+    """Formulário para o administrador lançar KM manualmente."""
+    class Meta:
+        model = RegistroKM
+        fields = ['utilizador', 'viatura', 'km']
+        widgets = {
+            'utilizador': forms.Select(attrs={'class': INPUT_CLASS}),
+            'viatura': forms.Select(attrs={'class': INPUT_CLASS}),
+            'km': forms.NumberInput(attrs={'class': INPUT_CLASS, 'placeholder': 'KM Atual'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['utilizador'].queryset = User.objects.filter(profile__isnull=False).order_by('profile__nome')
+        self.fields['viatura'].queryset = Viatura.objects.filter(ativo=True).order_by('matricula')
+
+class MarcacaoForm(forms.ModelForm):
+    """Formulário para editar marcações de ponto manualmente."""
+    data = forms.DateField(label='Data', widget=forms.DateInput(attrs={'type': 'date', 'class': INPUT_CLASS}))
+    hora = forms.TimeField(label='Hora', widget=forms.TimeInput(attrs={'type': 'time', 'class': INPUT_CLASS}))
+
+    class Meta:
+        model = Marcacao
+        fields = ['tipo', 'justificativa', 'aprovado']
+        widgets = {
+            'tipo': forms.Select(attrs={'class': INPUT_CLASS}),
+            'justificativa': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Motivo da alteração', 'class': INPUT_CLASS}),
+            'aprovado': forms.CheckboxInput(attrs={'class': 'rounded border-slate-300'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            from django.utils import timezone
+            # Converter timestamp para local time antes de exibir no form
+            dt = timezone.localtime(self.instance.timestamp)
+            self.fields['data'].initial = dt.date()
+            self.fields['hora'].initial = dt.time()
+
+    def save(self, commit=True):
+        from django.utils import timezone
+        import datetime
+        data = self.cleaned_data['data']
+        hora = self.cleaned_data['hora']
+        # Combinar data e hora e tornar aware
+        dt = datetime.datetime.combine(data, hora)
+        self.instance.timestamp = timezone.make_aware(dt)
+        return super().save(commit=commit)

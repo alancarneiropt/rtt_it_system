@@ -1,0 +1,260 @@
+{% extends "backoffice/base.html" %}
+{% load static %}
+
+{% block title %}Histórico e Auditoria{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <h1 class="text-2xl font-bold text-slate-800">Histórico e Auditoria</h1>
+    
+    <!-- Botões de Exportação Premium -->
+    <div class="flex items-center gap-2 flex-wrap">
+        <a href="{% url 'backoffice_historico_export_excel' %}?data_inicio={{ data_inicio|date:'Y-m-d' }}&data_fim={{ data_fim|date:'Y-m-d' }}{% if viatura_selecionada %}&viatura={{ viatura_selecionada }}{% endif %}{% if cartao_selecionado %}&cartao={{ cartao_selecionado }}{% endif %}{% if colaborador_selecionado %}&colaborador={{ colaborador_selecionado }}{% endif %}" 
+           class="inline-flex items-center px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-sm transition-all gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            Exportar Excel
+        </a>
+        <a href="{% url 'backoffice_historico_export_pdf' %}?data_inicio={{ data_inicio|date:'Y-m-d' }}&data_fim={{ data_fim|date:'Y-m-d' }}{% if viatura_selecionada %}&viatura={{ viatura_selecionada }}{% endif %}{% if cartao_selecionado %}&cartao={{ cartao_selecionado }}{% endif %}{% if colaborador_selecionado %}&colaborador={{ colaborador_selecionado }}{% endif %}" 
+           target="_blank"
+           class="inline-flex items-center px-4 py-2.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold shadow-sm transition-all gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            Exportar PDF
+        </a>
+    </div>
+</div>
+
+<!-- Filtros de Pesquisa -->
+<form method="get" class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Data Início</label>
+            <input type="date" name="data_inicio" value="{{ data_inicio|date:'Y-m-d' }}" 
+                   class="w-full rounded-lg border-slate-300 text-sm focus:ring-blue-500 focus:border-blue-500 font-medium">
+        </div>
+        
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Data Fim</label>
+            <input type="date" name="data_fim" value="{{ data_fim|date:'Y-m-d' }}" 
+                   class="w-full rounded-lg border-slate-300 text-sm focus:ring-blue-500 focus:border-blue-500 font-medium">
+        </div>
+
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Viatura</label>
+            <select name="viatura" class="w-full rounded-lg border-slate-300 text-sm focus:ring-blue-500 focus:border-blue-500 font-medium">
+                <option value="">Todas as viaturas</option>
+                {% for v in viaturas %}
+                <option value="{{ v.pk }}" {% if viatura_selecionada == v.pk|stringformat:"s" %}selected{% endif %}>{{ v.matricula }} - {{ v.marca_modelo }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Cartão</label>
+            <select name="cartao" class="w-full rounded-lg border-slate-300 text-sm focus:ring-blue-500 focus:border-blue-500 font-medium">
+                <option value="">Todos os cartões</option>
+                {% for c in cartoes %}
+                <option value="{{ c.pk }}" {% if cartao_selecionado == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.nome }} ({{ c.numero|slice:"-4:" }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Colaborador</label>
+            <select name="colaborador" class="w-full rounded-lg border-slate-300 text-sm focus:ring-blue-500 focus:border-blue-500 font-medium">
+                <option value="">Todos os colaboradores</option>
+                {% for col in colaboradores %}
+                <option value="{{ col.pk }}" {% if colaborador_selecionado == col.pk|stringformat:"s" %}selected{% endif %}>{{ col.profile.nome|default:col.email }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    
+    <div class="mt-4 flex justify-end gap-2">
+        <a href="{% url 'backoffice_historico' %}" class="px-5 py-2 rounded-lg bg-slate-100 text-slate-600 text-sm font-bold hover:bg-slate-200 transition-colors">
+            Limpar Filtros
+        </a>
+        <button type="submit" class="px-6 py-2 rounded-lg bg-slate-800 text-white text-sm font-bold hover:bg-slate-900 shadow-sm transition-colors">
+            Pesquisar
+        </button>
+    </div>
+</form>
+
+<!-- Abas de Navegação (Tabs) Táteis -->
+<div class="border-b border-slate-200 mb-6 overflow-x-auto">
+    <nav class="flex gap-4 min-w-max" aria-label="Tabs">
+        <button type="button" onclick="switchTab('consolidado')" id="tab-btn-consolidado" 
+                class="tab-btn border-b-2 border-blue-600 py-3 px-1 text-sm font-bold text-blue-600 transition-all flex items-center gap-2 whitespace-nowrap">
+            📊 Comparativo (Consolidado)
+            <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-black">{{ consolidated_logs|length }}</span>
+        </button>
+        <button type="button" onclick="switchTab('atribuicoes')" id="tab-btn-atribuicoes" 
+                class="tab-btn border-b-2 border-transparent py-3 px-1 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-all flex items-center gap-2 whitespace-nowrap">
+            🔑 Atribuições
+            <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full text-xs font-black">{{ tab_atribuicoes|length }}</span>
+        </button>
+        <button type="button" onclick="switchTab('abastecimentos')" id="tab-btn-abastecimentos" 
+                class="tab-btn border-b-2 border-transparent py-3 px-1 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-all flex items-center gap-2 whitespace-nowrap">
+            ⛽ Abastecimentos
+            <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full text-xs font-black">{{ tab_abastecimentos|length }}</span>
+        </button>
+        <button type="button" onclick="switchTab('km')" id="tab-btn-km" 
+                class="tab-btn border-b-2 border-transparent py-3 px-1 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-all flex items-center gap-2 whitespace-nowrap">
+            📈 Registos de KM
+            <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full text-xs font-black">{{ tab_km|length }}</span>
+        </button>
+    </nav>
+</div>
+
+<!-- Conteúdos das Abas -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+    
+    <!-- Tab 1: Consolidado / Comparativo -->
+    <div id="tab-content-consolidado" class="tab-pane space-y-6 relative border-l-2 border-slate-100 pl-6 ml-3">
+        {% if consolidated_logs %}
+            {% for log in consolidated_logs %}
+            <div class="relative group">
+                <!-- Timeline Indicator Dot -->
+                <div class="absolute -left-[35px] top-1.5 w-4 h-4 rounded-full border-4 border-white shadow-sm transition-all
+                    {% if log.tipo == 'atribuicao_viatura' %}bg-sky-500
+                    {% elif log.tipo == 'atribuicao_cartao' %}bg-indigo-500
+                    {% elif log.tipo == 'abastecimento' %}bg-emerald-500
+                    {% else %}bg-amber-500{% endif %}"></div>
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-slate-400">
+                        📅 {{ log.data|date:"d/m/Y H:i" }}
+                    </span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider
+                        {% if log.tipo == 'atribuicao_viatura' %}bg-sky-50 text-sky-700 border border-sky-200
+                        {% elif log.tipo == 'atribuicao_cartao' %}bg-indigo-50 text-indigo-700 border border-indigo-200
+                        {% elif log.tipo == 'abastecimento' %}bg-emerald-50 text-emerald-700 border border-emerald-200
+                        {% else %}bg-amber-50 text-amber-700 border border-amber-200{% endif %}">
+                        {{ log.tipo_label }}
+                    </span>
+                </div>
+                <h4 class="text-sm font-bold text-slate-800 mt-1">{{ log.descricao }}</h4>
+                <p class="text-xs text-slate-500 mt-0.5 font-medium">{{ log.detalhes }}</p>
+                <div class="text-[10px] text-slate-400 mt-1">Colaborador: <span class="font-bold text-slate-600">{{ log.colaborador }}</span> | Recurso: <span class="font-bold text-slate-600">{{ log.recurso }}</span></div>
+                
+                {% if not forloop.last %}<hr class="border-slate-100 mt-4">{% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-12 text-slate-400">
+                <svg class="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <p class="text-sm font-bold">Nenhum registo encontrado para os filtros selecionados.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Tab 2: Atribuições -->
+    <div id="tab-content-atribuicoes" class="tab-pane space-y-6 relative border-l-2 border-slate-100 pl-6 ml-3 hidden">
+        {% if tab_atribuicoes %}
+            {% for log in tab_atribuicoes %}
+            <div class="relative">
+                <div class="absolute -left-[35px] top-1.5 w-4 h-4 rounded-full border-4 border-white shadow-sm 
+                    {% if log.tipo == 'atribuicao_viatura' %}bg-sky-500{% else %}bg-indigo-500{% endif %}"></div>
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-slate-400">📅 {{ log.data|date:"d/m/Y H:i" }}</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider
+                        {% if log.tipo == 'atribuicao_viatura' %}bg-sky-50 text-sky-700 border border-sky-200
+                        {% else %}bg-indigo-50 text-indigo-700 border border-indigo-200{% endif %}">
+                        {{ log.tipo_label }}
+                    </span>
+                </div>
+                <h4 class="text-sm font-bold text-slate-800 mt-1">{{ log.descricao }}</h4>
+                <p class="text-xs text-slate-500 mt-0.5 font-medium">{{ log.detalhes }}</p>
+                
+                {% if not forloop.last %}<hr class="border-slate-100 mt-4">{% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-12 text-slate-400">
+                <p class="text-sm font-bold">Nenhum registo de atribuição encontrado.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Tab 3: Abastecimentos -->
+    <div id="tab-content-abastecimentos" class="tab-pane space-y-6 relative border-l-2 border-slate-100 pl-6 ml-3 hidden">
+        {% if tab_abastecimentos %}
+            {% for log in tab_abastecimentos %}
+            <div class="relative">
+                <div class="absolute -left-[35px] top-1.5 w-4 h-4 rounded-full border-4 border-white shadow-sm bg-emerald-500"></div>
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-slate-400">📅 {{ log.data|date:"d/m/Y H:i" }}</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wider">
+                        Abastecimento
+                    </span>
+                </div>
+                <h4 class="text-sm font-bold text-slate-800 mt-1">{{ log.descricao }}</h4>
+                <p class="text-xs text-slate-500 mt-0.5 font-medium">{{ log.detalhes }}</p>
+                
+                {% if not forloop.last %}<hr class="border-slate-100 mt-4">{% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-12 text-slate-400">
+                <p class="text-sm font-bold">Nenhum abastecimento registado neste período.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Tab 4: Registos de KM -->
+    <div id="tab-content-km" class="tab-pane space-y-6 relative border-l-2 border-slate-100 pl-6 ml-3 hidden">
+        {% if tab_km %}
+            {% for log in tab_km %}
+            <div class="relative">
+                <div class="absolute -left-[35px] top-1.5 w-4 h-4 rounded-full border-4 border-white shadow-sm bg-amber-500"></div>
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-slate-400">📅 {{ log.data|date:"d/m/Y H:i" }}</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-200 uppercase tracking-wider">
+                        Registo de KM
+                    </span>
+                </div>
+                <h4 class="text-sm font-bold text-slate-800 mt-1">{{ log.descricao }}</h4>
+                <p class="text-xs text-slate-500 mt-0.5 font-medium">{{ log.detalhes }}</p>
+                
+                {% if not forloop.last %}<hr class="border-slate-100 mt-4">{% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-12 text-slate-400">
+                <p class="text-sm font-bold">Nenhum registo de quilometragem encontrado.</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Script do Tab Switcher Premium -->
+<script>
+function switchTab(tabId) {
+    // Hide all tab panes
+    const panes = document.querySelectorAll('.tab-pane');
+    panes.forEach(pane => pane.classList.add('hidden'));
+
+    // Show selected pane
+    const activePane = document.getElementById('tab-content-' + tabId);
+    if (activePane) activePane.classList.remove('hidden');
+
+    // Reset button styles
+    const btns = document.querySelectorAll('.tab-btn');
+    btns.forEach(btn => {
+        btn.classList.remove('border-blue-600', 'text-blue-600');
+        btn.classList.add('border-transparent', 'text-slate-500');
+        btn.classList.remove('font-bold');
+        btn.classList.add('font-medium');
+    });
+
+    // Style selected button
+    const activeBtn = document.getElementById('tab-btn-' + tabId);
+    if (activeBtn) {
+        activeBtn.classList.remove('border-transparent', 'text-slate-500');
+        activeBtn.classList.add('border-blue-600', 'text-blue-600');
+        activeBtn.classList.remove('font-medium');
+        activeBtn.classList.add('font-bold');
+    }
+}
+</script>
+{% endblock %}

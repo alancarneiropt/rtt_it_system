@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-PT">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -10,7 +11,10 @@
     <link rel="apple-touch-icon" href="/static/pwa/icon.svg">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Inter', -apple-system, sans-serif;
             background: radial-gradient(1200px 600px at 50% -50%, rgba(37, 99, 235, 0.25), rgba(248, 250, 252, 0) 60%), #F1F5F9;
@@ -20,10 +24,18 @@
             padding: 0;
             padding-bottom: 80px;
         }
-        .wrap { max-width: 480px; margin: 0 auto; min-height: 100vh; }
+
+        .wrap {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
 
         /* Cabeçalho (estilo imagem) */
-        .header-wrap { padding: 0.9rem 1rem 0.5rem; }
+        .header-wrap {
+            padding: 0.9rem 1rem 0.5rem;
+        }
+
         .header {
             background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 40%, #3b82f6 100%);
             color: #fff;
@@ -33,99 +45,138 @@
             position: relative;
             overflow: hidden;
         }
-        .header::before{
-            content:'';
-            position:absolute;
-            inset:-40px -60px auto auto;
-            width:220px;
-            height:220px;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), rgba(255,255,255,0) 60%);
+
+        .header::before {
+            content: '';
+            position: absolute;
+            inset: -40px -60px auto auto;
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .35), rgba(255, 255, 255, 0) 60%);
             transform: rotate(12deg);
         }
+
         .header-top {
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:0.75rem;
-            position:relative;
-            z-index:1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            position: relative;
+            z-index: 1;
         }
+
         .perfil-mini {
-            display:flex;
-            align-items:center;
-            gap:0.75rem;
-            min-width:0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 0;
         }
+
         .avatar {
-            width:54px;
-            height:54px;
-            border-radius:999px;
-            background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,.15));
-            border: 3px solid rgba(255,255,255,.55);
-            box-shadow: 0 10px 20px rgba(0,0,0,.18);
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-weight:700;
-            letter-spacing:.02em;
-            flex-shrink:0;
+            width: 54px;
+            height: 54px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, .35), rgba(255, 255, 255, .15));
+            border: 3px solid rgba(255, 255, 255, .55);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, .18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            letter-spacing: .02em;
+            flex-shrink: 0;
         }
-        .avatar-status{
-            position:relative;
+
+        .avatar-status {
+            position: relative;
         }
-        .avatar-status::after{
-            content:'';
-            position:absolute;
-            right:-2px;
-            bottom:-2px;
-            width:14px;
-            height:14px;
-            border-radius:999px;
-            background:#22c55e;
-            border:2px solid #fff;
-            box-shadow:0 4px 10px rgba(0,0,0,.22);
+
+        .avatar-status::after {
+            content: '';
+            position: absolute;
+            right: -2px;
+            bottom: -2px;
+            width: 14px;
+            height: 14px;
+            border-radius: 999px;
+            background: #22c55e;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .22);
         }
-        .perfil-texto{ min-width:0; flex:1; min-width:0; }
-        .perfil-nome{
-            font-size:1rem;
-            font-weight:700;
-            line-height:1.2;
-            white-space:nowrap;
-            overflow:hidden;
-            text-overflow:ellipsis;
+
+        .perfil-texto {
+            min-width: 0;
+            flex: 1;
+            min-width: 0;
         }
-        .header-data{
-            font-size:0.9rem;
-            opacity:.95;
-            white-space:nowrap;
-            text-align:center;
-            margin-top:0.35rem;
-            position:relative;
-            z-index:1;
+
+        .perfil-nome {
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .btn-sair-top{
-            display:inline-flex;
-            align-items:center;
-            gap:0.5rem;
-            padding:0.55rem 0.85rem;
-            border-radius:12px;
-            background: rgba(255,255,255,.14);
-            color:#fff;
-            text-decoration:none;
-            font-weight:600;
-            border:1px solid rgba(255,255,255,.22);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
-            flex-shrink:0;
+
+        .header-data {
+            font-size: 0.9rem;
+            opacity: .95;
+            white-space: nowrap;
+            text-align: center;
+            margin-top: 0.35rem;
+            position: relative;
+            z-index: 1;
         }
-        .btn-sair-top:hover{ background: rgba(255,255,255,.18); }
-        .header-hora{
-            text-align:center;
-            font-size:3.0rem;
-            font-weight:800;
-            letter-spacing:0.03em;
-            margin-top:0.5rem;
-            position:relative;
-            z-index:1;
+
+        .btn-sair-top {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.55rem 0.85rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .14);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, .22);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18);
+            flex-shrink: 0;
+        }
+
+        .btn-sair-top:hover {
+            background: rgba(255, 255, 255, .18);
+        }
+
+        .header-hora {
+            text-align: center;
+            font-size: 3.0rem;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-compact .header-hora {
+            display: none;
+        }
+
+        .header-compact .header-data {
+            display: none;
+        }
+
+        .header-compact .header {
+            padding-bottom: 0.8rem;
+        }
+
+        .header.compact {
+            padding-bottom: 0.8rem;
+        }
+
+        .header.compact .header-hora,
+        .header.compact .header-data {
+            display: none;
         }
 
         /* Secção Agenda — linha do tempo */
@@ -137,6 +188,7 @@
             padding: 1.25rem 1.5rem 1.5rem;
             box-shadow: 0 22px 50px rgba(15, 23, 42, 0.10);
         }
+
         .agenda-section .agenda-titulo {
             font-size: 1.2rem;
             font-weight: 800;
@@ -145,10 +197,12 @@
             letter-spacing: -0.01em;
             text-transform: none;
         }
+
         .timeline {
             position: relative;
             padding-left: 2.5rem;
         }
+
         .timeline::before {
             content: '';
             position: absolute;
@@ -156,9 +210,10 @@
             top: 0.65rem;
             bottom: 0.65rem;
             width: 3px;
-            background: linear-gradient(180deg, rgba(59,130,246,.45), rgba(148,163,184,.35));
+            background: linear-gradient(180deg, rgba(59, 130, 246, .45), rgba(148, 163, 184, .35));
             border-radius: 999px;
         }
+
         .timeline-item {
             position: relative;
             padding: 0.6rem 0;
@@ -168,8 +223,16 @@
             gap: 0.75rem;
             border-bottom: 1px solid #f1f5f9;
         }
-        .timeline-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .timeline-item:first-child { padding-top: 0; }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .timeline-item:first-child {
+            padding-top: 0;
+        }
+
         .timeline-item::before {
             content: '';
             position: absolute;
@@ -183,10 +246,12 @@
             border: 3px solid #fff;
             box-shadow: 0 0 0 1px #e2e8f0;
         }
+
         .timeline-item.registado::before {
             background: #2563EB;
-            box-shadow: 0 0 0 1px #2563EB, 0 10px 22px rgba(37,99,235,.25);
+            box-shadow: 0 0 0 1px #2563EB, 0 10px 22px rgba(37, 99, 235, .25);
         }
+
         .timeline-item .label {
             display: flex;
             align-items: center;
@@ -194,6 +259,7 @@
             flex: 1;
             min-width: 0;
         }
+
         .timeline-item .icon-wrap {
             width: 40px;
             height: 40px;
@@ -204,34 +270,57 @@
             justify-content: center;
             flex-shrink: 0;
         }
+
         .timeline-item .icon-wrap svg {
             width: 18px;
             height: 18px;
             stroke: #64748b;
             fill: none;
         }
-        .timeline-item.registado .icon-wrap { background: #e0ecff; }
-        .timeline-item.registado .icon-wrap svg { stroke: #2563EB; }
+
+        .timeline-item.registado .icon-wrap {
+            background: #e0ecff;
+        }
+
+        .timeline-item.registado .icon-wrap svg {
+            stroke: #2563EB;
+        }
+
         .timeline-item .text-block .text,
         .timeline-item .timeline-item-texto {
             font-size: 0.95rem;
             font-weight: 600;
             color: #334155;
         }
-        .timeline-item .timeline-item-texto { margin-left: 0.5rem; }
+
+        .timeline-item .timeline-item-texto {
+            margin-left: 0.5rem;
+        }
+
         .timeline-item .text-block .sublabel {
             font-size: 0.78rem;
             color: #94a3b8;
             margin-top: 0.1rem;
         }
+
         .timeline-item .hora {
             font-size: 0.95rem;
             font-weight: 600;
             color: #0f172a;
             white-space: nowrap;
         }
-        .timeline-item .hora.planejado { font-weight: 500; color: #64748b; }
-        .timeline-item .hora .planejado-label { font-size: 0.75rem; font-weight: 400; color: #94a3b8; }
+
+        .timeline-item .hora.planejado {
+            font-weight: 500;
+            color: #64748b;
+        }
+
+        .timeline-item .hora .planejado-label {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: #94a3b8;
+        }
+
         #timeline-lista:empty::before,
         #timeline-calendario-lista:empty::before {
             content: 'Nenhuma marcação neste dia.';
@@ -240,6 +329,7 @@
             font-size: 0.9rem;
             color: #94a3b8;
         }
+
         .calendario-dia-toolbar {
             display: flex;
             align-items: center;
@@ -247,6 +337,7 @@
             margin-bottom: 1rem;
             flex-wrap: nowrap;
         }
+
         .calendario-dia-nav {
             width: 38px;
             height: 38px;
@@ -264,8 +355,17 @@
             line-height: 1;
             transition: background 0.2s, border-color 0.2s;
         }
-        .calendario-dia-nav:hover { background: #f1f5f9; border-color: #cbd5e1; color: #1e293b; }
-        .calendario-dia-nav:active { background: #e2e8f0; }
+
+        .calendario-dia-nav:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #1e293b;
+        }
+
+        .calendario-dia-nav:active {
+            background: #e2e8f0;
+        }
+
         .calendario-dia-input {
             flex-shrink: 0;
             width: 140px;
@@ -275,7 +375,13 @@
             font-size: 0.9rem;
             font-family: inherit;
         }
-        .calendario-dia-input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.15); }
+
+        .calendario-dia-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, .15);
+        }
+
         .calendario-dia-label {
             flex: 1;
             min-width: 0;
@@ -294,12 +400,14 @@
             justify-content: center;
             grid-template-columns: none;
         }
+
         .acoes {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0.75rem;
             margin: 1.5rem 1rem;
         }
+
         .btn-acao {
             border: none;
             border-radius: 14px;
@@ -310,19 +418,41 @@
             color: #fff;
             cursor: pointer;
             transition: transform 0.12s, filter 0.2s;
-            box-shadow: 0 16px 28px rgba(15,23,42,.18);
+            box-shadow: 0 16px 28px rgba(15, 23, 42, .18);
         }
-        .btn-acao:active { transform: scale(0.98); }
-        .btn-acao:disabled { opacity: 0.6; cursor: not-allowed; }
-        .btn-registrar { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; min-width: 200px; }
-        .btn-registrar:hover:not(:disabled), .btn-registrar:active:not(:disabled) { filter: brightness(1.05); }
+
+        .btn-acao:active {
+            transform: scale(0.98);
+        }
+
+        .btn-acao:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-registrar {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            min-width: 200px;
+        }
+
+        .btn-registrar:hover:not(:disabled),
+        .btn-registrar:active:not(:disabled) {
+            filter: brightness(1.05);
+        }
+
         .btn-oi {
             background: linear-gradient(180deg, #22c55e, #16a34a);
         }
+
         .btn-tchau {
             background: linear-gradient(180deg, #ef4444, #dc2626);
         }
-        .btn-oi:hover:not(:disabled), .btn-tchau:hover:not(:disabled) { filter: brightness(1.03); }
+
+        .btn-oi:hover:not(:disabled),
+        .btn-tchau:hover:not(:disabled) {
+            filter: brightness(1.03);
+        }
 
         /* Mensagem de feedback */
         .toast {
@@ -339,16 +469,34 @@
             transition: transform 0.3s ease;
             max-width: 90%;
         }
-        .toast.visible { transform: translateX(-50%) translateY(0); }
-        .toast.erro { background: #dc2626; }
+
+        .toast.visible {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.erro {
+            background: #dc2626;
+        }
 
         /* Secções da área (Painel, Calendário, Hoje, Perfil) */
         .area-sec {
             display: none;
             animation: fadeIn 0.25s ease;
         }
-        .area-sec.visivel { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .area-sec.visivel {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
 
         .sec-titulo {
             font-size: 1.1rem;
@@ -357,16 +505,34 @@
             margin: 0 0 0.75rem 0;
             padding: 0 0.25rem;
         }
+
         .card-sec {
             background: #fff;
             border-radius: 12px;
             padding: 1rem 1.25rem;
             margin: 0 1rem 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,.06);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
         }
-        .card-sec h3 { font-size: 0.9rem; font-weight: 600; color: #475569; margin: 0 0 0.5rem 0; }
-        .card-sec p { font-size: 0.9rem; color: #64748b; margin: 0; }
-        .lista-dias { list-style: none; padding: 0; margin: 0; }
+
+        .card-sec h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #475569;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .card-sec p {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .lista-dias {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
         .lista-dias li {
             display: flex;
             justify-content: space-between;
@@ -375,9 +541,20 @@
             border-bottom: 1px solid #f1f5f9;
             font-size: 0.9rem;
         }
-        .lista-dias li:last-child { border-bottom: none; }
-        .lista-dias .dia-num { font-weight: 600; color: #334155; }
-        .lista-dias .dia-marc { font-size: 0.8rem; color: #64748b; }
+
+        .lista-dias li:last-child {
+            border-bottom: none;
+        }
+
+        .lista-dias .dia-num {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .lista-dias .dia-marc {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
 
         /* Relatório semanal — Calendário (estilo Super Punch) */
         .calendario-toolbar {
@@ -388,15 +565,18 @@
             margin: 0 1rem 0.75rem;
             padding: 0.5rem 0;
         }
+
         .calendario-periodo {
             font-size: 0.9rem;
             font-weight: 600;
             color: #1e293b;
         }
+
         .calendario-nav {
             display: flex;
             gap: 0.25rem;
         }
+
         .calendario-nav button {
             width: 36px;
             height: 36px;
@@ -411,24 +591,32 @@
             justify-content: center;
             transition: background 0.2s, color 0.2s;
         }
-        .calendario-nav button:hover { background: #f1f5f9; color: #2563EB; }
+
+        .calendario-nav button:hover {
+            background: #f1f5f9;
+            color: #2563EB;
+        }
+
         .relatorio-wrap {
             margin: 0 1rem 1rem;
             background: #fff;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.06);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
             overflow: hidden;
         }
+
         .relatorio-scroll {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
+
         .relatorio-table {
             width: 100%;
             min-width: 560px;
             border-collapse: collapse;
             font-size: 0.8rem;
         }
+
         .relatorio-table th {
             background: #f8fafc;
             color: #475569;
@@ -438,34 +626,191 @@
             border-bottom: 2px solid #e2e8f0;
             white-space: nowrap;
         }
+
         .relatorio-table td {
             padding: 0.5rem 0.4rem;
             border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
         }
-        .relatorio-table tbody tr.fim-de-semana { background: #f8fafc; }
-        .relatorio-table tbody tr.fim-de-semana td { color: #94a3b8; }
-        .relatorio-table .col-data { font-weight: 600; color: #334155; min-width: 72px; }
-        .relatorio-table .col-jornada { color: #64748b; font-size: 0.75rem; min-width: 70px; }
-        .relatorio-table .cel-ok { color: #16a34a; font-weight: 500; }
-        .relatorio-table .cel-falta { color: #f97316; font-weight: 500; }
-        .status-atraso { color: #dc2626 !important; font-weight: 600; }
-        .status-falta { color: #f97316 !important; font-weight: 600; }
-        .status-ok { color: #16a34a !important; font-weight: 600; }
-        .status-total { font-weight: 700; color: #0f172a; }
-        .fim-de-semana { background-color: #f8fafc; }
-        .relatorio-table .cel-falta { color: #dc2626; font-style: italic; }
-        .relatorio-table .cel-planejado { color: #64748b; }
-        .relatorio-table .cel-vazio { color: #cbd5e1; }
-        .relatorio-loading { padding: 1.5rem; text-align: center; color: #94a3b8; font-size: 0.9rem; }
-        .relatorio-erro { padding: 1rem; text-align: center; color: #dc2626; font-size: 0.9rem; }
 
-        .perfil-campo { margin-bottom: 1rem; }
-        .perfil-campo:last-child { margin-bottom: 0; }
-        .perfil-campo label { display: block; font-size: 0.75rem; font-weight: 600; color: #94a3b8; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        .perfil-campo .valor { font-size: 1rem; color: #1e293b; font-weight: 500; }
-        .perfil-campo .btn-logout { display: inline-block; margin-top: 1rem; padding: 0.6rem 1.2rem; background: #ef4444; color: #fff; border-radius: 8px; text-decoration: none; font-size: 0.9rem; font-weight: 600; border: none; cursor: pointer; }
-        .perfil-campo .btn-logout:hover { background: #dc2626; }
+        .relatorio-table tbody tr.fim-de-semana {
+            background: #f8fafc;
+        }
+
+        .relatorio-table tbody tr.fim-de-semana td {
+            color: #94a3b8;
+        }
+
+        .relatorio-table .col-data {
+            font-weight: 600;
+            color: #334155;
+            min-width: 72px;
+        }
+
+        .relatorio-table .col-jornada {
+            color: #64748b;
+            font-size: 0.75rem;
+            min-width: 70px;
+        }
+
+        .relatorio-table .cel-ok {
+            color: #16a34a;
+            font-weight: 500;
+        }
+
+        .relatorio-table .cel-falta {
+            color: #f97316;
+            font-weight: 500;
+        }
+
+        .status-atraso {
+            color: #dc2626 !important;
+            font-weight: 600;
+        }
+
+        .status-falta {
+            color: #f97316 !important;
+            font-weight: 600;
+        }
+
+        .status-ok {
+            color: #16a34a !important;
+            font-weight: 600;
+        }
+
+        .status-total {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .fim-de-semana {
+            background-color: #f8fafc;
+        }
+
+        /* KM Section Styles */
+        .km-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .km-box {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .km-box h4 {
+            margin: 0 0 0.5rem;
+            font-size: 0.8rem;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .km-valor {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+
+        .btn-km {
+            width: 100%;
+            padding: 0.5rem;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .btn-km:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        .input-km {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .relatorio-table .cel-falta {
+            color: #dc2626;
+            font-style: italic;
+        }
+
+        .relatorio-table .cel-planejado {
+            color: #64748b;
+        }
+
+        .relatorio-table .cel-vazio {
+            color: #cbd5e1;
+        }
+
+        .relatorio-loading {
+            padding: 1.5rem;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .relatorio-erro {
+            padding: 1rem;
+            text-align: center;
+            color: #dc2626;
+            font-size: 0.9rem;
+        }
+
+        .perfil-campo {
+            margin-bottom: 1rem;
+        }
+
+        .perfil-campo:last-child {
+            margin-bottom: 0;
+        }
+
+        .perfil-campo label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .perfil-campo .valor {
+            font-size: 1rem;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .perfil-campo .btn-logout {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.6rem 1.2rem;
+            background: #ef4444;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        .perfil-campo .btn-logout:hover {
+            background: #dc2626;
+        }
 
         /* Barra de navegação inferior */
         .nav-bottom {
@@ -475,8 +820,8 @@
             right: 0;
             max-width: 480px;
             margin: 0 auto;
-            background: rgba(255,255,255,.95);
-            border-top: 1px solid rgba(226,232,240,.9);
+            background: rgba(255, 255, 255, .95);
+            border-top: 1px solid rgba(226, 232, 240, .9);
             display: flex;
             justify-content: space-around;
             padding: 0.5rem 0 0.75rem;
@@ -486,6 +831,7 @@
             border-top-left-radius: 16px;
             border-top-right-radius: 16px;
         }
+
         .nav-item {
             display: flex;
             flex-direction: column;
@@ -499,38 +845,77 @@
             border-radius: 8px;
             transition: color 0.2s, background 0.2s;
         }
-        .nav-item:hover { color: #64748b; background: #f8fafc; }
-        .nav-item svg { width: 22px; height: 22px; }
-        .nav-item.ativo { color: #2563EB; font-weight: 700; }
-        .nav-item.ativo:hover { color: #2563EB; background: #eff6ff; }
-        .nav-item:focus { outline: none; }
-        .nav-bottom a[data-sec="painel"] { display: none; }
+
+        .nav-item:hover {
+            color: #64748b;
+            background: #f8fafc;
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .nav-item.ativo {
+            color: #2563EB;
+            font-weight: 700;
+        }
+
+        .nav-item.ativo:hover {
+            color: #2563EB;
+            background: #eff6ff;
+        }
+
+        .nav-item:focus {
+            outline: none;
+        }
+
+        .nav-bottom a[data-sec="painel"] {
+            display: none;
+        }
 
         /* Utilizador / logout no topo */
-        .user-bar { display:none; }
+        .user-bar {
+            display: none;
+        }
 
         /* Modal justificativa saída sem almoço */
         .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,.45);
+            background: rgba(0, 0, 0, .45);
             z-index: 1000;
             align-items: center;
             justify-content: center;
             padding: 1rem;
         }
-        .modal-overlay.visible { display: flex; }
+
+        .modal-overlay.visible {
+            display: flex;
+        }
+
         .modal-justificativa {
             background: #fff;
             border-radius: 16px;
             padding: 1.25rem 1.5rem;
             max-width: 360px;
             width: 100%;
-            box-shadow: 0 20px 50px rgba(0,0,0,.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, .2);
         }
-        .modal-justificativa h3 { margin: 0 0 0.5rem; font-size: 1.1rem; color: #1e293b; }
-        .modal-justificativa p { margin: 0 0 1rem; font-size: 0.9rem; color: #64748b; }
+
+        .modal-justificativa h3 {
+            margin: 0 0 0.5rem;
+            font-size: 1.1rem;
+            color: #1e293b;
+        }
+
+        .modal-justificativa p {
+            margin: 0 0 1rem;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
         .modal-justificativa textarea {
             width: 100%;
             min-height: 90px;
@@ -541,19 +926,197 @@
             font-size: 0.95rem;
             resize: vertical;
         }
-        .modal-justificativa textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.2); }
-        .modal-botoes { display: flex; gap: 0.75rem; margin-top: 1rem; }
-        .modal-botoes button { flex: 1; padding: 0.65rem 1rem; border-radius: 10px; font-weight: 600; font-size: 0.95rem; cursor: pointer; border: none; }
-        .modal-btn-cancelar { background: #f1f5f9; color: #475569; }
-        .modal-btn-confirmar { background: #2563eb; color: #fff; }
-        .modal-btn-confirmar:disabled { opacity: 0.6; cursor: not-allowed; }
-        .modal-registro-sucesso .modal-registro-data-hora { font-size: 1.1rem; font-weight: 700; color: #2563eb; margin: 0.5rem 0 1rem; }
-        .modal-registro-sucesso .modal-botoes { justify-content: center; }
 
+        .modal-justificativa textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, .2);
+        }
+
+        .modal-botoes {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .modal-botoes button {
+            flex: 1;
+            padding: 0.65rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: none;
+        }
+
+        .modal-btn-cancelar {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .modal-btn-confirmar {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .modal-btn-confirmar:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .modal-registro-sucesso .modal-registro-data-hora {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2563eb;
+            margin: 0.5rem 0 1rem;
+        }
+
+        .modal-registro-sucesso .modal-botoes {
+            justify-content: center;
+        }
+
+        /* --- Estilos Calendário de Folhinhas --- */
+        .folhinha-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1 / 1;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            user-select: none;
+        }
+
+        .folhinha-card.out-month {
+            color: #cbd5e1;
+            background: transparent;
+            border-color: transparent;
+            pointer-events: none;
+        }
+
+        .folhinha-card.com-registo {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-color: #bfdbfe;
+            color: #1e40af;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.06);
+        }
+
+        .folhinha-card.com-registo:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border-color: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 8px 15px -3px rgba(37, 99, 235, 0.2);
+        }
+
+        .folhinha-card.com-registo::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #2563eb;
+        }
+
+        .folhinha-card.com-registo:hover::after {
+            background: #ffffff;
+        }
+
+        .folhinha-card.com-abast {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-color: #bbf7d0;
+            color: #166534;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.06);
+        }
+
+        .folhinha-card.com-abast:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #059669;
+            color: #ffffff;
+            box-shadow: 0 8px 15px -3px rgba(16, 185, 129, 0.2);
+        }
+
+        .folhinha-card.com-abast::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        .folhinha-card.com-abast:hover::after {
+            background: #ffffff;
+        }
+
+        .folhinha-card.selecionado {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
+
+        .btn-mes-nav {
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            font-size: 1.25rem;
+            color: #2563eb;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .btn-mes-nav:hover {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+            transform: scale(1.05);
+        }
+
+        .btn-mes-nav:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
+
 <body>
     <div class="wrap">
+
+        <div class="header-wrap">
+            <header class="header">
+                <div class="header-top">
+                    <div class="perfil-mini">
+                        <div class="avatar-status">
+                            <div class="avatar" id="avatarIniciais">RT</div>
+                        </div>
+                        <div class="perfil-texto">
+                            <div class="perfil-nome" title="{{ nome }}">{{ nome }}</div>
+                        </div>
+                    </div>
+                    <a class="btn-sair-top" href="?sair=1" aria-label="Sair">
+                        <span style="font-size:1rem; line-height:0;">⎋</span>
+                        <span>Sair</span>
+                    </a>
+                </div>
+                <div class="header-hora" id="horaAtual">--:--</div>
+                <div class="header-data" id="dataHoje"></div>
+            </header>
+        </div>
 
         <!-- Secção Espelho de Ponto (Antigo Painel) -->
         <section id="sec-painel" class="area-sec" aria-labelledby="titulo-painel">
@@ -575,15 +1138,24 @@
                             {% for linha in espelho_linhas %}
                             <tr class="{% if linha.is_weekend %}fim-de-semana{% endif %}">
                                 <td class="col-data">{{ linha.dia_semana }}, {{ linha.data|date:"d/m/y" }}</td>
-                                <td class="{% if linha.marcacao_1_status %}status-{{ linha.marcacao_1_status }}{% endif %}">{{ linha.marcacao_1 }}</td>
-                                <td class="{% if linha.marcacao_2_status %}status-{{ linha.marcacao_2_status }}{% endif %}">{{ linha.marcacao_2 }}</td>
-                                <td class="{% if linha.marcacao_3_status %}status-{{ linha.marcacao_3_status }}{% endif %}">{{ linha.marcacao_3 }}</td>
-                                <td class="{% if linha.marcacao_4_status %}status-{{ linha.marcacao_4_status }}{% endif %}">{{ linha.marcacao_4 }}</td>
+                                <td
+                                    class="{% if linha.marcacao_1_status %}status-{{ linha.marcacao_1_status }}{% endif %}">
+                                    {{ linha.marcacao_1 }}</td>
+                                <td
+                                    class="{% if linha.marcacao_2_status %}status-{{ linha.marcacao_2_status }}{% endif %}">
+                                    {{ linha.marcacao_2 }}</td>
+                                <td
+                                    class="{% if linha.marcacao_3_status %}status-{{ linha.marcacao_3_status }}{% endif %}">
+                                    {{ linha.marcacao_3 }}</td>
+                                <td
+                                    class="{% if linha.marcacao_4_status %}status-{{ linha.marcacao_4_status }}{% endif %}">
+                                    {{ linha.marcacao_4 }}</td>
                                 <td class="status-total">{{ linha.total }}</td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">Nenhuma marcação encontrada.</td>
+                                <td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">Nenhuma
+                                    marcação encontrada.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -592,50 +1164,230 @@
             </div>
         </section>
 
-        <!-- Secção Calendário — Timeline do dia + Relatório semanal -->
+        <!-- Secção Calendário — Timeline do dia (Folhinhas) -->
         <section id="sec-calendario" class="area-sec" aria-labelledby="titulo-calendario">
             <h2 id="titulo-calendario" class="sec-titulo" style="margin-top: 1rem; padding: 0 1rem;">Calendário</h2>
 
-            <!-- Timeline do dia (linha do tempo) com filtro de data -->
-            <section class="agenda-section agenda-section-calendario">
-                <h3 class="agenda-titulo">Marcações do dia</h3>
-                <div class="calendario-dia-toolbar">
-                    <button type="button" id="calendario-dia-prev" class="calendario-dia-nav" aria-label="Dia anterior">‹</button>
-                    <span class="calendario-dia-label" id="calendario-dia-label">—</span>
-                    <button type="button" id="calendario-dia-next" class="calendario-dia-nav" aria-label="Dia seguinte">›</button>
-                    <input type="date" id="calendario-dia-input" class="calendario-dia-input" aria-label="Selecionar data">
+            <!-- Calendário Mensal (Folhinhas) -->
+            <div class="card-sec" style="padding: 1.25rem; margin-bottom: 1rem; margin-left: 1rem; margin-right: 1rem; border-radius: 18px; box-shadow: 0 22px 50px rgba(15, 23, 42, 0.08);">
+                <div class="calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                    <button type="button" id="ponto-mes-prev" class="btn-mes-nav" aria-label="Mês anterior">‹</button>
+                    <span id="ponto-mes-label" style="font-weight: 800; font-size: 1.15rem; color: #0f172a; text-transform: capitalize;">—</span>
+                    <button type="button" id="ponto-mes-next" class="btn-mes-nav" aria-label="Próximo mês">›</button>
                 </div>
+                <div class="calendar-weekdays" style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 700; font-size: 0.75rem; color: #64748b; margin-bottom: 0.75rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem;">
+                    <div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div><div>Dom</div>
+                </div>
+                <div id="ponto-calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem;">
+                    <!-- Dias injetados via JS -->
+                </div>
+            </div>
+
+            <!-- Detalhes do dia selecionado (Oculto por padrão, revela sob clique) -->
+            <section class="agenda-section agenda-section-calendario" id="ponto-detalhes-container" style="display: none; transition: all 0.3s ease;">
+                <h3 class="agenda-titulo" id="ponto-detalhes-titulo">Marcações do dia</h3>
                 <div class="timeline" id="timeline-calendario">
                     <div id="timeline-calendario-lista"></div>
                 </div>
             </section>
         </section>
 
-        <!-- Secção Hoje: apenas botão Registrar -->
-        <section id="sec-hoje" class="area-sec visivel" aria-labelledby="titulo-hoje">
-            <div class="header-wrap">
-                <header class="header">
-                    <div class="header-top">
-                        <div class="perfil-mini">
-                            <div class="avatar-status">
-                                <div class="avatar" id="avatarIniciais">RT</div>
-                            </div>
-                            <div class="perfil-texto">
-                                <div class="perfil-nome" title="{{ nome }}">{{ nome }}</div>
+        <!-- Secção Registro de KM -->
+        <section id="sec-km" class="area-sec" aria-labelledby="titulo-km">
+            <h2 id="titulo-km" class="sec-titulo" style="margin-top: 1rem; padding: 0 1rem;">Registo & Gastos</h2>
+            <div class="card-sec" style="padding: 1.25rem;">
+                
+                <!-- Sub-abas de Navegação Segmentada (Sliding Switch) -->
+                <div class="km-tabs-container" style="display: flex; gap: 0.25rem; margin-bottom: 1.25rem; background: #e2e8f0; padding: 0.25rem; border-radius: 12px; position: relative;">
+                    <!-- Sliding background para as abas de topo -->
+                    <div id="km-tabs-bg" style="position: absolute; top: 0.25rem; bottom: 0.25rem; left: 0.25rem; width: calc(50% - 0.25rem); background: white; border-radius: 9px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1;"></div>
+                    
+                    <button type="button" id="tab-km-deslocamentos" style="flex: 1; padding: 0.65rem; border: none; background: transparent; border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; position: relative; z-index: 2; color: #1e293b; transition: color 0.2s;">
+                        🚗 Deslocamentos
+                    </button>
+                    <button type="button" id="tab-km-gastos" style="flex: 1; padding: 0.65rem; border: none; background: transparent; border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; position: relative; z-index: 2; color: #64748b; transition: color 0.2s;">
+                        ⛽ Combustível & Gastos
+                    </button>
+                </div>
+
+                <!-- CONTEÚDO 1: QUILOMETRAGEM & DESLOCAMENTOS -->
+                <div id="km-tab-content-deslocamentos">
+                    <!-- Resumo de Totais -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1.5rem;">
+                        <div
+                            style="background: #eff6ff; padding: 0.75rem; border-radius: 12px; text-align: center; border: 1px solid #dbeafe; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <div
+                                style="font-size: 0.6rem; color: #1e40af; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">
+                                Hoje</div>
+                            <div style="font-size: 1.1rem; font-weight: 800; color: #1e3a8a; line-height: 1;"
+                                id="km-total-hoje">0.0</div>
+                            <div style="font-size: 0.5rem; color: #60a5fa; margin-top: 2px;">KM</div>
+                        </div>
+                        <div
+                            style="background: #f0fdf4; padding: 0.75rem; border-radius: 12px; text-align: center; border: 1px solid #dcfce7; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <div
+                                style="font-size: 0.6rem; color: #166534; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">
+                                Semana</div>
+                            <div style="font-size: 1.1rem; font-weight: 800; color: #14532d; line-height: 1;"
+                                id="km-total-semana">0.0</div>
+                            <div style="font-size: 0.5rem; color: #4ade80; margin-top: 2px;">KM</div>
+                        </div>
+                        <div
+                            style="background: #fff7ed; padding: 0.75rem; border-radius: 12px; text-align: center; border: 1px solid #ffedd5; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <div
+                                style="font-size: 0.6rem; color: #9a3412; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">
+                                Mês</div>
+                            <div style="font-size: 1.1rem; font-weight: 800; color: #7c2d12; line-height: 1;"
+                                id="km-total-mes">0.0</div>
+                            <div style="font-size: 0.5rem; color: #fb923c; margin-top: 2px;">KM</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Segmented Switch (Registar vs Histórico) -->
+                    <div class="km-switch-container" style="display: flex; gap: 0.25rem; margin-top: 0.5rem; margin-bottom: 1.25rem; background: #e2e8f0; padding: 0.25rem; border-radius: 12px; position: relative;">
+                        <!-- O sliding background do switch -->
+                        <div id="km-switch-bg" style="position: absolute; top: 0.25rem; bottom: 0.25rem; left: 0.25rem; width: calc(50% - 0.25rem); background: white; border-radius: 9px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1;"></div>
+                        
+                        <button type="button" id="btn-switch-registrar" style="flex: 1; padding: 0.65rem; border: none; background: transparent; border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; position: relative; z-index: 2; color: #1e293b; transition: color 0.2s;">
+                            🚗 Registar KM
+                        </button>
+                        <button type="button" id="btn-switch-historico" style="flex: 1; padding: 0.65rem; border: none; background: transparent; border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; position: relative; z-index: 2; color: #64748b; transition: color 0.2s;">
+                            📅 Histórico (KM)
+                        </button>
+                    </div>
+
+                    <!-- Lado 1: Registo de Quilometragem -->
+                    <div id="km-registrar-seccao">
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label
+                                style="display:block; margin-bottom:0.5rem; font-weight:600; font-size:0.9rem; color:#475569;">Viatura</label>
+                            <select id="km-viatura-select" class="input-km"
+                                style="border: 1px solid #cbd5e1; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); background: white; width: 100%; padding: 0.75rem; border-radius: 8px; font-weight: 600; color: #1e293b;">
+                                <option value="">Carregando viaturas...</option>
+                            </select>
+                        </div>
+
+                        <button type="button" class="btn-km" id="btn-km-registrar"
+                            style="width: 100%; padding: 1rem; background: #2563eb; color: white; border: none; border-radius: 12px; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                            🚗 Registar KM Atual
+                        </button>
+                    </div>
+
+                    <!-- Container do Calendário de KM (Histórico) -->
+                    <div id="km-calendario-container" style="display: none; border-top: 1px solid #f1f5f9; padding-top: 1.25rem; margin-bottom: 1.5rem;">
+                        <div class="calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                            <button type="button" id="km-mes-prev" class="btn-mes-nav" aria-label="Mês anterior">‹</button>
+                            <span id="km-mes-label" style="font-weight: 800; font-size: 1.1rem; color: #0f172a; text-transform: capitalize;">—</span>
+                            <button type="button" id="km-mes-next" class="btn-mes-nav" aria-label="Próximo mês">›</button>
+                        </div>
+                        <div class="calendar-weekdays" style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 700; font-size: 0.75rem; color: #64748b; margin-bottom: 0.75rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem;">
+                            <div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div><div>Dom</div>
+                        </div>
+                        <div id="km-calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
+                            <!-- Dias injetados via JS -->
+                        </div>
+
+                        <!-- Detalhes do dia de KM selecionado -->
+                        <div id="km-detalhes-container" style="display: none; background: #f8fafc; padding: 1.25rem; border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.3s ease;">
+                            <h4 id="km-detalhes-titulo" style="margin: 0 0 0.75rem; font-size: 0.95rem; color: #1e293b; font-weight: 800;">Registos do dia</h4>
+                            <div id="km-detalhes-lista" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <!-- Inserido dinamicamente via JS -->
                             </div>
                         </div>
-                        <a class="btn-sair-top" href="?sair=1" aria-label="Sair">
-                            <span style="font-size:1rem; line-height:0;">⎋</span>
-                            <span>Sair</span>
-                        </a>
                     </div>
-                    <div class="header-hora" id="horaAtual">--:--</div>
-                    <div class="header-data" id="dataHoje"></div>
-                </header>
-            </div>
 
+                    <p style="margin-top:1.25rem; font-size:0.8rem; color:#64748b; line-height:1.5; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
+                        <strong>Dica:</strong> Registe o KM em cada paragem ou deslocação importante. Pode registar quantas vezes precisar por dia.
+                    </p>
+                </div>
+
+                <!-- CONTEÚDO 2: COMBUSTÍVEL & GASTOS -->
+                <div id="km-tab-content-gastos" style="display: none;">
+                    <!-- Resumo Financeiro -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1.5rem;">
+                        <div style="background: #eff6ff; padding: 0.75rem; border-radius: 12px; text-align: center; border: 1px solid #dbeafe; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <div style="font-size: 0.6rem; color: #1e40af; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Semana</div>
+                            <div style="font-size: 1.1rem; font-weight: 800; color: #1e3a8a; line-height: 1;" id="gastos-total-semana">€ 0.00</div>
+                            <div style="font-size: 0.5rem; color: #60a5fa; margin-top: 4px;">Aprovado</div>
+                        </div>
+                        <div style="background: #f0fdf4; padding: 0.75rem; border-radius: 12px; text-align: center; border: 1px solid #bbf7d0; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <div style="font-size: 0.6rem; color: #15803d; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Mês</div>
+                            <div style="font-size: 1.1rem; font-weight: 800; color: #166534; line-height: 1;" id="gastos-total-mes">€ 0.00</div>
+                            <div style="font-size: 0.5rem; color: #22c55e; margin-top: 4px;">Aprovado</div>
+                        </div>
+                        <div style="background: #fffbeb; padding: 0.75rem; border-radius: 12px; text-align: center; border: 1px solid #fde68a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <div style="font-size: 0.6rem; color: #b45309; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Pendentes</div>
+                            <div style="font-size: 1.1rem; font-weight: 800; color: #92400e; line-height: 1;" id="gastos-total-pendentes">0</div>
+                            <div style="font-size: 0.5rem; color: #f59e0b; margin-top: 4px;">Em Aprovação</div>
+                        </div>
+                    </div>
+
+                    <!-- Segmented Switch (Registar vs Histórico) -->
+                    <div class="abast-switch-container" style="display: flex; gap: 0.25rem; margin-top: 0.5rem; margin-bottom: 1.25rem; background: #e2e8f0; padding: 0.25rem; border-radius: 12px; position: relative;">
+                        <!-- O sliding background do switch -->
+                        <div id="abast-switch-bg" style="position: absolute; top: 0.25rem; bottom: 0.25rem; left: 0.25rem; width: calc(50% - 0.25rem); background: white; border-radius: 9px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1;"></div>
+                        
+                        <button type="button" id="btn-abast-switch-registrar" style="flex: 1; padding: 0.65rem; border: none; background: transparent; border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; position: relative; z-index: 2; color: #1e293b; transition: color 0.2s;">
+                            ⛽ Registar Abast.
+                        </button>
+                        <button type="button" id="btn-abast-switch-historico" style="flex: 1; padding: 0.65rem; border: none; background: transparent; border-radius: 9px; font-weight: 700; font-size: 0.8rem; cursor: pointer; position: relative; z-index: 2; color: #64748b; transition: color 0.2s;">
+                            📅 Histórico (Abast)
+                        </button>
+                    </div>
+
+                    <!-- Lado 1: Registo de Abastecimento -->
+                    <div id="abast-registrar-seccao">
+                        <button type="button" class="btn-km" id="btn-gastos-registrar"
+                            style="width: 100%; padding: 1rem; background: #10b981; color: white; border: none; border-radius: 12px; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                            <span style="font-size:1.2rem;">⛽</span> Registar Abastecimento
+                        </button>
+
+                        <!-- Lista de Abastecimentos Recentes -->
+                        <div style="border-top: 1px solid #f1f5f9; padding-top: 1.25rem;">
+                            <h4 style="margin: 0 0 0.75rem 0; font-size: 0.95rem; color: #1e293b; font-weight: 800;">Abastecimentos Recentes</h4>
+                            <div id="gastos-historico-lista" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <!-- Inserido via JS -->
+                                <div style="text-align: center; padding: 1.5rem; color: #94a3b8; font-size: 0.85rem;">
+                                    Nenhuma despesa registada ainda.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Container do Calendário de Abastecimento (Histórico) -->
+                    <div id="abast-calendario-container" style="display: none; border-top: 1px solid #f1f5f9; padding-top: 1.25rem; margin-bottom: 1.5rem;">
+                        <div class="calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                            <button type="button" id="abast-mes-prev" class="btn-mes-nav" aria-label="Mês anterior">‹</button>
+                            <span id="abast-mes-label" style="font-weight: 800; font-size: 1.1rem; color: #0f172a; text-transform: capitalize;">—</span>
+                            <button type="button" id="abast-mes-next" class="btn-mes-nav" aria-label="Próximo mês">›</button>
+                        </div>
+                        <div class="calendar-weekdays" style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 700; font-size: 0.75rem; color: #64748b; margin-bottom: 0.75rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem;">
+                            <div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div><div>Dom</div>
+                        </div>
+                        <div id="abast-calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
+                            <!-- Dias injetados via JS -->
+                        </div>
+
+                        <!-- Detalhes do dia de Abastecimento selecionado -->
+                        <div id="abast-detalhes-container" style="display: none; background: #f8fafc; padding: 1.25rem; border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.3s ease;">
+                            <h4 id="abast-detalhes-titulo" style="margin: 0 0 0.75rem; font-size: 0.95rem; color: #1e293b; font-weight: 800;">Registos do dia</h4>
+                            <div id="abast-detalhes-lista" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <!-- Inserido dinamicamente via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        </section>
+
+        <!-- Secção Hoje: apenas botão Registar -->
+        <section id="sec-hoje" class="area-sec visivel" aria-labelledby="titulo-hoje">
             <div class="acoes acoes-single">
-                <button type="button" class="btn-acao btn-registrar" id="btnRegistrar">Registrar</button>
+                <button type="button" class="btn-acao btn-registrar" id="btnRegistrar">Registar</button>
             </div>
         </section>
 
@@ -677,21 +1429,22 @@
                     <div class="valor">{{ jornada_nome }}</div>
                 </div>
                 {% endif %}
+                {% if user.is_staff %}
                 <div class="perfil-campo">
-                    {% if user.is_staff %}
-                    <a href="{% url 'backoffice_dashboard' %}" class="btn-logout" style="background: #2563eb; margin-right: 0.5rem;">Ir para Backoffice</a>
-                    {% endif %}
-                    <a href="?sair=1" class="btn-logout">Terminar sessão</a>
+                    <a href="{% url 'backoffice_dashboard' %}" class="btn-logout"
+                        style="background: #2563eb; margin-right: 0.5rem;">Ir para Backoffice</a>
                 </div>
+                {% endif %}
             </div>
         </section>
     </div>
 
     <div class="toast" id="toast" role="alert"></div>
 
-    <div class="modal-overlay" id="modalRegistroSucesso" role="dialog" aria-labelledby="modalRegistroSucessoTitulo" aria-modal="true">
+    <div class="modal-overlay" id="modalRegistroSucesso" role="dialog" aria-labelledby="modalRegistroSucessoTitulo"
+        aria-modal="true">
         <div class="modal-justificativa modal-registro-sucesso">
-            <h3 id="modalRegistroSucessoTitulo">Registrada com sucesso</h3>
+            <h3 id="modalRegistroSucessoTitulo">Registada com sucesso</h3>
             <p class="modal-registro-data-hora" id="modalRegistroDataHora">—</p>
             <div class="modal-botoes">
                 <button type="button" class="modal-btn-confirmar" id="btnModalRegistroOk">OK</button>
@@ -699,11 +1452,26 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="modalJustificativa" role="dialog" aria-labelledby="modalJustificativaTitulo" aria-modal="true">
+    <!-- Modal de Carregamento (Loading Screen) -->
+    <div class="modal-overlay" id="loadingOverlay" role="dialog" aria-modal="true" style="backdrop-filter: blur(8px); background: rgba(15, 23, 42, 0.65); z-index: 9999;">
+        <div style="background: #ffffff; border-radius: 24px; padding: 2.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); max-width: 300px; width: 100%; text-align: center; border: 1px solid rgba(255, 255, 255, 0.2);">
+            <div style="position: relative; width: 80px; height: 80px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center;">
+                <div style="position: absolute; border: 4px solid #f1f5f9; border-radius: 50%; width: 100%; height: 100%;"></div>
+                <div style="position: absolute; border: 4px solid transparent; border-top-color: #2563eb; border-right-color: #2563eb; border-radius: 50%; width: 100%; height: 100%; animation: spin 0.8s linear infinite;"></div>
+                <div style="font-size: 2rem; animation: pulse 1.5s ease-in-out infinite;">📍</div>
+            </div>
+            <h4 style="margin: 0 0 0.5rem; font-size: 1.25rem; color: #1e293b; font-weight: 800; letter-spacing: -0.025em;">A registar ponto...</h4>
+            <p id="loadingOverlayTexto" style="margin: 0; font-size: 0.875rem; color: #64748b; font-weight: 500; line-height: 1.4;">A obter geolocalização e a comunicar com o servidor.</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalJustificativa" role="dialog" aria-labelledby="modalJustificativaTitulo"
+        aria-modal="true">
         <div class="modal-justificativa">
             <h3 id="modalJustificativaTitulo">Saída sem pausa para almoço</h3>
             <p>Indique o motivo da saída antes de registar a pausa para almoço (obrigatório).</p>
-            <textarea id="inputJustificativa" placeholder="Ex.: Saída antecipada por motivo pessoal" maxlength="500"></textarea>
+            <textarea id="inputJustificativa" placeholder="Ex.: Saída antecipada por motivo pessoal"
+                maxlength="500"></textarea>
             <div class="modal-botoes">
                 <button type="button" class="modal-btn-cancelar" id="btnModalCancelar">Cancelar</button>
                 <button type="button" class="modal-btn-confirmar" id="btnModalConfirmar">Confirmar saída</button>
@@ -711,518 +1479,1885 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="modalKM" role="dialog" aria-labelledby="modalKMTitulo" aria-modal="true">
+        <div class="modal-justificativa">
+            <h3 id="modalKMTitulo">Registar KM</h3>
+
+            <div
+                style="background: #f8fafc; padding: 0.75rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid #e2e8f0; text-align: left;">
+                <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 2px;">Viatura Selecionada:</div>
+                <div style="font-weight: 800; color: #1e293b; font-size: 1rem;" id="modalKMViaturaMatricula">---</div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Último KM registado: <span
+                        id="modalKMUltimoValor" style="color: #2563eb; font-weight: 700;">---</span></div>
+            </div>
+
+            <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem; text-align: left;">Novo KM Atual:</p>
+            <input type="number" id="inputKM" placeholder="0" step="1"
+                style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 700; text-align: center;">
+
+            <div class="modal-botoes">
+                <button type="button" class="modal-btn-cancelar" id="btnModalKMCancelar">Cancelar</button>
+                <button type="button" class="modal-btn-confirmar" id="btnModalKMConfirmar">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalKMConfirmacao" role="dialog" aria-labelledby="modalKMConfirmacaoTitulo" aria-modal="true">
+        <div class="modal-justificativa" style="border-left: 5px solid #eab308;">
+            <h3 id="modalKMConfirmacaoTitulo" style="color: #a16207; display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.5rem 0;">
+                ⚠️ Confirmar Quilometragem
+            </h3>
+            <p style="margin: 0.75rem 0 1.25rem 0; font-size: 0.95rem; line-height: 1.5; color: #475569; text-align: left;">
+                O valor digitado representa um acréscimo de <strong id="kmConfirmacaoDiferenca" style="color: #dc2626;">— KM</strong> em relação ao anterior. 
+                <br><br>
+                Tem a certeza que este valor de <strong id="kmConfirmacaoValor" style="color: #1e293b;">— KM</strong> está correto?
+            </p>
+            <div class="modal-botoes">
+                <button type="button" class="modal-btn-cancelar" id="btnModalKMConfirmacaoVoltar">Voltar e Editar</button>
+                <button type="button" class="modal-btn-confirmar" id="btnModalKMConfirmarReal" style="background: #eab308; color: #1e1b4b;">Sim, está correto</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Registar Abastecimento -->
+    <div class="modal-overlay" id="modalAbastecimento" role="dialog" aria-labelledby="modalAbastecimentoTitulo" aria-modal="true">
+        <div class="modal-justificativa" style="max-height: 90vh; overflow-y: auto;">
+            <h3 id="modalAbastecimentoTitulo" style="margin-bottom: 1rem; color: #1e293b; font-weight: 800;">⛽ Registar Abastecimento</h3>
+            
+            <form id="formAbastecimento" onsubmit="event.preventDefault();" style="text-align: left; display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Drag and Drop Upload Fatura -->
+                <div class="form-group">
+                    <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color:#475569;">Talão / Fatura Simplificada</label>
+                    <div id="abast-dropzone" style="border: 2px dashed #cbd5e1; border-radius: 12px; padding: 1.5rem; text-align: center; background: #f8fafc; cursor: pointer; transition: all 0.2s;">
+                        <span style="font-size: 1.75rem; display: block; margin-bottom: 0.25rem;">📷</span>
+                        <span style="font-size: 0.8rem; font-weight: 700; color: #475569; display: block;">Tirar Foto ou Carregar Recibo</span>
+                        <span style="font-size: 0.7rem; color: #94a3b8;">PNG, JPG (Auto-OCR ativado)</span>
+                        <input type="file" id="abast-file-input" accept="image/*" style="display: none;">
+                    </div>
+                    <div id="abast-file-preview-container" style="display: none; align-items: center; gap: 0.75rem; margin-top: 0.5rem; padding: 0.5rem; background: #e2e8f0; border-radius: 8px;">
+                        <span style="font-size: 1.2rem;">📎</span>
+                        <span id="abast-file-name" style="font-size: 0.75rem; font-weight: 700; color: #1e293b; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">recibo.jpg</span>
+                        <button type="button" id="btn-abast-remove-file" style="border: none; background: transparent; color: #ef4444; font-weight: 700; cursor: pointer; font-size: 0.8rem; padding: 2px 6px;">Remover</button>
+                    </div>
+                    <div id="abast-ocr-spinner" style="display: none; text-align: center; margin-top: 0.75rem;">
+                        <span class="spinner" style="display: inline-block; width: 16px; height: 16px; border: 2px solid #10b981; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></span>
+                        <span style="font-size: 0.8rem; font-weight: 700; color: #10b981; margin-left: 0.5rem;">A ler fatura com IA (OCR)...</span>
+                    </div>
+                </div>
+
+                <!-- Campo KM Atual -->
+                <div class="form-group">
+                    <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color:#475569;">Quilometragem (KM) no Abastecimento</label>
+                    <input type="number" id="abast-km-input" placeholder="Ex: 142500" step="1" required
+                        style="width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; font-weight: 700; text-align: center;">
+                </div>
+
+                <!-- Linha dupla: Valor e Litros -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <div class="form-group">
+                        <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color:#475569;">Valor Gasto (€)</label>
+                        <input type="text" id="abast-valor-input" placeholder="Ex: 50.00" required
+                            style="width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; font-weight: 700; text-align: center;">
+                    </div>
+                    <div class="form-group">
+                        <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color:#475569;">Litros</label>
+                        <input type="text" id="abast-litros-input" placeholder="Ex: 40.25" required
+                            style="width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; font-weight: 700; text-align: center;">
+                    </div>
+                </div>
+
+                <!-- Método de Pagamento -->
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color:#475569;">Método de Pagamento</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                        <button type="button" id="btn-pag-dinheiro"
+                            style="padding: 0.6rem; border: 2px solid #3b82f6; background: #eff6ff; color: #1d4ed8; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+                            💶 Dinheiro (€)
+                        </button>
+                        <button type="button" id="btn-pag-cartao"
+                            style="padding: 0.6rem; border: 2px solid #cbd5e1; background: #ffffff; color: #475569; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+                            💳 Cartão
+                        </button>
+                    </div>
+                    <input type="hidden" id="abast-metodo-pagamento" value="dinheiro">
+                </div>
+
+                <!-- Campo Nº do Cartão Utilizado -->
+                <div class="form-group" id="abast-cartao-container" style="display: none;">
+                    <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color:#475569;">Nº do Cartão Utilizado (4 últimos dígitos)</label>
+                    <input type="text" id="abast-cartao-input" placeholder="Ex: 8900" maxlength="4"
+                        style="width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; font-weight: 700; text-align: center;">
+                </div>
+
+                <div class="modal-botoes" style="margin-top: 1rem;">
+                    <button type="button" class="modal-btn-cancelar" id="btnModalAbastCancelar">Cancelar</button>
+                    <button type="button" class="modal-btn-confirmar" id="btnModalAbastSubmeter" style="background: #10b981;">Pedir Aprovação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Visualizar Recibo/Comprovativo -->
+    <div class="modal-overlay" id="modalVisualizarRecibo" role="dialog" aria-labelledby="modalVisualizarReciboTitulo" aria-modal="true">
+        <div class="modal-justificativa" style="max-width: 95vw; max-height: 90vh; display: flex; flex-direction: column; padding: 0.75rem; border-radius: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding: 0 0.5rem;">
+                <h3 id="modalVisualizarReciboTitulo" style="margin: 0; font-size: 1rem; color: #1e293b; font-weight: 800;">Fatura / Comprovativo</h3>
+                <button type="button" id="btnFecharRecibo" style="border: none; background: #e2e8f0; border-radius: 50%; width: 28px; height: 28px; font-weight: 800; cursor: pointer; color: #475569;">✕</button>
+            </div>
+            <div style="flex: 1; overflow: auto; display: flex; justify-content: center; align-items: center; background: #f8fafc; border-radius: 8px; border: 1px solid #cbd5e1; min-height: 250px;">
+                <img id="imgComprovativoZoom" src="" alt="Comprovativo" style="max-width: 100%; max-height: 70vh; object-fit: contain;">
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.12); opacity: 0.85; }
+        }
+    </style>
     <nav class="nav-bottom" aria-label="Navegação principal">
         <a href="#espelho" class="nav-item" data-sec="painel" aria-label="Espelho">📊<span>Espelho</span></a>
-        <a href="#calendario" class="nav-item" data-sec="calendario" aria-label="Calendário">📅<span>Calendário</span></a>
-        <a href="#hoje" class="nav-item ativo" data-sec="hoje" aria-label="Hoje" aria-current="page">📍<span>Hoje</span></a>
+        <a href="#calendario" class="nav-item" data-sec="calendario"
+            aria-label="Calendário">📅<span>Calendário</span></a>
+        <a href="#km" class="nav-item" data-sec="km" aria-label="KM">🚗<span>KM</span></a>
+        <a href="#hoje" class="nav-item ativo" data-sec="hoje" aria-label="Hoje"
+            aria-current="page">📍<span>Hoje</span></a>
         <a href="#perfil" class="nav-item" data-sec="perfil" aria-label="Perfil">👤<span>Perfil</span></a>
     </nav>
 
     <script>
-(function() {
-    var LOGOUT_AFTER_MS = 5 * 60 * 1000;
-    var logoutUrl = '/area/?sair=1';
-    var inactivityTimer;
-    function resetInactivityTimer() {
-        clearTimeout(inactivityTimer);
-        inactivityTimer = setTimeout(function() {
-            window.location.href = logoutUrl;
-        }, LOGOUT_AFTER_MS);
-    }
-    ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'].forEach(function(ev) {
-        document.addEventListener(ev, resetInactivityTimer, { passive: true });
-    });
-    resetInactivityTimer();
-
-    var API_MINHAS = '/api/marcacoes/minhas/';
-    var API_MARCAR = '/api/marcacoes/';
-    var API_HORA_SERVIDOR = '/api/hora-servidor/';
-    /** Fuso do Django (settings.TIME_ZONE); o servidor devolve o valor real em /api/hora-servidor/ */
-    var SERVER_TZ = 'Europe/Lisbon';
-    /** Offset em ms: hora_do_servidor ≈ Date.now() + clockOffsetMs (mesma referência que nas marcações). */
-    var clockOffsetMs = 0;
-    var clockSyncOk = false;
-    var TIPOS_ORDEM = ['entrada', 'inicio_almoco', 'fim_almoco', 'fim_jornada'];
-    var estadoHoje = { entrada: false, inicio_almoco: false, fim_almoco: false, fim_jornada: false };
-    var totalMarcacoesHoje = 0;
-    var ICONE_MARCACAO = '<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>';
-
-    function serverInstantMs() {
-        return Date.now() + clockOffsetMs;
-    }
-
-    function syncServerClock() {
-        return fetch(API_HORA_SERVIDOR, { credentials: 'same-origin', cache: 'no-store' })
-            .then(function(r) {
-                if (!r.ok) throw new Error('hora');
-                return r.json();
-            })
-            .then(function(data) {
-                if (data.time_zone) SERVER_TZ = data.time_zone;
-                clockOffsetMs = (data.unix_ms || 0) - Date.now();
-                clockSyncOk = true;
+        (function () {
+            var LOGOUT_AFTER_MS = 5 * 60 * 1000;
+            var logoutUrl = '/area/?sair=1';
+            var inactivityTimer;
+            function resetInactivityTimer() {
+                clearTimeout(inactivityTimer);
+                inactivityTimer = setTimeout(function () {
+                    window.location.href = logoutUrl;
+                }, LOGOUT_AFTER_MS);
+            }
+            ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'].forEach(function (ev) {
+                document.addEventListener(ev, resetInactivityTimer, { passive: true });
             });
-    }
+            resetInactivityTimer();
 
-    /** Data civil YYYY-MM-DD no fuso SERVER_TZ para o instante dado (ms). */
-    function ymdISOFromMs(ms) {
-        var parts = new Intl.DateTimeFormat('en-CA', { timeZone: SERVER_TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(ms));
-        var y = '', m = '', d = '';
-        parts.forEach(function(p) {
-            if (p.type === 'year') y = p.value;
-            if (p.type === 'month') m = p.value;
-            if (p.type === 'day') d = p.value;
-        });
-        return y + '-' + m + '-' + d;
-    }
+            var API_MINHAS = '/api/marcacoes/minhas/';
+            var API_MARCAR = '/api/marcacoes/';
+            var API_HORA_SERVIDOR = '/api/hora-servidor/';
+            /** Fuso do Django (settings.TIME_ZONE); o servidor devolve o valor real em /api/hora-servidor/ */
+            var SERVER_TZ = 'Europe/Lisbon';
+            /** Offset em ms: hora_do_servidor ≈ Date.now() + clockOffsetMs (mesma referência que nas marcações). */
+            var clockOffsetMs = 0;
+            var clockSyncOk = false;
+            var TIPOS_ORDEM = ['entrada', 'inicio_almoco', 'fim_almoco', 'fim_jornada'];
+            var estadoHoje = { entrada: false, inicio_almoco: false, fim_almoco: false, fim_jornada: false };
+            var totalMarcacoesHoje = 0;
+            var ICONE_MARCACAO = '<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>';
 
-    function hojeISO() {
-        if (!clockSyncOk) return ymdISOFromMs(Date.now());
-        return ymdISOFromMs(serverInstantMs());
-    }
+            function serverInstantMs() {
+                return Date.now() + clockOffsetMs;
+            }
 
-    function atualizarDataHora() {
-        var horaEl = document.getElementById('horaAtual');
-        var dataEl = document.getElementById('dataHoje');
-        if (!horaEl || !dataEl) return;
-        if (!clockSyncOk) {
-            horaEl.textContent = '…';
-            return;
-        }
-        var d = new Date(serverInstantMs());
-        var opts = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: SERVER_TZ };
-        dataEl.textContent = d.toLocaleDateString('pt-PT', opts);
-        horaEl.textContent = d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: SERVER_TZ });
-    }
+            function syncServerClock() {
+                return fetch(API_HORA_SERVIDOR, { credentials: 'same-origin', cache: 'no-store' })
+                    .then(function (r) {
+                        if (!r.ok) throw new Error('hora');
+                        return r.json();
+                    })
+                    .then(function (data) {
+                        if (data.time_zone) SERVER_TZ = data.time_zone;
+                        clockOffsetMs = (data.unix_ms || 0) - Date.now();
+                        clockSyncOk = true;
+                    });
+            }
 
-    function atualizarAvatar() {
-        var el = document.getElementById('avatarIniciais');
-        if (!el) return;
-        var nomeEl = document.querySelector('.perfil-nome');
-        var nome = (nomeEl && nomeEl.textContent) ? nomeEl.textContent.trim() : '';
-        var parts = nome.split(/\s+/).filter(Boolean);
-        var ini = '';
-        if (parts.length >= 2) ini = (parts[0][0] + parts[parts.length - 1][0]);
-        else if (parts.length === 1) ini = parts[0].slice(0, 2);
-        ini = (ini || 'RT').toUpperCase();
-        el.textContent = ini;
-    }
-
-    function showToast(msg, isError) {
-        var el = document.getElementById('toast');
-        el.textContent = msg;
-        el.classList.toggle('erro', !!isError);
-        el.classList.add('visible');
-        setTimeout(function() { el.classList.remove('visible'); }, 3500);
-    }
-
-    function parseDataHora(str) {
-        if (!str) return null;
-        var m = str.match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})/);
-        if (!m) return null;
-        return { date: m[1]+'-'+m[2]+'-'+m[3], time: m[4]+':'+m[5] };
-    }
-
-    function carregarAgenda() {
-        fetch(API_MINHAS, { credentials: 'same-origin' })
-            .then(function(r) { return r.json(); })
-            .then(function(lista) {
-                var hoje = hojeISO();
-                var porTipo = {};
-                TIPOS_ORDEM.forEach(function(t) { porTipo[t] = null; });
-                totalMarcacoesHoje = 0;
-                var mapTipo = { 'Entrada': 'entrada', 'Início Almoço': 'inicio_almoco', 'Fim Almoço': 'fim_almoco', 'Fim Jornada': 'fim_jornada' };
-                (lista || []).forEach(function(m) {
-                    var key = m['Tipo de Marcação'];
-                    var tipo = mapTipo[key];
-                    if (!tipo) return;
-                    var dh = parseDataHora(m['Data e Hora']);
-                    if (!dh || dh.date !== hoje) return;
-                    totalMarcacoesHoje += 1;
-                    if (!porTipo[tipo]) porTipo[tipo] = dh;
+            /** Data civil YYYY-MM-DD no fuso SERVER_TZ para o instante dado (ms). */
+            function ymdISOFromMs(ms) {
+                var parts = new Intl.DateTimeFormat('en-CA', { timeZone: SERVER_TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(ms));
+                var y = '', m = '', d = '';
+                parts.forEach(function (p) {
+                    if (p.type === 'year') y = p.value;
+                    if (p.type === 'month') m = p.value;
+                    if (p.type === 'day') d = p.value;
                 });
-                estadoHoje = { entrada: !!porTipo.entrada, inicio_almoco: !!porTipo.inicio_almoco, fim_almoco: !!porTipo.fim_almoco, fim_jornada: !!porTipo.fim_jornada };
-                atualizarBotoes();
-            })
-            .catch(function() { showToast('Erro ao carregar agenda.', true); });
-    }
+                return y + '-' + m + '-' + d;
+            }
 
-    function proximoPasso() {
-        if (totalMarcacoesHoje >= 8) return null;
-        // Cicla nos 4 tipos para permitir até 8 marcações no dia.
-        return TIPOS_ORDEM[totalMarcacoesHoje % TIPOS_ORDEM.length];
-    }
+            function hojeISO() {
+                if (!clockSyncOk) return ymdISOFromMs(Date.now());
+                return ymdISOFromMs(serverInstantMs());
+            }
 
-    function atualizarBotoes() {
-        var btn = document.getElementById('btnRegistrar');
-        if (!btn) return;
-        var next = proximoPasso();
-        btn.textContent = 'Registrar';
-        btn.disabled = !next;
-    }
+            function atualizarDataHora() {
+                var horaEl = document.getElementById('horaAtual');
+                var dataEl = document.getElementById('dataHoje');
+                if (!horaEl || !dataEl) return;
+                if (!clockSyncOk) {
+                    horaEl.textContent = '…';
+                    return;
+                }
+                var d = new Date(serverInstantMs());
+                var opts = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: SERVER_TZ };
+                dataEl.textContent = d.toLocaleDateString('pt-PT', opts);
+                horaEl.textContent = d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: SERVER_TZ });
+            }
 
-    function marcar(tipo, btn, justificativa) {
-        if (!navigator.geolocation) {
-            showToast('Geolocalização não disponível.', true);
-            return;
-        }
-        btn.disabled = true;
-        navigator.geolocation.getCurrentPosition(
-            function(pos) {
-                var payload = { tipo_marcacao: tipo, latitude: pos.coords.latitude, longitude: pos.coords.longitude };
-                if (tipo === 'fim_jornada' && justificativa) payload.justificativa = justificativa;
-                fetch(API_MARCAR, {
+            function atualizarAvatar() {
+                var el = document.getElementById('avatarIniciais');
+                if (!el) return;
+                var nomeEl = document.querySelector('.perfil-nome');
+                var nome = (nomeEl && nomeEl.textContent) ? nomeEl.textContent.trim() : '';
+                var parts = nome.split(/\s+/).filter(Boolean);
+                var ini = '';
+                if (parts.length >= 2) ini = (parts[0][0] + parts[parts.length - 1][0]);
+                else if (parts.length === 1) ini = parts[0].slice(0, 2);
+                ini = (ini || 'RT').toUpperCase();
+                el.textContent = ini;
+            }
+
+            function showToast(msg, isError) {
+                var el = document.getElementById('toast');
+                el.textContent = msg;
+                el.classList.toggle('erro', !!isError);
+                el.classList.add('visible');
+                setTimeout(function () { el.classList.remove('visible'); }, 3500);
+            }
+
+            function parseDataHora(str) {
+                if (!str) return null;
+                var m = str.match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})/);
+                if (!m) return null;
+                return { date: m[1] + '-' + m[2] + '-' + m[3], time: m[4] + ':' + m[5] };
+            }
+
+            function carregarAgenda() {
+                fetch(API_MINHAS + '?_=' + Date.now(), { credentials: 'same-origin', cache: 'no-store' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (lista) {
+                        var hoje = hojeISO();
+                        var porTipo = {};
+                        TIPOS_ORDEM.forEach(function (t) { porTipo[t] = null; });
+                        totalMarcacoesHoje = 0;
+                        var mapTipo = { 'Entrada': 'entrada', 'Início Almoço': 'inicio_almoco', 'Fim Almoço': 'fim_almoco', 'Fim Jornada': 'fim_jornada' };
+                        (lista || []).forEach(function (m) {
+                            var key = m['Tipo de Marcação'];
+                            var tipo = mapTipo[key];
+                            if (!tipo) return;
+                            var dh = parseDataHora(m['Data e Hora']);
+                            if (!dh || dh.date !== hoje) return;
+                            totalMarcacoesHoje += 1;
+                            if (!porTipo[tipo]) porTipo[tipo] = dh;
+                        });
+                        estadoHoje = { entrada: !!porTipo.entrada, inicio_almoco: !!porTipo.inicio_almoco, fim_almoco: !!porTipo.fim_almoco, fim_jornada: !!porTipo.fim_jornada };
+                        atualizarBotoes();
+                    })
+                    .catch(function () { showToast('Erro ao carregar agenda.', true); });
+            }
+
+            function proximoPasso() {
+                if (totalMarcacoesHoje >= 8) return null;
+                // Cicla nos 4 tipos para permitir até 8 marcações no dia.
+                return TIPOS_ORDEM[totalMarcacoesHoje % TIPOS_ORDEM.length];
+            }
+
+            function atualizarBotoes() {
+                var btn = document.getElementById('btnRegistrar');
+                if (!btn) return;
+                var next = proximoPasso();
+                btn.textContent = 'Registrar';
+                btn.disabled = !next;
+            }
+
+            function marcar(tipo, btn, justificativa) {
+                if (!navigator.geolocation) {
+                    showToast('Geolocalização não disponível.', true);
+                    return;
+                }
+                btn.disabled = true;
+                
+                var loadingOverlay = document.getElementById('loadingOverlay');
+                var loadingText = document.getElementById('loadingOverlayTexto');
+                if (loadingOverlay) {
+                    if (loadingText) {
+                        loadingText.textContent = 'A obter geolocalização e a comunicar com o servidor.';
+                    }
+                    loadingOverlay.classList.add('visible');
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    function (pos) {
+                        var payload = { tipo_marcacao: tipo, latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+                        if (tipo === 'fim_jornada' && justificativa) payload.justificativa = justificativa;
+                        
+                        if (loadingText) {
+                            loadingText.textContent = 'A comunicar com o servidor...';
+                        }
+
+                        fetch(API_MARCAR, {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        })
+                            .then(function (r) { return r.json(); })
+                            .then(function (data) {
+                                if (data && data.sucesso) {
+                                    carregarAgenda();
+                                    var dataHora = data.data_hora || '—';
+                                    var el = document.getElementById('modalRegistroDataHora');
+                                    if (el) el.textContent = dataHora;
+                                    
+                                    if (loadingOverlay) {
+                                        loadingOverlay.classList.remove('visible');
+                                    }
+
+                                    var overlay = document.getElementById('modalRegistroSucesso');
+                                    if (overlay) overlay.classList.add('visible');
+                                } else {
+                                    if (loadingOverlay) {
+                                        loadingOverlay.classList.remove('visible');
+                                    }
+                                    showToast(data.mensagem || data.erro || 'Erro ao marcar.', true);
+                                }
+                            })
+                            .catch(function () { 
+                                if (loadingOverlay) {
+                                    loadingOverlay.classList.remove('visible');
+                                }
+                                showToast('Erro de ligação.', true); 
+                            })
+                            .finally(function () { btn.disabled = false; });
+                    },
+                    function () {
+                        if (loadingOverlay) {
+                            loadingOverlay.classList.remove('visible');
+                        }
+                        showToast('Não foi possível obter a localização.', true);
+                        btn.disabled = false;
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            }
+
+            function decidirOi() {
+                if (!estadoHoje.entrada) return 'entrada';
+                if (estadoHoje.inicio_almoco && !estadoHoje.fim_almoco) return 'fim_almoco';
+                return null;
+            }
+            function decidirTchau() {
+                if (!estadoHoje.entrada) return null;
+                if (!estadoHoje.inicio_almoco) return 'inicio_almoco';
+                if (!estadoHoje.fim_jornada) return 'fim_jornada';
+                return null;
+            }
+
+            function precisaJustificativaSaida() {
+                // Mantemos a lógica de pedir justificativa quando estiver a tentar "fim_jornada"
+                // sem ter registado "inicio_almoco" pelo menos uma vez no dia.
+                return estadoHoje.entrada && !estadoHoje.inicio_almoco;
+            }
+
+            function abrirModalJustificativa(btnRef) {
+                var overlay = document.getElementById('modalJustificativa');
+                var input = document.getElementById('inputJustificativa');
+                var btnConfirmar = document.getElementById('btnModalConfirmar');
+                input.value = '';
+                overlay.classList.add('visible');
+                input.focus();
+                var confirmarHandler = function () {
+                    var texto = (input.value || '').trim();
+                    if (!texto) { showToast('Indique uma justificativa.', true); return; }
+                    overlay.classList.remove('visible');
+                    document.getElementById('btnModalCancelar').removeEventListener('click', cancelarHandler);
+                    btnConfirmar.removeEventListener('click', confirmarHandler);
+                    marcar('fim_jornada', btnRef, texto);
+                };
+                var cancelarHandler = function () {
+                    overlay.classList.remove('visible');
+                    document.getElementById('btnModalCancelar').removeEventListener('click', cancelarHandler);
+                    btnConfirmar.removeEventListener('click', confirmarHandler);
+                };
+                document.getElementById('btnModalCancelar').addEventListener('click', cancelarHandler);
+                btnConfirmar.addEventListener('click', confirmarHandler);
+            }
+
+            document.getElementById('btnRegistrar').addEventListener('click', function () {
+                var t = proximoPasso();
+                if (!t) { showToast('Nenhuma marcação disponível.', true); return; }
+                if (t === 'fim_jornada' && precisaJustificativaSaida()) {
+                    abrirModalJustificativa(this);
+                } else {
+                    marcar(t, this);
+                }
+            });
+
+            document.getElementById('btnModalRegistroOk').addEventListener('click', function () {
+                document.getElementById('modalRegistroSucesso').classList.remove('visible');
+            });
+
+            atualizarAvatar();
+            (function iniciarRelogioServidor() {
+                function depoisDeSincronizar() {
+                    atualizarDataHora();
+                    setInterval(atualizarDataHora, 1000);
+                    setInterval(function () { syncServerClock().catch(function () { }); }, 5 * 60 * 1000);
+                    carregarAgenda();
+                    /* Recarrega a secção visível com “hoje” já alinhado ao servidor (calendário/painel). */
+                    if (typeof mostrarSec === 'function' && typeof secFromHash === 'function') {
+                        mostrarSec(secFromHash());
+                    }
+                }
+                syncServerClock()
+                    .then(depoisDeSincronizar)
+                    .catch(function retry() {
+                        showToast('A sincronizar a hora com o servidor…', false);
+                        setTimeout(function () {
+                            syncServerClock().then(depoisDeSincronizar).catch(retry);
+                        }, 2000);
+                    });
+            })();
+
+            // --- Lógica de KM ---
+            var API_KM_STATUS = '/api/km-status/';
+            var API_KM_REGISTO = '/api/km-registo/';
+            var API_VIATURAS = '/api/viaturas-api/';
+            var viaturasCache = [];
+
+            function carregarViaturas() {
+                var select = document.getElementById('km-viatura-select');
+                if (!select) return;
+                fetch(API_VIATURAS + '?_=' + Date.now(), { credentials: 'same-origin', cache: 'no-store' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data.sucesso) {
+                            viaturasCache = data.viaturas;
+                            if (data.viaturas.length === 0) {
+                                select.innerHTML = '<option value="">Nenhuma viatura atribuída</option>';
+                                select.disabled = false;
+                                select.style.background = 'white';
+                                select.style.color = '#1e293b';
+                                select.style.cursor = 'default';
+                            } else if (data.viaturas.length === 1) {
+                                // Se tiver exatamente uma viatura, auto-seleciona e bloqueia a seleção
+                                var v = data.viaturas[0];
+                                select.innerHTML = '';
+                                var opt = document.createElement('option');
+                                opt.value = v.id;
+                                opt.textContent = v.matricula + ' (' + v.km_atual + ' KM)';
+                                select.appendChild(opt);
+                                select.value = v.id;
+                                select.disabled = true;
+                                select.style.background = '#f1f5f9';
+                                select.style.color = '#64748b';
+                                select.style.cursor = 'not-allowed';
+                            } else {
+                                select.innerHTML = '<option value="">Selecione uma viatura...</option>';
+                                select.disabled = false;
+                                select.style.background = 'white';
+                                select.style.color = '#1e293b';
+                                select.style.cursor = 'default';
+                                data.viaturas.forEach(function (v) {
+                                    var opt = document.createElement('option');
+                                    opt.value = v.id;
+                                    opt.textContent = v.matricula + ' (' + v.km_atual + ' KM)';
+                                    select.appendChild(opt);
+                                });
+                            }
+                        } else {
+                            select.innerHTML = '<option value="">Erro ao carregar</option>';
+                        }
+                    })
+                    .catch(function (err) {
+                        select.innerHTML = '<option value="">Erro de ligação</option>';
+                    });
+            }
+
+            function carregarKmStatus() {
+                carregarViaturas();
+                fetch(API_KM_STATUS + '?_=' + Date.now(), { credentials: 'same-origin', cache: 'no-store' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data.sucesso) {
+                            // Atualizar Totais
+                            if (data.totais) {
+                                document.getElementById('km-total-hoje').textContent = data.totais.hoje.toFixed(0);
+                                document.getElementById('km-total-semana').textContent = data.totais.semana.toFixed(0);
+                                document.getElementById('km-total-mes').textContent = data.totais.mes.toFixed(0);
+                            }
+                            // Recarrega o calendário de KM se o mesmo estiver expandido
+                            var kmCal = document.getElementById('km-calendario-container');
+                            if (kmCal && kmCal.style.display !== 'none') {
+                                carregarKMCalendario();
+                            }
+                        }
+                    });
+            }
+
+            function registrarKm() {
+                var select = document.getElementById('km-viatura-select');
+                var viaturaId = select.value;
+                if (!viaturaId) { showToast('Selecione uma viatura primeiro.', true); return; }
+
+                var viatura = viaturasCache.find(function (v) { return v.id == viaturaId; });
+                if (!viatura) return;
+
+                var modal = document.getElementById('modalKM');
+                var input = document.getElementById('inputKM');
+                var btnConfirmar = document.getElementById('btnModalKMConfirmar');
+                var btnCancelar = document.getElementById('btnModalKMCancelar');
+
+                document.getElementById('modalKMViaturaMatricula').textContent = viatura.matricula + (viatura.marca_modelo ? ' - ' + viatura.marca_modelo : '');
+                document.getElementById('modalKMUltimoValor').textContent = viatura.km_atual + ' KM';
+
+                input.value = '';
+                input.placeholder = viatura.km_atual;
+                modal.classList.add('visible');
+
+                // Foco inicial no KM
+                setTimeout(function () { input.focus(); }, 300);
+
+                var keyHandler = function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        btnConfirmar.click();
+                    }
+                };
+                input.addEventListener('keydown', keyHandler);
+
+                var confirmar = function () {
+                    var valor = input.value;
+
+                    if (!valor) {
+                        showToast('Insira a quilometragem.', true);
+                        input.focus();
+                        return;
+                    }
+
+                    var km = parseInt(valor, 10);
+
+                    if (km < viatura.km_atual) {
+                        showToast('O KM não pode ser menor que o atual (' + viatura.km_atual + ').', true);
+                        return;
+                    }
+
+                    var diff = km - viatura.km_atual;
+
+                    // Limpa listeners do modalKM
+                    cleanup();
+
+                    if (diff > 100) {
+                        // Salto superior a 100 KM -> Pede confirmação extra com popup
+                        var modalConf = document.getElementById('modalKMConfirmacao');
+                        var labelDiff = document.getElementById('kmConfirmacaoDiferenca');
+                        var labelVal = document.getElementById('kmConfirmacaoValor');
+                        var btnReal = document.getElementById('btnModalKMConfirmarReal');
+                        var btnVoltar = document.getElementById('btnModalKMConfirmacaoVoltar');
+
+                        if (labelDiff) labelDiff.textContent = '+' + diff + ' KM';
+                        if (labelVal) labelVal.textContent = km + ' KM';
+
+                        modalConf.classList.add('visible');
+
+                        var onConfirmReal = function () {
+                            modalConf.classList.remove('visible');
+                            btnReal.removeEventListener('click', onConfirmReal);
+                            btnVoltar.removeEventListener('click', onVoltar);
+                            enviarRequisicaoKM(km, viaturaId);
+                        };
+
+                        var onVoltar = function () {
+                            modalConf.classList.remove('visible');
+                            btnReal.removeEventListener('click', onConfirmReal);
+                            btnVoltar.removeEventListener('click', onVoltar);
+                            // Abre novamente o modal anterior para edição
+                            modal.classList.add('visible');
+                            setTimeout(function () { input.focus(); }, 300);
+                            btnConfirmar.addEventListener('click', confirmar);
+                            btnCancelar.addEventListener('click', cancelar);
+                            input.addEventListener('keydown', keyHandler);
+                        };
+
+                        btnReal.addEventListener('click', onConfirmReal);
+                        btnVoltar.addEventListener('click', onVoltar);
+                    } else {
+                        // Envia diretamente
+                        enviarRequisicaoKM(km, viaturaId);
+                    }
+                };
+
+                var cancelar = function () {
+                    cleanup();
+                };
+
+                function cleanup() {
+                    modal.classList.remove('visible');
+                    btnConfirmar.removeEventListener('click', confirmar);
+                    btnCancelar.removeEventListener('click', cancelar);
+                    input.removeEventListener('keydown', keyHandler);
+                }
+
+                btnConfirmar.addEventListener('click', confirmar);
+                btnCancelar.addEventListener('click', cancelar);
+            }
+
+            function enviarRequisicaoKM(km, viaturaId) {
+                fetch(API_KM_REGISTO, {
                     method: 'POST',
                     credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ km: km, viatura_id: viaturaId, descricao: '' })
                 })
-                    .then(function(r) { return r.json(); })
-                    .then(function(data) {
-                        if (data && data.sucesso) {
-                            carregarAgenda();
-                            var dataHora = data.data_hora || '—';
-                            var el = document.getElementById('modalRegistroDataHora');
-                            if (el) el.textContent = dataHora;
-                            var overlay = document.getElementById('modalRegistroSucesso');
-                            if (overlay) overlay.classList.add('visible');
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data.sucesso) {
+                            showToast(data.mensagem);
+                            carregarKmStatus();
                         } else {
-                            showToast(data.mensagem || data.erro || 'Erro ao marcar.', true);
+                            showToast(data.erro || 'Erro ao registrar KM.', true);
                         }
                     })
-                    .catch(function() { showToast('Erro de ligação.', true); })
-                    .finally(function() { btn.disabled = false; });
-            },
-            function() {
-                showToast('Não foi possível obter a localização.', true);
-                btn.disabled = false;
-            },
-            { enableHighAccuracy: true, timeout: 10000 }
-        );
-    }
-
-    function decidirOi() {
-        if (!estadoHoje.entrada) return 'entrada';
-        if (estadoHoje.inicio_almoco && !estadoHoje.fim_almoco) return 'fim_almoco';
-        return null;
-    }
-    function decidirTchau() {
-        if (!estadoHoje.entrada) return null;
-        if (!estadoHoje.inicio_almoco) return 'inicio_almoco';
-        if (!estadoHoje.fim_jornada) return 'fim_jornada';
-        return null;
-    }
-
-    function precisaJustificativaSaida() {
-        // Mantemos a lógica de pedir justificativa quando estiver a tentar "fim_jornada"
-        // sem ter registado "inicio_almoco" pelo menos uma vez no dia.
-        return estadoHoje.entrada && !estadoHoje.inicio_almoco;
-    }
-
-    function abrirModalJustificativa(btnRef) {
-        var overlay = document.getElementById('modalJustificativa');
-        var input = document.getElementById('inputJustificativa');
-        var btnConfirmar = document.getElementById('btnModalConfirmar');
-        input.value = '';
-        overlay.classList.add('visible');
-        input.focus();
-        var confirmarHandler = function() {
-            var texto = (input.value || '').trim();
-            if (!texto) { showToast('Indique uma justificativa.', true); return; }
-            overlay.classList.remove('visible');
-            document.getElementById('btnModalCancelar').removeEventListener('click', cancelarHandler);
-            btnConfirmar.removeEventListener('click', confirmarHandler);
-            marcar('fim_jornada', btnRef, texto);
-        };
-        var cancelarHandler = function() {
-            overlay.classList.remove('visible');
-            document.getElementById('btnModalCancelar').removeEventListener('click', cancelarHandler);
-            btnConfirmar.removeEventListener('click', confirmarHandler);
-        };
-        document.getElementById('btnModalCancelar').addEventListener('click', cancelarHandler);
-        btnConfirmar.addEventListener('click', confirmarHandler);
-    }
-
-    document.getElementById('btnRegistrar').addEventListener('click', function() {
-        var t = proximoPasso();
-        if (!t) { showToast('Nenhuma marcação disponível.', true); return; }
-        if (t === 'fim_jornada' && precisaJustificativaSaida()) {
-            abrirModalJustificativa(this);
-        } else {
-            marcar(t, this);
-        }
-    });
-
-    document.getElementById('btnModalRegistroOk').addEventListener('click', function() {
-        document.getElementById('modalRegistroSucesso').classList.remove('visible');
-    });
-
-    atualizarAvatar();
-    (function iniciarRelogioServidor() {
-        function depoisDeSincronizar() {
-            atualizarDataHora();
-            setInterval(atualizarDataHora, 1000);
-            setInterval(function() { syncServerClock().catch(function() {}); }, 5 * 60 * 1000);
-            carregarAgenda();
-            /* Recarrega a secção visível com “hoje” já alinhado ao servidor (calendário/painel). */
-            if (typeof mostrarSec === 'function' && typeof secFromHash === 'function') {
-                mostrarSec(secFromHash());
+                    .catch(function () {
+                        showToast('Erro de ligação.', true);
+                    });
             }
-        }
-        syncServerClock()
-            .then(depoisDeSincronizar)
-            .catch(function retry() {
-                showToast('A sincronizar a hora com o servidor…', false);
-                setTimeout(function() {
-                    syncServerClock().then(depoisDeSincronizar).catch(retry);
-                }, 2000);
-            });
-    })();
 
-    // --- Navegação entre secções (Painel, Calendário, Hoje, Perfil) ---
-    var secIds = { painel: 'sec-painel', calendario: 'sec-calendario', hoje: 'sec-hoje', perfil: 'sec-perfil' };
-    function mostrarSec(id) {
-        id = id || 'hoje';
-        if (!secIds[id]) id = 'hoje';
-        document.querySelectorAll('.area-sec').forEach(function(sec) { sec.classList.remove('visivel'); });
-        var el = document.getElementById(secIds[id]);
-        if (el) el.classList.add('visivel');
-        document.querySelectorAll('.nav-item').forEach(function(a) {
-            a.classList.remove('ativo');
-            a.removeAttribute('aria-current');
-            if (a.getAttribute('data-sec') === id) {
-                a.classList.add('ativo');
-                if (id === 'hoje') a.setAttribute('aria-current', 'page');
+            // --- Lógica de Combustível & Gastos ---
+            var API_ABASTECIMENTO_REGISTAR = '/api/abastecimento/registar/';
+            var API_ABASTECIMENTO_MINHAS = '/api/abastecimento/minhas/';
+            var API_ABASTECIMENTO_OCR = '/api/abastecimento/ocr/';
+
+            // Eventos das sub-abas (Sliding Switch)
+            var tabKMDeslocamentos = document.getElementById('tab-km-deslocamentos');
+            var tabKMGastos = document.getElementById('tab-km-gastos');
+            var tabsBg = document.getElementById('km-tabs-bg');
+            var contentKMDeslocamentos = document.getElementById('km-tab-content-deslocamentos');
+            var contentKMGastos = document.getElementById('km-tab-content-gastos');
+
+            if (tabKMDeslocamentos && tabKMGastos && tabsBg) {
+                tabKMDeslocamentos.addEventListener('click', function () {
+                    tabsBg.style.transform = 'translateX(0)';
+                    tabKMDeslocamentos.style.color = '#1e293b';
+                    tabKMGastos.style.color = '#64748b';
+                    
+                    if (contentKMDeslocamentos) contentKMDeslocamentos.style.display = 'block';
+                    if (contentKMGastos) contentKMGastos.style.display = 'none';
+                });
+
+                tabKMGastos.addEventListener('click', function () {
+                    tabsBg.style.transform = 'translateX(100%)';
+                    tabKMDeslocamentos.style.color = '#64748b';
+                    tabKMGastos.style.color = '#1e293b';
+                    
+                    if (contentKMGastos) contentKMGastos.style.display = 'block';
+                    if (contentKMDeslocamentos) contentKMDeslocamentos.style.display = 'none';
+                    carregarAbastecimentos();
+                });
             }
-        });
-        window.location.hash = id;
-        if (id === 'painel') carregarPainel();
-        if (id === 'calendario') {
-            if (dataSelecionadaCalendario === null) dataSelecionadaCalendario = hojeISO();
-            var inputDia = document.getElementById('calendario-dia-input');
-            var labelDia = document.getElementById('calendario-dia-label');
-            if (inputDia) inputDia.value = dataSelecionadaCalendario;
-            if (labelDia) labelDia.textContent = formatarDiaLabel(dataSelecionadaCalendario);
-            carregarTimelineDia(dataSelecionadaCalendario);
-        }
-    }
-    var dataSelecionadaCalendario = null;
-    function formatarDiaLabel(iso) {
-        if (!iso) return '—';
-        var p = iso.split('-');
-        if (p.length !== 3) return iso;
-        var utcNoon = new Date(Date.UTC(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10), 12, 0, 0));
-        return utcNoon.toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: SERVER_TZ });
-    }
 
-    function addCalendarDays(iso, delta) {
-        var p = iso.split('-');
-        var d = new Date(Date.UTC(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10), 12, 0, 0));
-        d.setUTCDate(d.getUTCDate() + delta);
-        return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
-    }
+            // Modal Abastecimento e Drag & Drop
+            var modalAbast = document.getElementById('modalAbastecimento');
+            var dropzone = document.getElementById('abast-dropzone');
+            var fileInput = document.getElementById('abast-file-input');
+            var previewContainer = document.getElementById('abast-file-preview-container');
+            var fileNameSpan = document.getElementById('abast-file-name');
+            var btnRemoveFile = document.getElementById('btn-abast-remove-file');
+            var ocrSpinner = document.getElementById('abast-ocr-spinner');
+            
+            var inputAbastKM = document.getElementById('abast-km-input');
+            var inputAbastValor = document.getElementById('abast-valor-input');
+            var inputAbastLitros = document.getElementById('abast-litros-input');
+            var inputAbastCartao = document.getElementById('abast-cartao-input');
 
-    function parseISOYMD(iso) {
-        var p = (iso || '').split('-');
-        return { y: parseInt(p[0], 10), m: parseInt(p[1], 10), d: parseInt(p[2], 10) };
-    }
+            var btnPagDinheiro = document.getElementById('btn-pag-dinheiro');
+            var btnPagCartao = document.getElementById('btn-pag-cartao');
+            var inputMetodoPagamento = document.getElementById('abast-metodo-pagamento');
+            var cartaoContainer = document.getElementById('abast-cartao-container');
 
-    function formatDiaCurtoPtFromIso(iso) {
-        var pr = parseISOYMD(iso);
-        if (isNaN(pr.y)) return iso;
-        var utcNoon = new Date(Date.UTC(pr.y, pr.m - 1, pr.d, 12, 0, 0));
-        return utcNoon.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short', timeZone: SERVER_TZ });
-    }
+            function selecionarMetodoPagamento(metodo) {
+                if (metodo === 'dinheiro') {
+                    if (btnPagDinheiro) {
+                        btnPagDinheiro.style.border = '2px solid #3b82f6';
+                        btnPagDinheiro.style.background = '#eff6ff';
+                        btnPagDinheiro.style.color = '#1d4ed8';
+                    }
+                    if (btnPagCartao) {
+                        btnPagCartao.style.border = '2px solid #cbd5e1';
+                        btnPagCartao.style.background = '#ffffff';
+                        btnPagCartao.style.color = '#475569';
+                    }
+                    if (inputMetodoPagamento) inputMetodoPagamento.value = 'dinheiro';
+                    if (cartaoContainer) cartaoContainer.style.display = 'none';
+                    if (inputAbastCartao) {
+                        inputAbastCartao.removeAttribute('required');
+                        inputAbastCartao.value = '';
+                    }
+                } else {
+                    if (btnPagCartao) {
+                        btnPagCartao.style.border = '2px solid #3b82f6';
+                        btnPagCartao.style.background = '#eff6ff';
+                        btnPagCartao.style.color = '#1d4ed8';
+                    }
+                    if (btnPagDinheiro) {
+                        btnPagDinheiro.style.border = '2px solid #cbd5e1';
+                        btnPagDinheiro.style.background = '#ffffff';
+                        btnPagDinheiro.style.color = '#475569';
+                    }
+                    if (inputMetodoPagamento) inputMetodoPagamento.value = 'cartao';
+                    if (cartaoContainer) cartaoContainer.style.display = 'block';
+                    if (inputAbastCartao) {
+                        inputAbastCartao.setAttribute('required', 'required');
+                        inputAbastCartao.value = '';
+                    }
+                }
+            }
 
-    var timelineDiaReqId = 0;
-    function carregarTimelineDia(dataISO) {
-        var listaEl = document.getElementById('timeline-calendario-lista');
-        if (!listaEl) return;
-        listaEl.innerHTML = '';
-        var reqId = ++timelineDiaReqId;
-        fetch(API_MINHAS, { credentials: 'same-origin' })
-            .then(function(r) { return r.json(); })
-            .then(function(lista) {
-                if (reqId !== timelineDiaReqId) return; // ignora respostas antigas (evita duplicados)
-                var doDia = [];
-                var vistos = {};
-                (lista || []).forEach(function(m) {
-                    var dh = parseDataHora(m['Data e Hora']);
-                    if (!dh || dh.date !== dataISO) return;
-                    var key = (m['Data e Hora'] || (dh.date + ' ' + dh.time + ':00'));
-                    if (vistos[key]) return;
-                    vistos[key] = true;
-                    doDia.push({ time: dh.time, sortKey: m['Data e Hora'] || (dh.date + ' ' + dh.time + ':00') });
+            if (btnPagDinheiro) {
+                btnPagDinheiro.addEventListener('click', function() { selecionarMetodoPagamento('dinheiro'); });
+            }
+            if (btnPagCartao) {
+                btnPagCartao.addEventListener('click', function() { selecionarMetodoPagamento('cartao'); });
+            }
+
+            if (document.getElementById('btn-gastos-registrar')) {
+                document.getElementById('btn-gastos-registrar').addEventListener('click', function () {
+                    // Limpar formulário
+                    inputAbastKM.value = '';
+                    inputAbastValor.value = '';
+                    inputAbastLitros.value = '';
+                    if (inputAbastCartao) inputAbastCartao.value = '';
+                    selecionarMetodoPagamento('dinheiro');
+                    fileInput.value = '';
+                    if (previewContainer) previewContainer.style.display = 'none';
+                    if (ocrSpinner) ocrSpinner.style.display = 'none';
+
+                    // Prefill KM da viatura selecionada (apenas placeholder, valor vazio!)
+                    var select = document.getElementById('km-viatura-select');
+                    var viaturaId = select ? select.value : '';
+                    if (viaturaId && viaturasCache) {
+                        var viatura = viaturasCache.find(function (v) { return v.id == viaturaId; });
+                        if (viatura) {
+                            inputAbastKM.placeholder = 'Atual: ' + viatura.km_atual;
+                        } else {
+                            inputAbastKM.placeholder = 'Ex: 142500';
+                        }
+                    } else {
+                        inputAbastKM.placeholder = 'Ex: 142500';
+                    }
+                    
+                    if (modalAbast) modalAbast.classList.add('visible');
                 });
-                doDia.sort(function(a, b) { return (a.sortKey || '').localeCompare(b.sortKey || ''); });
-                doDia.forEach(function(reg) {
-                    var div = document.createElement('div');
-                    div.className = 'timeline-item registado';
-                    div.innerHTML = '<div class="label"><div class="icon-wrap">' + ICONE_MARCACAO + '</div><span class="timeline-item-texto">Registrado</span></div><span class="hora">' + reg.time + '</span>';
-                    listaEl.appendChild(div);
+            }
+
+            if (document.getElementById('btnModalAbastCancelar')) {
+                document.getElementById('btnModalAbastCancelar').addEventListener('click', function () {
+                    if (modalAbast) modalAbast.classList.remove('visible');
                 });
-            })
-            .catch(function() { listaEl.innerHTML = ''; });
-    }
-    function aplicarDataCalendario(iso) {
-        dataSelecionadaCalendario = iso;
-        var inputDia = document.getElementById('calendario-dia-input');
-        var labelDia = document.getElementById('calendario-dia-label');
-        if (inputDia) inputDia.value = iso;
-        if (labelDia) labelDia.textContent = formatarDiaLabel(iso);
-        carregarTimelineDia(iso);
-    }
-    document.getElementById('calendario-dia-prev') && document.getElementById('calendario-dia-prev').addEventListener('click', function() {
-        aplicarDataCalendario(addCalendarDays(dataSelecionadaCalendario || hojeISO(), -1));
-    });
-    document.getElementById('calendario-dia-next') && document.getElementById('calendario-dia-next').addEventListener('click', function() {
-        aplicarDataCalendario(addCalendarDays(dataSelecionadaCalendario || hojeISO(), 1));
-    });
-    document.getElementById('calendario-dia-input') && document.getElementById('calendario-dia-input').addEventListener('change', function() {
-        var v = this.value;
-        if (v) aplicarDataCalendario(v);
-    });
+            }
 
-    function secFromHash() {
-        var h = (window.location.hash || '#hoje').replace('#', '');
-        return secIds[h] ? h : 'hoje';
-    }
-    document.querySelectorAll('.nav-item').forEach(function(a) {
-        a.addEventListener('click', function(e) {
-            e.preventDefault();
-            var id = a.getAttribute('data-sec');
-            if (id) mostrarSec(id);
-        });
-    });
-    window.addEventListener('hashchange', function() { mostrarSec(secFromHash()); });
-    mostrarSec(secFromHash());
-
-    function carregarPainel() {
-        return; // Dados agora vêm estáticos do Django
-    }
-
-    // --- Relatório semanal (Calendário) ---
-    var calendarWeekStart = null; // ISO date (YYYY-MM-DD) do Monday da semana em exibição
-
-    function getMondayOfWeek(d) {
-        var ms = d.getTime();
-        var formatter = new Intl.DateTimeFormat('en-US', { timeZone: SERVER_TZ, weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit' });
-        var parts = formatter.formatToParts(new Date(ms));
-        var map = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
-        var wdStr = '';
-        var y, m, day;
-        parts.forEach(function(p) {
-            if (p.type === 'weekday') wdStr = p.value;
-            if (p.type === 'year') y = parseInt(p.value, 10);
-            if (p.type === 'month') m = parseInt(p.value, 10);
-            if (p.type === 'day') day = parseInt(p.value, 10);
-        });
-        var wi = map[wdStr];
-        var diff = wi === 0 ? -6 : 1 - wi;
-        var utc = Date.UTC(y, m - 1, day, 12, 0, 0);
-        var adj = new Date(utc);
-        adj.setUTCDate(adj.getUTCDate() + diff);
-        return adj.getUTCFullYear() + '-' + String(adj.getUTCMonth() + 1).padStart(2, '0') + '-' + String(adj.getUTCDate()).padStart(2, '0');
-    }
-    function getWeekDates(weekStartISO) {
-        var out = [];
-        for (var i = 0; i < 7; i++) {
-            out.push(addCalendarDays(weekStartISO, i));
-        }
-        return out;
-    }
-    function minutosFromTime(t) {
-        if (!t || t.length < 5) return null;
-        var p = t.split(':');
-        return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
-    }
-    function formatDuracao(minutos) {
-        if (minutos == null || minutos < 0) return '—';
-        var h = Math.floor(minutos / 60);
-        var m = minutos % 60;
-        return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-    }
-
-    function carregarCalendario() {
-        var tbody = document.getElementById('relatorio-tbody');
-        var periodoEl = document.getElementById('calendario-periodo');
-        if (!tbody || !periodoEl) return;
-        if (calendarWeekStart === null) calendarWeekStart = getMondayOfWeek(new Date(serverInstantMs()));
-        var weekDates = getWeekDates(calendarWeekStart);
-        var yDom = parseISOYMD(weekDates[6]).y;
-        periodoEl.textContent = formatDiaCurtoPtFromIso(weekDates[0]) + ' - ' + formatDiaCurtoPtFromIso(weekDates[6]) + ', ' + yDom;
-        tbody.innerHTML = '<tr><td colspan="8" class="relatorio-loading">A carregar…</td></tr>';
-        fetch(API_MINHAS, { credentials: 'same-origin' })
-            .then(function(r) { return r.json(); })
-            .then(function(marcacoes) {
-                var mapTipo = { 'Entrada': 'entrada', 'Início Almoço': 'inicio_almoco', 'Fim Almoço': 'fim_almoco', 'Fim Jornada': 'fim_jornada' };
-                var porDia = {};
-                (marcacoes || []).forEach(function(m) {
-                    var dh = parseDataHora(m['Data e Hora']);
-                    if (!dh) return;
-                    var tipo = mapTipo[m['Tipo de Marcação']];
-                    if (!tipo) return;
-                    if (!porDia[dh.date]) porDia[dh.date] = {};
-                    if (!porDia[dh.date][tipo]) porDia[dh.date][tipo] = dh.time;
+            if (dropzone && fileInput) {
+                dropzone.addEventListener('click', function () {
+                    fileInput.click();
                 });
-                var diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-                tbody.innerHTML = '';
-                weekDates.forEach(function(date, i) {
-                    var dp = parseISOYMD(date);
-                    var isWeekend = i >= 5;
-                    var row = porDia[date] || {};
-                    var entrada = row.entrada || null;
-                    var inicioInt = row.inicio_almoco || null;
-                    var voltaInt = row.fim_almoco || null;
-                    var saida = row.fim_jornada || null;
-                    var trab = '—';
-                    if (entrada && saida && !isWeekend) {
-                        var mEnt = minutosFromTime(entrada);
-                        var mSai = minutosFromTime(saida);
-                        if (mEnt != null && mSai != null) {
-                            var dur = mSai - mEnt;
-                            if (inicioInt && voltaInt) {
-                                var mIni = minutosFromTime(inicioInt);
-                                var mVol = minutosFromTime(voltaInt);
-                                if (mIni != null && mVol != null) dur -= (mVol - mIni);
+
+                fileInput.addEventListener('change', function () {
+                    if (fileInput.files && fileInput.files[0]) {
+                        var file = fileInput.files[0];
+                        if (fileNameSpan) fileNameSpan.textContent = file.name;
+                        if (previewContainer) previewContainer.style.display = 'flex';
+
+                        // Executar OCR em background
+                        if (ocrSpinner) ocrSpinner.style.display = 'block';
+                        var fd = new FormData();
+                        fd.append('comprovativo', file);
+
+                        fetch(API_ABASTECIMENTO_OCR, {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            body: fd
+                        })
+                        .then(function (r) { return r.json(); })
+                        .then(function (data) {
+                            if (ocrSpinner) ocrSpinner.style.display = 'none';
+                            if (data.sucesso) {
+                                if (data.valor) {
+                                    var valFormatado = Number(data.valor).toFixed(2);
+                                    inputAbastValor.value = valFormatado;
+                                    showToast('IA leu o valor de €' + valFormatado + ' da fatura!');
+                                } else {
+                                    inputAbastValor.value = '';
+                                    showToast('Comprovativo carregado. Indique o valor manualmente.');
+                                }
+                                if (data.litros) {
+                                    inputAbastLitros.value = Number(data.litros).toFixed(2);
+                                } else {
+                                    inputAbastLitros.value = '';
+                                }
+                            } else {
+                                showToast('Ficheiro associado. Preencha os campos abaixo.');
                             }
-                            trab = formatDuracao(dur >= 0 ? dur : null);
+                        })
+                        .catch(function () {
+                            if (ocrSpinner) ocrSpinner.style.display = 'none';
+                            showToast('Erro ao ler recibo. Preencha os campos abaixo.');
+                        });
+                    }
+                });
+            }
+
+            if (btnRemoveFile) {
+                btnRemoveFile.addEventListener('click', function () {
+                    fileInput.value = '';
+                    if (previewContainer) previewContainer.style.display = 'none';
+                    if (ocrSpinner) ocrSpinner.style.display = 'none';
+                });
+            }
+
+            // Submeter Abastecimento
+            var btnSubmeterAbast = document.getElementById('btnModalAbastSubmeter');
+            if (btnSubmeterAbast) {
+                btnSubmeterAbast.addEventListener('click', function () {
+                    var select = document.getElementById('km-viatura-select');
+                    var viaturaId = select ? select.value : '';
+                    if (!viaturaId) {
+                        showToast('Selecione primeiro uma viatura no painel de deslocamentos.', true);
+                        return;
+                    }
+
+                    var km = inputAbastKM.value.trim();
+                    var valor = inputAbastValor.value.trim();
+                    var litros = inputAbastLitros.value.trim();
+                    var metodo = inputMetodoPagamento ? inputMetodoPagamento.value : 'dinheiro';
+                    var cartao = inputAbastCartao ? inputAbastCartao.value.trim() : '';
+
+                    if (!km || !valor || !litros) {
+                        showToast('Por favor, preencha todos os campos obrigatórios (KM, Valor e Litros).', true);
+                        return;
+                    }
+
+                    if (metodo === 'cartao') {
+                        if (!cartao) {
+                            showToast('Por favor, indique os 4 últimos dígitos do cartão.', true);
+                            return;
+                        }
+                        if (cartao.length !== 4 || isNaN(cartao)) {
+                            showToast('O número de cartão deve ter exatamente os 4 últimos dígitos.', true);
+                            return;
+                        }
+                    } else {
+                        cartao = '';
+                    }
+
+                    // Validação de quilometragem mínima
+                    if (viaturasCache) {
+                        var viatura = viaturasCache.find(function (v) { return v.id == viaturaId; });
+                        if (viatura && parseInt(km, 10) < viatura.km_atual) {
+                            showToast('KM do abastecimento não pode ser inferior ao atual (' + viatura.km_atual + ').', true);
+                            return;
                         }
                     }
-                    var cel = function(val, falta) {
-                        if (isWeekend) return '<span class="cel-vazio">—</span>';
-                        if (falta && !val) return '<span class="cel-falta">Missing</span>';
-                        if (val) return '<span class="cel-ok">' + val + '</span>';
-                        return '<span class="cel-vazio">—</span>';
-                    };
-                    var tr = document.createElement('tr');
-                    if (isWeekend) tr.classList.add('fim-de-semana');
-                    var dataLabel = diasSemana[i] + ' ' + String(dp.d).padStart(2, '0') + '/' + String(dp.m).padStart(2, '0');
-                    tr.innerHTML =
-                        '<td class="col-data">' + dataLabel + '</td>' +
-                        '<td class="col-jornada">' + (isWeekend ? 'Folga' : 'Padrão 08h-18h') + '</td>' +
-                        '<td class="cel-planejado">' + (isWeekend ? '—' : '08:00') + '</td>' +
-                        '<td>' + cel(entrada, true) + '</td>' +
-                        '<td>' + cel(inicioInt, true) + '</td>' +
-                        '<td>' + cel(voltaInt, true) + '</td>' +
-                        '<td>' + cel(saida, true) + '</td>' +
-                        '<td>' + (isWeekend ? '<span class="cel-vazio">—</span>' : '<span class="cel-' + (trab !== '—' ? 'ok' : 'vazio') + '">' + trab + '</span>') + '</td>';
-                    tbody.appendChild(tr);
+
+                    var fd = new FormData();
+                    fd.append('viatura_id', viaturaId);
+                    fd.append('km', km);
+                    fd.append('valor', valor);
+                    fd.append('litros', litros);
+                    fd.append('metodo_pagamento', metodo);
+                    fd.append('cartao', cartao);
+                    if (fileInput.files && fileInput.files[0]) {
+                        fd.append('comprovativo', fileInput.files[0]);
+                    }
+
+                    btnSubmeterAbast.disabled = true;
+                    fetch(API_ABASTECIMENTO_REGISTAR, {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        body: fd
+                    })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        btnSubmeterAbast.disabled = false;
+                        if (data.sucesso) {
+                            showToast(data.mensagem);
+                            if (modalAbast) modalAbast.classList.remove('visible');
+                            carregarAbastecimentos();
+                            carregarKmStatus();
+                        } else {
+                            showToast(data.erro || 'Erro ao submeter abastecimento.', true);
+                        }
+                    })
+                    .catch(function () {
+                        btnSubmeterAbast.disabled = false;
+                        showToast('Erro de rede.', true);
+                    });
                 });
-            })
-            .catch(function() {
-                tbody.innerHTML = '<tr><td colspan="8" class="relatorio-erro">Erro ao carregar marcações.</td></tr>';
+            }
+
+            // Zoom de Fatura/Comprovativo
+            var modalZoom = document.getElementById('modalVisualizarRecibo');
+            var imgZoom = document.getElementById('imgComprovativoZoom');
+            var btnFecharZoom = document.getElementById('btnFecharRecibo');
+
+            if (btnFecharZoom) {
+                btnFecharZoom.addEventListener('click', function () {
+                    if (modalZoom) modalZoom.classList.remove('visible');
+                });
+            }
+
+            function abrirReciboZoom(url) {
+                if (imgZoom && modalZoom) {
+                    imgZoom.src = url;
+                    modalZoom.classList.add('visible');
+                }
+            }
+
+            // --- Variáveis do Calendário de Abastecimento ---
+            var abastViewYear = null;
+            var abastViewMonth = null;
+            var abastRegistrosCache = {};
+            var abastDataSelecionada = null;
+
+            // Carregar Abastecimentos
+            function carregarAbastecimentos() {
+                var listaContainer = document.getElementById('gastos-historico-lista');
+                if (!listaContainer) return;
+
+                fetch(API_ABASTECIMENTO_MINHAS + '?_=' + Date.now(), { credentials: 'same-origin', cache: 'no-store' })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var totalMesAprovado = 0;
+                    var totalSemanaAprovado = 0;
+                    var totalPendente = 0;
+
+                    // Obter a data civil atual do servidor para os cálculos
+                    var hojeStr = hojeISO(); // YYYY-MM-DD
+                    var partsHoje = hojeStr.split('-');
+                    var curY = parseInt(partsHoje[0], 10);
+                    var curM = parseInt(partsHoje[1], 10);
+
+                    // Obter a segunda-feira e os dias da semana atual
+                    var monISO = getMondayOfWeek(new Date(serverInstantMs()));
+                    var currentWeekDates = getWeekDates(monISO);
+
+                    // Resetar a cache do calendário
+                    abastRegistrosCache = {};
+                    listaContainer.innerHTML = '';
+
+                    if (data && data.length > 0) {
+                        data.forEach(function (a) {
+                            // Converter data de dd/mm/yyyy para yyyy-mm-dd para agrupamento
+                            var dateISO = a.data_iso || (a.data ? a.data.split('/').reverse().join('-') : '');
+                            
+                            if (dateISO) {
+                                if (!abastRegistrosCache[dateISO]) abastRegistrosCache[dateISO] = [];
+                                abastRegistrosCache[dateISO].push(a);
+                            }
+
+                            // Calcular totais
+                            if (a.status === 'aprovado') {
+                                var partsA = dateISO.split('-');
+                                var aY = parseInt(partsA[0], 10);
+                                var aM = parseInt(partsA[1], 10);
+
+                                // Se no mês corrente
+                                if (aY === curY && aM === curM) {
+                                    totalMesAprovado += a.valor;
+                                }
+
+                                // Se na semana corrente
+                                if (currentWeekDates.indexOf(dateISO) !== -1) {
+                                    totalSemanaAprovado += a.valor;
+                                }
+                            } else if (a.status === 'pendente') {
+                                totalPendente++;
+                            }
+
+                            // Card do histórico
+                            var card = document.createElement('div');
+                            card.style.background = '#ffffff';
+                            card.style.border = '1px solid #e2e8f0';
+                            card.style.borderRadius = '12px';
+                            card.style.padding = '0.9rem';
+                            card.style.display = 'flex';
+                            card.style.justifyContent = 'space-between';
+                            card.style.alignItems = 'center';
+                            card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.02)';
+
+                            // Detalhes (esquerda)
+                            var colLeft = document.createElement('div');
+                            colLeft.style.display = 'flex';
+                            colLeft.style.flexDirection = 'column';
+                            colLeft.style.gap = '2px';
+
+                            var rowViatura = document.createElement('div');
+                            rowViatura.style.fontWeight = '700';
+                            rowViatura.style.fontSize = '0.85rem';
+                            rowViatura.style.color = '#1e293b';
+                            rowViatura.textContent = a.viatura + ' • ' + a.km + ' KM';
+                            colLeft.appendChild(rowViatura);
+
+                            var rowData = document.createElement('div');
+                            rowData.style.fontSize = '0.75rem';
+                            rowData.style.color = '#64748b';
+                            var pagTexto = (a.metodo_pagamento === 'dinheiro') ? '💶 Dinheiro (€)' : ('💳 Cartão (' + (a.cartao || '---') + ')');
+                            rowData.textContent = a.data + ' às ' + a.hora + (a.litros ? ' • ' + a.litros + ' Litros' : '') + ' • ' + pagTexto;
+                            colLeft.appendChild(rowData);
+
+                            // Status Badge
+                            var badge = document.createElement('span');
+                            badge.style.display = 'inline-block';
+                            badge.style.alignSelf = 'flex-start';
+                            badge.style.marginTop = '4px';
+                            badge.style.fontSize = '0.65rem';
+                            badge.style.fontWeight = '800';
+                            badge.style.padding = '2px 8px';
+                            badge.style.borderRadius = '20px';
+                            badge.style.textTransform = 'uppercase';
+
+                            if (a.status === 'aprovado') {
+                                badge.style.background = '#dcfce7';
+                                badge.style.color = '#166534';
+                                badge.textContent = 'Aprovado';
+                            } else if (a.status === 'rejeitado') {
+                                badge.style.background = '#fee2e2';
+                                badge.style.color = '#991b1b';
+                                badge.textContent = 'Rejeitado';
+                            } else {
+                                badge.style.background = '#fef3c7';
+                                badge.style.color = '#92400e';
+                                badge.textContent = 'Pendente';
+                            }
+                            colLeft.appendChild(badge);
+
+                            if (a.status === 'rejeitado' && a.justificativa_admin) {
+                                var rowJust = document.createElement('div');
+                                rowJust.style.fontSize = '0.7rem';
+                                rowJust.style.color = '#ef4444';
+                                rowJust.style.marginTop = '4px';
+                                rowJust.style.fontWeight = '600';
+                                rowJust.textContent = 'Motivo: ' + a.justificativa_admin;
+                                colLeft.appendChild(rowJust);
+                            }
+
+                            card.appendChild(colLeft);
+
+                            // Preço e Recibo (direita)
+                            var colRight = document.createElement('div');
+                            colRight.style.display = 'flex';
+                            colRight.style.flexDirection = 'column';
+                            colRight.style.alignItems = 'flex-end';
+                            colRight.style.gap = '6px';
+
+                            var rowValor = document.createElement('div');
+                            rowValor.style.fontWeight = '800';
+                            rowValor.style.fontSize = '1.05rem';
+                            rowValor.style.color = '#047857';
+                            rowValor.textContent = '€ ' + a.valor.toFixed(2);
+                            colRight.appendChild(rowValor);
+
+                            if (a.comprovativo_url) {
+                                var btnRecibo = document.createElement('button');
+                                btnRecibo.type = 'button';
+                                btnRecibo.textContent = '📄 Ver Recibo';
+                                btnRecibo.style.border = 'none';
+                                btnRecibo.style.background = '#f1f5f9';
+                                btnRecibo.style.color = '#334155';
+                                btnRecibo.style.fontSize = '0.7rem';
+                                btnRecibo.style.fontWeight = '700';
+                                btnRecibo.style.padding = '3px 8px';
+                                btnRecibo.style.borderRadius = '6px';
+                                btnRecibo.style.cursor = 'pointer';
+                                btnRecibo.addEventListener('click', function () {
+                                    abrirReciboZoom(a.comprovativo_url);
+                                });
+                                colRight.appendChild(btnRecibo);
+                            }
+
+                            card.appendChild(colRight);
+                            listaContainer.appendChild(card);
+                        });
+                    } else {
+                        listaContainer.innerHTML = '<div style="text-align: center; padding: 1.5rem; color: #94a3b8; font-size: 0.85rem;">Nenhuma despesa registada ainda.</div>';
+                    }
+
+                    // Atualizar totais no dashboard de gastos
+                    document.getElementById('gastos-total-semana').textContent = '€ ' + totalSemanaAprovado.toFixed(2);
+                    document.getElementById('gastos-total-mes').textContent = '€ ' + totalMesAprovado.toFixed(2);
+                    document.getElementById('gastos-total-pendentes').textContent = totalPendente;
+
+                    // Atualizar calendário se estiver visível
+                    var calendarContainer = document.getElementById('abast-calendario-container');
+                    if (calendarContainer && calendarContainer.style.display !== 'none') {
+                        renderizarAbastCalendario();
+                        if (abastDataSelecionada) {
+                            mostrarDetalhesAbastDia(abastDataSelecionada);
+                        }
+                    }
+                })
+                .catch(function () {
+                    listaContainer.innerHTML = '<div style="text-align: center; padding: 1.5rem; color: #ef4444; font-size: 0.85rem;">Erro ao obter histórico.</div>';
+                });
+            }
+
+            // --- Lógica e Navegação do Calendário de Abastecimento ---
+            function inicializarAbastCalendario() {
+                var btnPrev = document.getElementById('abast-mes-prev');
+                var btnNext = document.getElementById('abast-mes-next');
+                if (btnPrev && btnNext) {
+                    btnPrev.onclick = function() {
+                        abastViewMonth--;
+                        if (abastViewMonth < 0) {
+                            abastViewMonth = 11;
+                            abastViewYear--;
+                        }
+                        renderizarAbastCalendario();
+                    };
+                    btnNext.onclick = function() {
+                        abastViewMonth++;
+                        if (abastViewMonth > 11) {
+                            abastViewMonth = 0;
+                            abastViewYear++;
+                        }
+                        renderizarAbastCalendario();
+                    };
+                }
+
+                var btnSwitchRegistrar = document.getElementById('btn-abast-switch-registrar');
+                var btnSwitchHistorico = document.getElementById('btn-abast-switch-historico');
+                var switchBg = document.getElementById('abast-switch-bg');
+                
+                var registrarSeccao = document.getElementById('abast-registrar-seccao');
+                var calendarioContainer = document.getElementById('abast-calendario-container');
+                var detalhesContainer = document.getElementById('abast-detalhes-container');
+
+                if (btnSwitchRegistrar && btnSwitchHistorico && switchBg) {
+                    btnSwitchRegistrar.onclick = function() {
+                        switchBg.style.transform = 'translateX(0)';
+                        btnSwitchRegistrar.style.color = '#1e293b';
+                        btnSwitchHistorico.style.color = '#64748b';
+                        
+                        if (registrarSeccao) registrarSeccao.style.display = 'block';
+                        if (calendarioContainer) calendarioContainer.style.display = 'none';
+                        if (detalhesContainer) detalhesContainer.style.display = 'none';
+                    };
+
+                    btnSwitchHistorico.onclick = function() {
+                        switchBg.style.transform = 'translateX(100%)';
+                        btnSwitchRegistrar.style.color = '#64748b';
+                        btnSwitchHistorico.style.color = '#1e293b';
+                        
+                        if (registrarSeccao) registrarSeccao.style.display = 'none';
+                        if (calendarioContainer) calendarioContainer.style.display = 'block';
+                        
+                        carregarAbastCalendario();
+                    };
+                }
+            }
+
+            function carregarAbastCalendario() {
+                if (abastViewYear === null || abastViewMonth === null) {
+                    var sTime = new Date(serverInstantMs());
+                    abastViewYear = sTime.getFullYear();
+                    abastViewMonth = sTime.getMonth();
+                }
+                carregarAbastecimentos();
+            }
+
+            function renderizarAbastCalendario() {
+                var grid = document.getElementById('abast-calendar-grid');
+                var label = document.getElementById('abast-mes-label');
+                if (!grid || !label) return;
+
+                label.textContent = NOMES_MESES[abastViewMonth] + ' ' + abastViewYear;
+                grid.innerHTML = '';
+
+                var primeiroDiaSemana = new Date(abastViewYear, abastViewMonth, 1).getDay();
+                var indexSeg = primeiroDiaSemana === 0 ? 6 : primeiroDiaSemana - 1;
+
+                var totalDiasMes = new Date(abastViewYear, abastViewMonth + 1, 0).getDate();
+
+                for (var i = 0; i < indexSeg; i++) {
+                    var empty = document.createElement('div');
+                    empty.className = 'folhinha-card out-month';
+                    grid.appendChild(empty);
+                }
+
+                for (var dia = 1; dia <= totalDiasMes; dia++) {
+                    var diaStr = String(dia).padStart(2, '0');
+                    var mesStr = String(abastViewMonth + 1).padStart(2, '0');
+                    var isoDate = abastViewYear + '-' + mesStr + '-' + diaStr;
+
+                    var card = document.createElement('div');
+                    card.className = 'folhinha-card';
+                    card.textContent = dia;
+                    card.setAttribute('data-date', isoDate);
+
+                    if (abastRegistrosCache[isoDate] && abastRegistrosCache[isoDate].length > 0) {
+                        card.classList.add('com-abast');
+                        card.onclick = (function(date) {
+                            return function() {
+                                document.querySelectorAll('#abast-calendar-grid .folhinha-card').forEach(function(c) {
+                                    c.classList.remove('selecionado');
+                                });
+                                this.classList.add('selecionado');
+                                mostrarDetalhesAbastDia(date);
+                            };
+                        })(isoDate);
+                    }
+
+                    if (abastDataSelecionada === isoDate) {
+                        card.classList.add('selecionado');
+                    }
+
+                    grid.appendChild(card);
+                }
+            }
+
+            function mostrarDetalhesAbastDia(dateISO) {
+                var container = document.getElementById('abast-detalhes-container');
+                var titulo = document.getElementById('abast-detalhes-titulo');
+                var listaEl = document.getElementById('abast-detalhes-lista');
+                if (!container || !titulo || !listaEl) return;
+
+                abastDataSelecionada = dateISO;
+                titulo.textContent = 'Registros de ' + formatDiaCurtoPtFromIso(dateISO);
+                listaEl.innerHTML = '';
+
+                var registros = abastRegistrosCache[dateISO] || [];
+                if (registros.length === 0) {
+                    container.style.display = 'none';
+                    return;
+                }
+
+                registros.forEach(function (a) {
+                    var card = document.createElement('div');
+                    card.style.background = '#ffffff';
+                    card.style.border = '1px solid #e2e8f0';
+                    card.style.borderRadius = '12px';
+                    card.style.padding = '0.9rem';
+                    card.style.display = 'flex';
+                    card.style.justifyContent = 'space-between';
+                    card.style.alignItems = 'center';
+                    card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.02)';
+                    card.style.marginBottom = '0.5rem';
+
+                    // Detalhes (esquerda)
+                    var colLeft = document.createElement('div');
+                    colLeft.style.display = 'flex';
+                    colLeft.style.flexDirection = 'column';
+                    colLeft.style.gap = '2px';
+
+                    var rowViatura = document.createElement('div');
+                    rowViatura.style.fontWeight = '700';
+                    rowViatura.style.fontSize = '0.85rem';
+                    rowViatura.style.color = '#1e293b';
+                    rowViatura.textContent = a.viatura + ' • ' + a.km + ' KM';
+                    colLeft.appendChild(rowViatura);
+
+                    var rowData = document.createElement('div');
+                    rowData.style.fontSize = '0.75rem';
+                    rowData.style.color = '#64748b';
+                    var pagTexto = (a.metodo_pagamento === 'dinheiro') ? '💶 Dinheiro (€)' : ('💳 Cartão (' + (a.cartao || '---') + ')');
+                    rowData.textContent = a.hora + (a.litros ? ' • ' + a.litros + ' Litros' : '') + ' • ' + pagTexto;
+                    colLeft.appendChild(rowData);
+
+                    // Status Badge
+                    var badge = document.createElement('span');
+                    badge.style.display = 'inline-block';
+                    badge.style.alignSelf = 'flex-start';
+                    badge.style.marginTop = '4px';
+                    badge.style.fontSize = '0.65rem';
+                    badge.style.fontWeight = '800';
+                    badge.style.padding = '2px 8px';
+                    badge.style.borderRadius = '20px';
+                    badge.style.textTransform = 'uppercase';
+
+                    if (a.status === 'aprovado') {
+                        badge.style.background = '#dcfce7';
+                        badge.style.color = '#166534';
+                        badge.textContent = 'Aprovado';
+                    } else if (a.status === 'rejeitado') {
+                        badge.style.background = '#fee2e2';
+                        badge.style.color = '#991b1b';
+                        badge.textContent = 'Rejeitado';
+                    } else {
+                        badge.style.background = '#fef3c7';
+                        badge.style.color = '#92400e';
+                        badge.textContent = 'Pendente';
+                    }
+                    colLeft.appendChild(badge);
+
+                    if (a.status === 'rejeitado' && a.justificativa_admin) {
+                        var rowJust = document.createElement('div');
+                        rowJust.style.fontSize = '0.7rem';
+                        rowJust.style.color = '#ef4444';
+                        rowJust.style.marginTop = '4px';
+                        rowJust.style.fontWeight = '600';
+                        rowJust.textContent = 'Motivo: ' + a.justificativa_admin;
+                        colLeft.appendChild(rowJust);
+                    }
+
+                    card.appendChild(colLeft);
+
+                    // Preço e Recibo (direita)
+                    var colRight = document.createElement('div');
+                    colRight.style.display = 'flex';
+                    colRight.style.flexDirection = 'column';
+                    colRight.style.alignItems = 'flex-end';
+                    colRight.style.gap = '6px';
+
+                    var rowValor = document.createElement('div');
+                    rowValor.style.fontWeight = '800';
+                    rowValor.style.fontSize = '1.05rem';
+                    rowValor.style.color = '#047857';
+                    rowValor.textContent = '€ ' + a.valor.toFixed(2);
+                    colRight.appendChild(rowValor);
+
+                    if (a.comprovativo_url) {
+                        var btnRecibo = document.createElement('button');
+                        btnRecibo.type = 'button';
+                        btnRecibo.textContent = '📄 Ver Recibo';
+                        btnRecibo.style.border = 'none';
+                        btnRecibo.style.background = '#f1f5f9';
+                        btnRecibo.style.color = '#334155';
+                        btnRecibo.style.fontSize = '0.7rem';
+                        btnRecibo.style.fontWeight = '700';
+                        btnRecibo.style.padding = '3px 8px';
+                        btnRecibo.style.borderRadius = '6px';
+                        btnRecibo.style.cursor = 'pointer';
+                        btnRecibo.addEventListener('click', function () {
+                            abrirReciboZoom(a.comprovativo_url);
+                        });
+                        colRight.appendChild(btnRecibo);
+                    }
+
+                    card.appendChild(colRight);
+                    listaEl.appendChild(card);
+                });
+
+                container.style.display = 'block';
+                container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            if (document.getElementById('btn-km-registrar')) document.getElementById('btn-km-registrar').addEventListener('click', registrarKm);
+
+            // --- Navegação entre secções (Painel, Calendário, KM, Hoje, Perfil) ---
+            var secIds = { painel: 'sec-painel', calendario: 'sec-calendario', km: 'sec-km', hoje: 'sec-hoje', perfil: 'sec-perfil' };
+            function mostrarSec(id) {
+                id = id || 'hoje';
+                if (!secIds[id]) id = 'hoje';
+                if (id === 'km') carregarKmStatus();
+                document.querySelectorAll('.area-sec').forEach(function (sec) { sec.classList.remove('visivel'); });
+                var el = document.getElementById(secIds[id]);
+                if (el) el.classList.add('visivel');
+
+                // Ajuste opcional do cabeçalho conforme a secção
+                var header = document.querySelector('.header');
+                if (header) {
+                    if (id === 'hoje') {
+                        header.classList.remove('compact');
+                    } else {
+                        header.classList.add('compact');
+                    }
+                }
+
+                document.querySelectorAll('.nav-item').forEach(function (a) {
+                    a.classList.remove('ativo');
+                    a.removeAttribute('aria-current');
+                    if (a.getAttribute('data-sec') === id) {
+                        a.classList.add('ativo');
+                        if (id === 'hoje') a.setAttribute('aria-current', 'page');
+                    }
+                });
+                window.location.hash = id;
+                if (id === 'painel') carregarPainel();
+                if (id === 'calendario') {
+                    carregarPontoCalendario();
+                }
+            }
+            var dataSelecionadaCalendario = null;
+            var pontoViewYear = null;
+            var pontoViewMonth = null;
+            var pontoRegistrosCache = {};
+
+            var NOMES_MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+            function formatarDiaLabel(iso) {
+                if (!iso) return '—';
+                var p = iso.split('-');
+                if (p.length !== 3) return iso;
+                var utcNoon = new Date(Date.UTC(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10), 12, 0, 0));
+                return utcNoon.toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: SERVER_TZ });
+            }
+
+            function addCalendarDays(iso, delta) {
+                var p = iso.split('-');
+                var d = new Date(Date.UTC(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10), 12, 0, 0));
+                d.setUTCDate(d.getUTCDate() + delta);
+                return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
+            }
+
+            function parseISOYMD(iso) {
+                var p = (iso || '').split('-');
+                return { y: parseInt(p[0], 10), m: parseInt(p[1], 10), d: parseInt(p[2], 10) };
+            }
+
+            function formatDiaCurtoPtFromIso(iso) {
+                var pr = parseISOYMD(iso);
+                if (isNaN(pr.y)) return iso;
+                var utcNoon = new Date(Date.UTC(pr.y, pr.m - 1, pr.d, 12, 0, 0));
+                return utcNoon.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short', timeZone: SERVER_TZ });
+            }
+
+            // Engine de inicialização e renderização do Calendário de Ponto
+            function inicializarPontoCalendario() {
+                var btnPrev = document.getElementById('ponto-mes-prev');
+                var btnNext = document.getElementById('ponto-mes-next');
+                if (btnPrev && btnNext) {
+                    btnPrev.onclick = function() {
+                        pontoViewMonth--;
+                        if (pontoViewMonth < 0) {
+                            pontoViewMonth = 11;
+                            pontoViewYear--;
+                        }
+                        renderizarPontoCalendario();
+                    };
+                    btnNext.onclick = function() {
+                        pontoViewMonth++;
+                        if (pontoViewMonth > 11) {
+                            pontoViewMonth = 0;
+                            pontoViewYear++;
+                        }
+                        renderizarPontoCalendario();
+                    };
+                }
+            }
+
+            function carregarPontoCalendario() {
+                if (pontoViewYear === null || pontoViewMonth === null) {
+                    var sTime = new Date(serverInstantMs());
+                    pontoViewYear = sTime.getFullYear();
+                    pontoViewMonth = sTime.getMonth();
+                }
+                inicializarPontoCalendario();
+
+                fetch(API_MINHAS + '?_=' + Date.now(), { credentials: 'same-origin', cache: 'no-store' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (lista) {
+                        pontoRegistrosCache = {};
+                        (lista || []).forEach(function (m) {
+                            var dh = parseDataHora(m['Data e Hora']);
+                            if (!dh) return;
+                            if (!pontoRegistrosCache[dh.date]) pontoRegistrosCache[dh.date] = [];
+                            pontoRegistrosCache[dh.date].push({
+                                time: dh.time,
+                                tipo: m['Tipo de Marcação'],
+                                sortKey: m['Data e Hora']
+                            });
+                        });
+                        renderizarPontoCalendario();
+                    })
+                    .catch(function () {
+                        renderizarPontoCalendario();
+                    });
+            }
+
+            function renderizarPontoCalendario() {
+                var grid = document.getElementById('ponto-calendar-grid');
+                var label = document.getElementById('ponto-mes-label');
+                if (!grid || !label) return;
+
+                label.textContent = NOMES_MESES[pontoViewMonth] + ' ' + pontoViewYear;
+                grid.innerHTML = '';
+
+                var primeiroDiaSemana = new Date(pontoViewYear, pontoViewMonth, 1).getDay();
+                var indexSeg = primeiroDiaSemana === 0 ? 6 : primeiroDiaSemana - 1;
+
+                var totalDiasMes = new Date(pontoViewYear, pontoViewMonth + 1, 0).getDate();
+
+                for (var i = 0; i < indexSeg; i++) {
+                    var empty = document.createElement('div');
+                    empty.className = 'folhinha-card out-month';
+                    grid.appendChild(empty);
+                }
+
+                for (var dia = 1; dia <= totalDiasMes; dia++) {
+                    var diaStr = String(dia).padStart(2, '0');
+                    var mesStr = String(pontoViewMonth + 1).padStart(2, '0');
+                    var isoDate = pontoViewYear + '-' + mesStr + '-' + diaStr;
+
+                    var card = document.createElement('div');
+                    card.className = 'folhinha-card';
+                    card.textContent = dia;
+                    card.setAttribute('data-date', isoDate);
+
+                    if (pontoRegistrosCache[isoDate] && pontoRegistrosCache[isoDate].length > 0) {
+                        card.classList.add('com-registo');
+                        card.onclick = (function(date) {
+                            return function() {
+                                document.querySelectorAll('#ponto-calendar-grid .folhinha-card').forEach(function(c) {
+                                    c.classList.remove('selecionado');
+                                });
+                                this.classList.add('selecionado');
+                                mostrarDetalhesPontoDia(date);
+                            };
+                        })(isoDate);
+                    }
+
+                    if (dataSelecionadaCalendario === isoDate) {
+                        card.classList.add('selecionado');
+                    }
+
+                    grid.appendChild(card);
+                }
+            }
+
+            function mostrarDetalhesPontoDia(dateISO) {
+                var container = document.getElementById('ponto-detalhes-container');
+                var titulo = document.getElementById('ponto-detalhes-titulo');
+                var listaEl = document.getElementById('timeline-calendario-lista');
+                if (!container || !titulo || !listaEl) return;
+
+                dataSelecionadaCalendario = dateISO;
+                titulo.textContent = 'Marcações de ' + formatDiaCurtoPtFromIso(dateISO);
+                listaEl.innerHTML = '';
+
+                var registros = pontoRegistrosCache[dateISO] || [];
+                registros.sort(function (a, b) { return (a.sortKey || '').localeCompare(b.sortKey || ''); });
+
+                if (registros.length === 0) {
+                    container.style.display = 'none';
+                    return;
+                }
+
+                registros.forEach(function (reg) {
+                    var div = document.createElement('div');
+                    div.className = 'timeline-item registado';
+                    div.innerHTML = '<div class="label"><div class="icon-wrap">' + ICONE_MARCACAO + '</div></div><span class="hora">' + reg.time + '</span>';
+                    listaEl.appendChild(div);
+                });
+
+                container.style.display = 'block';
+                container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // Engine de inicialização e renderização do Calendário de KM
+            var kmViewYear = null;
+            var kmViewMonth = null;
+            var kmRegistrosCache = {};
+            var kmDataSelecionada = null;
+
+            function inicializarKMCalendario() {
+                var btnPrev = document.getElementById('km-mes-prev');
+                var btnNext = document.getElementById('km-mes-next');
+                if (btnPrev && btnNext) {
+                    btnPrev.onclick = function() {
+                        kmViewMonth--;
+                        if (kmViewMonth < 0) {
+                            kmViewMonth = 11;
+                            kmViewYear--;
+                        }
+                        renderizarKMCalendario();
+                    };
+                    btnNext.onclick = function() {
+                        kmViewMonth++;
+                        if (kmViewMonth > 11) {
+                            kmViewMonth = 0;
+                            kmViewYear++;
+                        }
+                        renderizarKMCalendario();
+                    };
+                }
+
+                var btnSwitchRegistrar = document.getElementById('btn-switch-registrar');
+                var btnSwitchHistorico = document.getElementById('btn-switch-historico');
+                var switchBg = document.getElementById('km-switch-bg');
+                
+                var registrarSeccao = document.getElementById('km-registrar-seccao');
+                var calendarioContainer = document.getElementById('km-calendario-container');
+                var detalhesContainer = document.getElementById('km-detalhes-container');
+
+                if (btnSwitchRegistrar && btnSwitchHistorico && switchBg) {
+                    btnSwitchRegistrar.onclick = function() {
+                        switchBg.style.transform = 'translateX(0)';
+                        btnSwitchRegistrar.style.color = '#1e293b';
+                        btnSwitchHistorico.style.color = '#64748b';
+                        
+                        if (registrarSeccao) registrarSeccao.style.display = 'block';
+                        if (calendarioContainer) calendarioContainer.style.display = 'none';
+                        if (detalhesContainer) detalhesContainer.style.display = 'none';
+                    };
+
+                    btnSwitchHistorico.onclick = function() {
+                        switchBg.style.transform = 'translateX(100%)';
+                        btnSwitchRegistrar.style.color = '#64748b';
+                        btnSwitchHistorico.style.color = '#1e293b';
+                        
+                        if (registrarSeccao) registrarSeccao.style.display = 'none';
+                        if (calendarioContainer) calendarioContainer.style.display = 'block';
+                        
+                        carregarKMCalendario();
+                    };
+                }
+            }
+
+            function carregarKMCalendario() {
+                if (kmViewYear === null || kmViewMonth === null) {
+                    var sTime = new Date(serverInstantMs());
+                    kmViewYear = sTime.getFullYear();
+                    kmViewMonth = sTime.getMonth();
+                }
+
+                fetch('/api/km-registos-todos/?_=' + Date.now(), { credentials: 'same-origin', cache: 'no-store' })
+                    .then(function(r) { return r.json(); })
+                    .then(function(lista) {
+                        kmRegistrosCache = {};
+                        (lista || []).forEach(function(r) {
+                            var dateISO = r.data;
+                            if (!kmRegistrosCache[dateISO]) kmRegistrosCache[dateISO] = [];
+                            kmRegistrosCache[dateISO].push(r);
+                        });
+                        renderizarKMCalendario();
+                    })
+                    .catch(function() {
+                        renderizarKMCalendario();
+                    });
+            }
+
+            function renderizarKMCalendario() {
+                var grid = document.getElementById('km-calendar-grid');
+                var label = document.getElementById('km-mes-label');
+                if (!grid || !label) return;
+
+                label.textContent = NOMES_MESES[kmViewMonth] + ' ' + kmViewYear;
+                grid.innerHTML = '';
+
+                var primeiroDiaSemana = new Date(kmViewYear, kmViewMonth, 1).getDay();
+                var indexSeg = primeiroDiaSemana === 0 ? 6 : primeiroDiaSemana - 1;
+
+                var totalDiasMes = new Date(kmViewYear, kmViewMonth + 1, 0).getDate();
+
+                for (var i = 0; i < indexSeg; i++) {
+                    var empty = document.createElement('div');
+                    empty.className = 'folhinha-card out-month';
+                    grid.appendChild(empty);
+                }
+
+                for (var dia = 1; dia <= totalDiasMes; dia++) {
+                    var diaStr = String(dia).padStart(2, '0');
+                    var mesStr = String(kmViewMonth + 1).padStart(2, '0');
+                    var isoDate = kmViewYear + '-' + mesStr + '-' + diaStr;
+
+                    var card = document.createElement('div');
+                    card.className = 'folhinha-card';
+                    card.textContent = dia;
+                    card.setAttribute('data-date', isoDate);
+
+                    if (kmRegistrosCache[isoDate] && kmRegistrosCache[isoDate].length > 0) {
+                        card.classList.add('com-registo');
+                        card.onclick = (function(date) {
+                            return function() {
+                                document.querySelectorAll('#km-calendar-grid .folhinha-card').forEach(function(c) {
+                                    c.classList.remove('selecionado');
+                                });
+                                this.classList.add('selecionado');
+                                mostrarDetalhesKMDia(date);
+                            };
+                        })(isoDate);
+                    }
+
+                    if (kmDataSelecionada === isoDate) {
+                        card.classList.add('selecionado');
+                    }
+
+                    grid.appendChild(card);
+                }
+            }
+
+            function mostrarDetalhesKMDia(dateISO) {
+                var container = document.getElementById('km-detalhes-container');
+                var titulo = document.getElementById('km-detalhes-titulo');
+                var listaEl = document.getElementById('km-detalhes-lista');
+                if (!container || !titulo || !listaEl) return;
+
+                kmDataSelecionada = dateISO;
+                titulo.textContent = 'Registros de ' + formatDiaCurtoPtFromIso(dateISO);
+                listaEl.innerHTML = '';
+
+                var registros = kmRegistrosCache[dateISO] || [];
+                if (registros.length === 0) {
+                    container.style.display = 'none';
+                    return;
+                }
+
+                registros.forEach(function (r) {
+                    var item = document.createElement('div');
+                    item.style.cssText = 'background:#ffffff; padding:0.75rem; border-radius:10px; border-left:4px solid #2563eb; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 0.5rem;';
+                    item.innerHTML = '<div style="flex:1;">' +
+                        '<div style="font-weight:800; font-size:1rem; color:#1e293b;">' + r.km + ' KM</div>' +
+                        '<div style="font-size:0.75rem; color:#10b981; font-weight:700;">+' + r.percorrido + ' KM percorrido</div>' +
+                        '</div>' +
+                        '<div style="text-align:right; min-width:80px;">' +
+                        '<div style="font-weight:700; font-size:0.85rem; color:#475569;">' + r.timestamp + '</div>' +
+                        '<div style="font-size:0.65rem; color:#94a3b8; font-family:monospace;">' + (r.viatura || '') + '</div>' +
+                        '</div>';
+                    listaEl.appendChild(item);
+                });
+
+                container.style.display = 'block';
+                container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // Inicialização na carga da página
+            inicializarKMCalendario();
+            inicializarAbastCalendario();
+
+            function secFromHash() {
+                var h = (window.location.hash || '#hoje').replace('#', '');
+                return secIds[h] ? h : 'hoje';
+            }
+            document.querySelectorAll('.nav-item').forEach(function (a) {
+                a.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var id = a.getAttribute('data-sec');
+                    if (id) mostrarSec(id);
+                });
             });
-    }
-})();
+            window.addEventListener('hashchange', function () { mostrarSec(secFromHash()); });
+            mostrarSec(secFromHash());
+
+            function carregarPainel() {
+                return; // Dados agora vêm estáticos do Django
+            }
+
+            // --- Relatório semanal (Calendário) ---
+            var calendarWeekStart = null; // ISO date (YYYY-MM-DD) do Monday da semana em exibição
+
+            function getMondayOfWeek(d) {
+                var ms = d.getTime();
+                var formatter = new Intl.DateTimeFormat('en-US', { timeZone: SERVER_TZ, weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit' });
+                var parts = formatter.formatToParts(new Date(ms));
+                var map = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+                var wdStr = '';
+                var y, m, day;
+                parts.forEach(function (p) {
+                    if (p.type === 'weekday') wdStr = p.value;
+                    if (p.type === 'year') y = parseInt(p.value, 10);
+                    if (p.type === 'month') m = parseInt(p.value, 10);
+                    if (p.type === 'day') day = parseInt(p.value, 10);
+                });
+                var wi = map[wdStr];
+                var diff = wi === 0 ? -6 : 1 - wi;
+                var utc = Date.UTC(y, m - 1, day, 12, 0, 0);
+                var adj = new Date(utc);
+                adj.setUTCDate(adj.getUTCDate() + diff);
+                return adj.getUTCFullYear() + '-' + String(adj.getUTCMonth() + 1).padStart(2, '0') + '-' + String(adj.getUTCDate()).padStart(2, '0');
+            }
+            function getWeekDates(weekStartISO) {
+                var out = [];
+                for (var i = 0; i < 7; i++) {
+                    out.push(addCalendarDays(weekStartISO, i));
+                }
+                return out;
+            }
+            function minutosFromTime(t) {
+                if (!t || t.length < 5) return null;
+                var p = t.split(':');
+                return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+            }
+            function formatDuracao(minutos) {
+                if (minutos == null || minutos < 0) return '—';
+                var h = Math.floor(minutos / 60);
+                var m = minutos % 60;
+                return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+            }
+
+            function carregarCalendario() {
+                var tbody = document.getElementById('relatorio-tbody');
+                var periodoEl = document.getElementById('calendario-periodo');
+                if (!tbody || !periodoEl) return;
+                if (calendarWeekStart === null) calendarWeekStart = getMondayOfWeek(new Date(serverInstantMs()));
+                var weekDates = getWeekDates(calendarWeekStart);
+                var yDom = parseISOYMD(weekDates[6]).y;
+                periodoEl.textContent = formatDiaCurtoPtFromIso(weekDates[0]) + ' - ' + formatDiaCurtoPtFromIso(weekDates[6]) + ', ' + yDom;
+                tbody.innerHTML = '<tr><td colspan="8" class="relatorio-loading">A carregar…</td></tr>';
+                fetch(API_MINHAS + '?_=' + Date.now(), { credentials: 'same-origin', cache: 'no-store' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (marcacoes) {
+                        var mapTipo = { 'Entrada': 'entrada', 'Início Almoço': 'inicio_almoco', 'Fim Almoço': 'fim_almoco', 'Fim Jornada': 'fim_jornada' };
+                        var porDia = {};
+                        (marcacoes || []).forEach(function (m) {
+                            var dh = parseDataHora(m['Data e Hora']);
+                            if (!dh) return;
+                            var tipo = mapTipo[m['Tipo de Marcação']];
+                            if (!tipo) return;
+                            if (!porDia[dh.date]) porDia[dh.date] = {};
+                            if (!porDia[dh.date][tipo]) porDia[dh.date][tipo] = dh.time;
+                        });
+                        var diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+                        tbody.innerHTML = '';
+                        weekDates.forEach(function (date, i) {
+                            var dp = parseISOYMD(date);
+                            var isWeekend = i >= 5;
+                            var row = porDia[date] || {};
+                            var entrada = row.entrada || null;
+                            var inicioInt = row.inicio_almoco || null;
+                            var voltaInt = row.fim_almoco || null;
+                            var saida = row.fim_jornada || null;
+                            var trab = '—';
+                            if (entrada && saida && !isWeekend) {
+                                var mEnt = minutosFromTime(entrada);
+                                var mSai = minutosFromTime(saida);
+                                if (mEnt != null && mSai != null) {
+                                    var dur = mSai - mEnt;
+                                    if (inicioInt && voltaInt) {
+                                        var mIni = minutosFromTime(inicioInt);
+                                        var mVol = minutosFromTime(voltaInt);
+                                        if (mIni != null && mVol != null) dur -= (mVol - mIni);
+                                    }
+                                    trab = formatDuracao(dur >= 0 ? dur : null);
+                                }
+                            }
+                            var cel = function (val, falta) {
+                                if (isWeekend) return '<span class="cel-vazio">—</span>';
+                                if (falta && !val) return '<span class="cel-falta">Missing</span>';
+                                if (val) return '<span class="cel-ok">' + val + '</span>';
+                                return '<span class="cel-vazio">—</span>';
+                            };
+                            var tr = document.createElement('tr');
+                            if (isWeekend) tr.classList.add('fim-de-semana');
+                            var dataLabel = diasSemana[i] + ' ' + String(dp.d).padStart(2, '0') + '/' + String(dp.m).padStart(2, '0');
+                            tr.innerHTML =
+                                '<td class="col-data">' + dataLabel + '</td>' +
+                                '<td class="col-jornada">' + (isWeekend ? 'Folga' : 'Padrão 08h-18h') + '</td>' +
+                                '<td class="cel-planejado">' + (isWeekend ? '—' : '08:00') + '</td>' +
+                                '<td>' + cel(entrada, true) + '</td>' +
+                                '<td>' + cel(inicioInt, true) + '</td>' +
+                                '<td>' + cel(voltaInt, true) + '</td>' +
+                                '<td>' + cel(saida, true) + '</td>' +
+                                '<td>' + (isWeekend ? '<span class="cel-vazio">—</span>' : '<span class="cel-' + (trab !== '—' ? 'ok' : 'vazio') + '">' + trab + '</span>') + '</td>';
+                            tbody.appendChild(tr);
+                        });
+                    })
+                    .catch(function () {
+                        tbody.innerHTML = '<tr><td colspan="8" class="relatorio-erro">Erro ao carregar marcações.</td></tr>';
+                    });
+            }
+        })();
     </script>
 </body>
 <script>
-(function() {
-  if (!('serviceWorker' in navigator)) return;
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/service-worker.js', { scope: '/' }).catch(function() {});
-  });
-})();
+    (function () {
+        if (!('serviceWorker' in navigator)) return;
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/service-worker.js', { scope: '/' }).catch(function () { });
+        });
+    })();
 </script>
+
 </html>
