@@ -28,7 +28,7 @@ LABEL org.opencontainers.image.title="RTT-IT" \
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
-    DJANGO_SETTINGS_MODULE=RTT_IT_System.settings \
+    DJANGO_SETTINGS_MODULE=rtt_it_system.settings \
     DJANGO_PRODUCTION=1 \
     DJANGO_DEBUG=0 \
     SQLITE_PATH=/app/media/db.sqlite3 \
@@ -43,14 +43,15 @@ COPY --from=builder /opt/venv /opt/venv
 
 WORKDIR /app
 COPY . /app/
+RUN if [ -d "/app/RTT_IT_System" ]; then mv /app/RTT_IT_System /app/rtt_it_system; fi
 RUN chown -R appuser:appuser /app \
     && chmod +x /app/docker/entrypoint.sh
 
-# Falha no build se o pacote RTT_IT_System não estiver na imagem (evita deploy com gitlink vazio).
+# Falha no build se o pacote rtt_it_system não estiver na imagem (evita deploy com gitlink vazio).
 RUN DJANGO_SECRET_KEY=build-verify-not-used-at-runtime-xxxxxxxx \
     DJANGO_PRODUCTION=1 \
     ALLOWED_HOSTS=127.0.0.1 \
-    python -c "import django; django.setup(); print('RTT_IT_System.settings OK')"
+    python -c "import django; django.setup(); print('rtt_it_system.settings OK')"
 
 # Entrypoint corre como root só para chown do bind mount /app/media; Gunicorn corre como appuser.
 EXPOSE 8009

@@ -93,7 +93,7 @@ log "OK: django check passou."
 log "Gunicorn 0.0.0.0:8009..."
 log "================================================================"
 if [[ "$(id -u)" -eq 0 ]]; then
-  exec runuser -u appuser -- gunicorn RTT_IT_System.wsgi:application \
+  exec runuser -u appuser -- gunicorn rtt_it_system.wsgi:application \
   --bind 0.0.0.0:8009 \
   --workers "${GUNICORN_WORKERS:-3}" \
   --threads "${GUNICORN_THREADS:-2}" \
@@ -103,7 +103,7 @@ if [[ "$(id -u)" -eq 0 ]]; then
   --capture-output \
   --enable-stdio-inheritance
 else
-  exec gunicorn RTT_IT_System.wsgi:application \
+  exec gunicorn rtt_it_system.wsgi:application \
   --bind 0.0.0.0:8009 \
   --workers "${GUNICORN_WORKERS:-3}" \
   --threads "${GUNICORN_THREADS:-2}" \
