@@ -6,3 +6,7 @@ reportlab>=4.0.0
 # Produção (Docker / Gunicorn)
 gunicorn>=21.0,<23
 whitenoise>=6.6,<7
+
+# Dependências para OCR
+Pillow>=10.0.0
+pytesseract>=0.3.10
