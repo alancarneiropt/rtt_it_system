@@ -2286,13 +2286,17 @@
                             if (ocrSpinner) ocrSpinner.style.display = 'none';
                             if (data.sucesso) {
                                 if (data.valor) {
-                                    inputAbastValor.value = data.valor;
-                                    showToast('IA leu o valor de €' + data.valor + ' da fatura!');
+                                    var valFormatado = Number(data.valor).toFixed(2);
+                                    inputAbastValor.value = valFormatado;
+                                    showToast('IA leu o valor de €' + valFormatado + ' da fatura!');
                                 } else {
+                                    inputAbastValor.value = '';
                                     showToast('Comprovativo carregado. Indique o valor manualmente.');
                                 }
                                 if (data.litros) {
-                                    inputAbastLitros.value = data.litros;
+                                    inputAbastLitros.value = Number(data.litros).toFixed(2);
+                                } else {
+                                    inputAbastLitros.value = '';
                                 }
                             } else {
                                 showToast('Ficheiro associado. Preencha os campos abaixo.');
