@@ -35,8 +35,8 @@ def processar_recibo_ocr(file_obj):
         enhancer = ImageEnhance.Contrast(resized)
         enhanced = enhancer.enhance(2.0)
         
-        # Converte para string
-        texto_ocr = pytesseract.image_to_string(enhanced, lang='por+eng')
+        # Converte para string usando modo 4 (Assume a single column of text of variable sizes) - ideal para recibos
+        texto_ocr = pytesseract.image_to_string(enhanced, lang='por+eng', config='--psm 4')
         print(f"--- OCR TEXT EXTRACTION (PRE-PROCESSED) ---")
         print(texto_ocr)
         print("---------------------------")
@@ -118,23 +118,9 @@ def processar_recibo_ocr(file_obj):
                 except ValueError:
                     pass
 
-    # 2. Fallback Heurístico (apenas se falhar completamente o OCR real)
-    if not valor or valor <= 0:
-        # Se falhar o OCR real por falta de texto legível, gera valores realistas
-        valor = round(random.uniform(45.50, 85.90), 2)
-        litros = round(valor / 1.75, 2)
-        texto_ocr = (
-            f"--- LEITURA SIMULADA IA OCR ---\n"
-            f"POSTO DE COMBUSTÍVEL NORDIGAL\n"
-            f"FATURA SIMPLIFICADA\n"
-            f"PRODUTO: GASÓLEO ESPECIAL\n"
-            f"QUANTIDADE: {litros} L\n"
-            f"PREÇO/L: 1.75 EUR\n"
-            f"TOTAL PAGO: {valor} EUR\n"
-            f"NIF: 501234567\n"
-            f"OBRIGADO PELA PREFERÊNCIA!"
-        )
-
+    # 2. Se falhar completamente, não geramos valores falsos.
+    # Simplesmente retornamos o que conseguimos (que pode ser None/vazio)
+    
     return {
         'valor': valor,
         'litros': litros,
