@@ -2493,6 +2493,8 @@
                             colLeft.style.display = 'flex';
                             colLeft.style.flexDirection = 'column';
                             colLeft.style.gap = '2px';
+                            colLeft.style.flex = '1';
+                            colLeft.style.minWidth = '0';
 
                             var rowViatura = document.createElement('div');
                             rowViatura.style.fontWeight = '700';
@@ -2505,7 +2507,7 @@
                             rowData.style.fontSize = '0.75rem';
                             rowData.style.color = '#64748b';
                             var pagTexto = (a.metodo_pagamento === 'dinheiro') ? '💶 Dinheiro (€)' : ('💳 Cartão (' + (a.cartao || '---') + ')');
-                            rowData.textContent = a.data + ' às ' + a.hora + (a.litros ? ' • ' + a.litros + ' Litros' : '') + ' • ' + pagTexto;
+                            rowData.innerHTML = a.data + ' às ' + a.hora + (a.litros ? ' • ' + a.litros + ' Litros' : '') + '<br>' + pagTexto;
                             colLeft.appendChild(rowData);
 
                             // Status Badge
@@ -2552,11 +2554,13 @@
                             colRight.style.flexDirection = 'column';
                             colRight.style.alignItems = 'flex-end';
                             colRight.style.gap = '6px';
+                            colRight.style.flexShrink = '0';
 
                             var rowValor = document.createElement('div');
                             rowValor.style.fontWeight = '800';
                             rowValor.style.fontSize = '1.05rem';
                             rowValor.style.color = '#047857';
+                            rowValor.style.whiteSpace = 'nowrap';
                             rowValor.textContent = '€ ' + a.valor.toFixed(2);
                             colRight.appendChild(rowValor);
 
@@ -2751,6 +2755,8 @@
                     colLeft.style.display = 'flex';
                     colLeft.style.flexDirection = 'column';
                     colLeft.style.gap = '2px';
+                    colLeft.style.flex = '1';
+                    colLeft.style.minWidth = '0';
 
                     var rowViatura = document.createElement('div');
                     rowViatura.style.fontWeight = '700';
@@ -2763,7 +2769,7 @@
                     rowData.style.fontSize = '0.75rem';
                     rowData.style.color = '#64748b';
                     var pagTexto = (a.metodo_pagamento === 'dinheiro') ? '💶 Dinheiro (€)' : ('💳 Cartão (' + (a.cartao || '---') + ')');
-                    rowData.textContent = a.hora + (a.litros ? ' • ' + a.litros + ' Litros' : '') + ' • ' + pagTexto;
+                    rowData.innerHTML = a.hora + (a.litros ? ' • ' + a.litros + ' Litros' : '') + '<br>' + pagTexto;
                     colLeft.appendChild(rowData);
 
                     // Status Badge
@@ -2810,11 +2816,13 @@
                     colRight.style.flexDirection = 'column';
                     colRight.style.alignItems = 'flex-end';
                     colRight.style.gap = '6px';
+                    colRight.style.flexShrink = '0';
 
                     var rowValor = document.createElement('div');
                     rowValor.style.fontWeight = '800';
                     rowValor.style.fontSize = '1.05rem';
                     rowValor.style.color = '#047857';
+                    rowValor.style.whiteSpace = 'nowrap';
                     rowValor.textContent = '€ ' + a.valor.toFixed(2);
                     colRight.appendChild(rowValor);
 

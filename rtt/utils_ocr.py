@@ -31,12 +31,12 @@ def processar_recibo_ocr(file_obj):
         # 2. Redimensionar para o dobro do tamanho (pontos pequenos ficam legíveis)
         width, height = gray.size
         resized = gray.resize((width * 2, height * 2), Image.Resampling.LANCZOS)
-        # 3. Aumentar o contraste
+        # 3. Aumentar o contraste (1.7 é o ponto ideal para evitar fusão de dígitos como 5 -> 9)
         enhancer = ImageEnhance.Contrast(resized)
-        enhanced = enhancer.enhance(2.0)
+        enhanced = enhancer.enhance(1.7)
         
-        # Converte para string
-        texto_ocr = pytesseract.image_to_string(enhanced, lang='por+eng')
+        # Converte para string usando modo 4 (Assume a single column of text of variable sizes) - ideal para recibos
+        texto_ocr = pytesseract.image_to_string(enhanced, lang='por+eng', config='--psm 4')
         print(f"--- OCR TEXT EXTRACTION (PRE-PROCESSED) ---")
         print(texto_ocr)
         print("---------------------------")
@@ -49,11 +49,24 @@ def processar_recibo_ocr(file_obj):
     if texto_ocr.strip():
         texto_clean = texto_ocr.upper()
 
+        # Extração preventiva do Preço Unitário para validação matemática
+        # Faixa de 0.000 a 3.999 perfeitamente específica para preços de combustível
+        preco_unitario = None
+        preco_match = re.search(r'(?<![0-9.])([0-3][.,][0-9]{3})(?![0-9])', texto_clean)
+        if preco_match:
+            try:
+                preco_unitario = float(preco_match.group(1).replace(',', '.'))
+            except ValueError:
+                pass
+
         def extrair_numero_flexivel(texto, padroes):
             for p in padroes:
                 matches = re.findall(p, texto)
                 if matches:
-                    num_str = matches[0].replace(' ', '')
+                    val_match = matches[0]
+                    if isinstance(val_match, tuple):
+                        val_match = val_match[0]
+                    num_str = val_match.replace(' ', '')
                     # Se o OCR comeu o ponto decimal (ex: 10250) mas sabemos que tem cêntimos
                     if '.' not in num_str and ',' not in num_str and len(num_str) > 2:
                         num_str = num_str[:-2] + '.' + num_str[-2:]
@@ -66,20 +79,18 @@ def processar_recibo_ocr(file_obj):
             return None
 
         # Regex inteligente para Valor (Total)
-        # O Total de combustível vem SEMPRE após EUR, € ou a palavra TOTAL/VALOR.
-        # Isto evita 100% de falsos positivos com preços unitários (ex: 1.639 EUR/L)
+        # Suporta delimitadores opcionais (dois-pontos, hífens) e variações comuns de moedas
         padroes_valor = [
-            r'TOTAL\s*(?:EUR|€)?\s*(?<![0-9.])([0-9]+\s*[.,]?\s*[0-9]{2})(?![0-9])',
-            r'(?:TOTAL|VALOR|PAGAR)\s*(?:EUR|€)?\s*(?<![0-9.])([0-9]+\s*[.,]?\s*[0-9]{2})(?![0-9])',
-            r'(?:EUR|€)\s*(?<![0-9.])([0-9]+\s*[.,]?\s*[0-9]{2})(?![0-9])',
+            r'TOTAL\s*[:\-=]*\s*(?:EUR|€|FUR|FUA|EUB|EUP|PTE|ESC|USD|GBP)?\s*[:\-=]*\s*(?<![0-9.])([0-9]+\s*[.,]?\s*[0-9]{2})(?![0-9])',
+            r'(?:TOTAL|VALOR|PAGAR)\s*[:\-=]*\s*(?:EUR|€|FUR|FUA|EUB|EUP|PTE|ESC)?\s*[:\-=]*\s*(?<![0-9.])([0-9]+\s*[.,]?\s*[0-9]{2})(?![0-9])',
+            r'(?:EUR|€|FUR|FUA|EUB|EUP)\s*[:\-=]*\s*(?<![0-9.])([0-9]+\s*[.,]?\s*[0-9]{2})(?![0-9])',
         ]
         valor = extrair_numero_flexivel(texto_clean, padroes_valor)
 
         # 1. Regra de Ouro da BOMBA para Litros:
-        # A linha que indica os litros quase sempre contém a palavra BOMBA (ou misreads como BORBA, BOMB, BOM).
-        # Extraímos o primeiro número decimal dessa linha, ignorando erros no 'L' (ex: '37.21.14' vira 37.21).
+        # A linha que indica os litros quase sempre contém a palavra BOMBA (ou misreads como BORBA, FONT, BONB, BOB, etc.).
         for linha in texto_clean.split('\n'):
-            if any(k in linha for k in ['BOMB', 'BORB', 'PUMP', 'BOM']):
+            if any(k in linha for k in ['BOMB', 'BORB', 'PUMP', 'BOM', 'BONB', 'BOB', 'FONT', 'B0M']):
                 match = re.search(r'(?<![0-9.])([0-9]+[.,][0-9]{2,3})', linha)
                 if match:
                     try:
@@ -94,7 +105,7 @@ def processar_recibo_ocr(file_obj):
         # 2. Fallback de Regex inteligente para Litros se a regra da Bomba falhar ou for absurda
         if not litros or litros < 1.0 or litros > 150.0:
             padroes_litros = [
-                r'(?<![0-9.])([0-9]+\s*[.,]?\s*[0-9]{2,3})\s*(?:L|1|I|l)\b',
+                r'(?<![0-9.])([0-9]+\s*[.,]?\s*[0-9]{2,3})\s*(?:L|1|I|l|\|)\b',
                 r'(?:LITROS|LTS|QTD|VOL)\s*[:\-=]?\s*(?<![0-9.])([0-9]+\s*[.,]?\s*[0-9]{2,3})(?![0-9])',
                 r'(?<![0-9.])([0-9]+\s*[.,]?\s*[0-9]{2,3})(?![0-9])\s*(?:LITROS|LTS|L\b)',
             ]
@@ -104,37 +115,22 @@ def processar_recibo_ocr(file_obj):
             else:
                 litros = None
 
-        # 3. Regra Matemática de Fallback Extremo (Total / Preço Unitário)
-        # Se falhou a leitura dos litros (como no caso de linhas ignoradas pelo OCR), tentamos
-        # ler o Preço Unitário (3 casas decimais, ex: 1.959 ou 1.344) e calcular os litros dividindo o total pelo preço.
-        if not litros and valor:
-            preco_match = re.search(r'(?<![0-9.])([1-2][.,][0-9]{3})(?![0-9])', texto_clean)
-            if preco_match:
-                try:
-                    preco_unitario = float(preco_match.group(1).replace(',', '.'))
-                    if preco_unitario > 0:
-                        litros = round(valor / preco_unitario, 2)
-                        print(f"Litros calculados matematicamente: {litros} ({valor} / {preco_unitario})")
-                except ValueError:
-                    pass
+        # 3. Regra Matemática de Validação e Correção Inteligente (Autocorretor)
+        # Se temos o preço unitário e o valor total, calculamos o volume matematicamente.
+        # Se os litros lidos falharam ou são incoerentes, substituímos pelo valor calculado.
+        if preco_unitario and valor:
+            try:
+                litros_calculados = round(valor / preco_unitario, 2)
+                if 1.0 <= litros_calculados <= 150.0:
+                    if not litros or abs(litros - litros_calculados) > 0.5:
+                        print(f"Litros corrigidos matematicamente: {litros} -> {litros_calculados} ({valor} / {preco_unitario})")
+                        litros = litros_calculados
+            except Exception as e:
+                print(f"Erro na validacao matematica: {e}")
 
-    # 2. Fallback Heurístico (apenas se falhar completamente o OCR real)
-    if not valor or valor <= 0:
-        # Se falhar o OCR real por falta de texto legível, gera valores realistas
-        valor = round(random.uniform(45.50, 85.90), 2)
-        litros = round(valor / 1.75, 2)
-        texto_ocr = (
-            f"--- LEITURA SIMULADA IA OCR ---\n"
-            f"POSTO DE COMBUSTÍVEL NORDIGAL\n"
-            f"FATURA SIMPLIFICADA\n"
-            f"PRODUTO: GASÓLEO ESPECIAL\n"
-            f"QUANTIDADE: {litros} L\n"
-            f"PREÇO/L: 1.75 EUR\n"
-            f"TOTAL PAGO: {valor} EUR\n"
-            f"NIF: 501234567\n"
-            f"OBRIGADO PELA PREFERÊNCIA!"
-        )
-
+    # 2. Se falhar completamente, não geramos valores falsos.
+    # Simplesmente retornamos o que conseguimos (que pode ser None/vazio)
+    
     return {
         'valor': valor,
         'litros': litros,
